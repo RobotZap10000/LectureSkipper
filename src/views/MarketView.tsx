@@ -5,12 +5,7 @@ import { items } from "@/items";
 import type { Dispatch, SetStateAction } from "react";
 import { HelpCircle, PackageOpen, Store, Gift } from "lucide-react";
 import ItemSlot from "@/components/ItemSlot";
-import
-{
-  HoverCard,
-  HoverCardTrigger,
-  HoverCardContent,
-} from "@/components/ui/hover-card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Item as ShadItem, ItemGroup } from "@/components/ui/item";
 
 interface Props
@@ -90,19 +85,19 @@ export default function MarketView({ game, setGame }: Props)
         <h2 className="font-bold m-1 flex items-center gap-2">
           <Store className="w-5 h-5" /> Store
 
-          <HoverCard openDelay={0} closeDelay={0}>
-            <HoverCardTrigger asChild>
+          <Popover>
+            <PopoverTrigger asChild>
               <HelpCircle className="w-4 h-4 cursor-pointer" />
-            </HoverCardTrigger>
-            <HoverCardContent className="w-64" side="top">
+            </PopoverTrigger>
+            <PopoverContent className="w-64" side="top">
               <h2 className="font-bold m-1 flex items-center gap-2">
                 <Store className="w-5 h-5" /> Store
               </h2>
               <p className="text-sm">
                 Spend units of Procrastination to buy items. The more expensive a box is, the higher the chance of getting rare and high-level items.
               </p>
-            </HoverCardContent>
-          </HoverCard>
+            </PopoverContent>
+          </Popover>
         </h2>
 
         <ItemGroup className="space-y-2">
@@ -132,11 +127,11 @@ export default function MarketView({ game, setGame }: Props)
         <h2 className="font-bold m-1 flex items-center gap-2">
           <PackageOpen className="w-5 h-5" /> Unboxed Item
 
-          <HoverCard openDelay={0} closeDelay={0}>
-            <HoverCardTrigger asChild>
+          <Popover>
+            <PopoverTrigger asChild>
               <HelpCircle className="w-4 h-4 cursor-pointer" />
-            </HoverCardTrigger>
-            <HoverCardContent className="w-64" side="top">
+            </PopoverTrigger>
+            <PopoverContent className="w-64" side="top">
               <h2 className="font-bold m-1 flex items-center gap-2">
                 <PackageOpen className="w-5 h-5" /> Unboxing
               </h2>
@@ -144,8 +139,8 @@ export default function MarketView({ game, setGame }: Props)
               <p className="text-sm">
                 After buying an item, click on an empty inventory slot to place the item there, or buy another item (automatically trash the previous one).
               </p>
-            </HoverCardContent>
-          </HoverCard>
+            </PopoverContent>
+          </Popover>
         </h2>
         <div className="flex flex-col items-center justify-center p-3">
           <h2 className={`font-bold m-1 flex items-center gap-2 ${game.unboxedItem ? '' : 'invisible'}`}>

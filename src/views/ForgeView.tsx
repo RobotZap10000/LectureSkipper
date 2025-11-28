@@ -3,12 +3,7 @@ import { Anvil, CirclePlus, HelpCircle } from "lucide-react";
 import type { GameState, Item } from "@/game";
 import type { Dispatch, SetStateAction } from "react";
 import ItemSlot from "@/components/ItemSlot";
-import
-{
-  HoverCard,
-  HoverCardTrigger,
-  HoverCardContent,
-} from "@/components/ui/hover-card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface Props
 {
@@ -29,9 +24,9 @@ export default function ForgeView({ game, setGame }: Props)
     {
       const newState = { ...state };
 
-      if (newState.selectedItemSlots.length === 1 && !newState.forgeItem)
+      if (newState.selectedItemSlots.length > 0 && !newState.forgeItem)
       {
-        const sourceIndex = newState.selectedItemSlots[0];
+        const sourceIndex = newState.selectedItemSlots[newState.selectedItemSlots.length - 1];
         const item = newState.items[sourceIndex];
         if (item)
         {
@@ -75,11 +70,11 @@ export default function ForgeView({ game, setGame }: Props)
         <h2 className="font-bold m-1 flex items-center gap-2">
           <CirclePlus className="w-5 h-5" /> Upgrade Items
 
-          <HoverCard openDelay={0} closeDelay={0}>
-            <HoverCardTrigger asChild>
+          <Popover>
+            <PopoverTrigger asChild>
               <HelpCircle className="w-4 h-4 cursor-pointer" />
-            </HoverCardTrigger>
-            <HoverCardContent className="w-64" side="top">
+            </PopoverTrigger>
+            <PopoverContent className="w-64" side="top">
               <h2 className="font-bold m-1 flex items-center gap-2">
                 <Anvil className="w-5 h-5" /> The Forge
               </h2>
@@ -87,8 +82,8 @@ export default function ForgeView({ game, setGame }: Props)
               <p className="text-sm">
                 Dump money into your items to upgrade them and make them more potent. There is no level cap, but each upgrade is more expensive than the last.
               </p>
-            </HoverCardContent>
-          </HoverCard></h2>
+            </PopoverContent>
+          </Popover></h2>
         <div className="flex flex-col items-center justify-center p-3">
           <div className="w-32 h-32 flex items-center justify-center mb-2">
             <ItemSlot
@@ -99,7 +94,7 @@ export default function ForgeView({ game, setGame }: Props)
             />
           </div>
           <button
-            className={`${game.forgeItem ? "" : "opacity-50"} ${game.cash < (game.forgeItem ? calculateUpgradeCost(game.forgeItem) : (game.selectedItemSlots.length > 0 ? (game.items[game.selectedItemSlots[0]] ? calculateUpgradeCost(game.items[game.selectedItemSlots[0]]!) : 0) : 0)) ? "bg-red-500" : "bg-green-500"} text-white px-2 py-1 rounded`}
+            className={`${game.forgeItem ? "" : "opacity-50"} ${game.cash < (game.forgeItem ? calculateUpgradeCost(game.forgeItem) : (game.selectedItemSlots.length > 0 ? (game.items[game.selectedItemSlots[game.selectedItemSlots.length - 1]] ? calculateUpgradeCost(game.items[game.selectedItemSlots[game.selectedItemSlots.length - 1]]!) : 0) : 0)) ? "bg-red-500" : "bg-green-500"} text-white px-2 py-1 rounded`}
             onClick={handleUpgrade}
             disabled={!game.forgeItem}
           >

@@ -2,12 +2,7 @@ import { Box, HelpCircle, LayoutGrid, Package } from "lucide-react";
 import ItemSlot from "@/components/ItemSlot";
 import type { GameState } from "@/game";
 import type { Dispatch, SetStateAction } from "react";
-import
-{
-  HoverCard,
-  HoverCardTrigger,
-  HoverCardContent,
-} from "@/components/ui/hover-card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface Props
 {
@@ -99,11 +94,11 @@ export default function Inventory({
       <h2 className="font-bold m-1 flex items-center gap-2">
         <Package className="w-5 h-5" /> Inventory
 
-        <HoverCard openDelay={0} closeDelay={0}>
-          <HoverCardTrigger asChild>
+        <Popover>
+          <PopoverTrigger asChild>
             <HelpCircle className="w-4 h-4 cursor-pointer" />
-          </HoverCardTrigger>
-          <HoverCardContent className="w-64" side="top">
+          </PopoverTrigger>
+          <PopoverContent className="w-64" side="top">
             <h2 className="font-bold m-1 flex items-center gap-2">
               <Box className="w-5 h-5" /> Items
             </h2>
@@ -123,8 +118,8 @@ export default function Inventory({
             <p className="text-sm">
               Click on an item to select/activate it. Click on an empty slot to move items there. While in the Forge or Market, click on the Trash button to remove them.
             </p>
-          </HoverCardContent>
-        </HoverCard>
+          </PopoverContent>
+        </Popover>
       </h2>
 
       <div className="flex-1 flex items-center justify-center overflow-auto p-5">

@@ -2,13 +2,8 @@ import Inventory from "@/components/Inventory";
 import type { GameState, Quest } from "../game";
 import type { Dispatch, SetStateAction } from "react";
 import { HelpCircle, MessageCircle, MessagesSquare } from "lucide-react";
-import
-{
-  HoverCard,
-  HoverCardTrigger,
-  HoverCardContent,
-} from "@/components/ui/hover-card";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import chroma from "chroma-js";
 
 interface Props
@@ -87,11 +82,11 @@ export default function ChatView({ game, setGame }: Props)
         <h2 className="font-bold m-1 flex items-center gap-2">
           <MessagesSquare className="w-5 h-5" /> Course Group Chat
 
-          <HoverCard openDelay={0} closeDelay={0}>
-            <HoverCardTrigger asChild>
+          <Popover>
+            <PopoverTrigger asChild>
               <HelpCircle className="w-4 h-4 cursor-pointer" />
-            </HoverCardTrigger>
-            <HoverCardContent className="w-64" side="top">
+            </PopoverTrigger>
+            <PopoverContent className="w-64" side="top">
               <h2 className="font-bold m-1 flex items-center gap-2">
                 <MessageCircle className="w-5 h-5" /> The GC
               </h2>
@@ -101,8 +96,8 @@ export default function ChatView({ game, setGame }: Props)
                 <br></br><br></br>
                 Trade offers appear at the start of a block and don't change until next block, unless you have some special items.
               </p>
-            </HoverCardContent>
-          </HoverCard>
+            </PopoverContent>
+          </Popover>
         </h2>
 
         {game.quests.length === 0 ? (
@@ -119,16 +114,13 @@ export default function ChatView({ game, setGame }: Props)
               return (
                 <Card
                   key={quest.id}
-                  className="flex flex-col border-2 gap-1 p-3 basis-[32%] min-w-[200px] h-content"
+                  className="flex flex-col border-2 gap-1 p-3 basis-[32%] min-w-[150px] h-content"
                   style={{
                     backgroundColor: bg,
                     borderColor: border,
                     color: text,
                   }}
                 >
-                  <CardTitle className="text-sm font-bold" style={{ color: text }}>
-                    Trade Offer
-                  </CardTitle>
 
                   <CardTitle className="text-sm font-semibold" style={{ color: text }}>
                     Requirements

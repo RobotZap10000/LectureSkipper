@@ -6,13 +6,8 @@ import { useEffect, useRef } from "react";
 import { Scroll, GraduationCap, BookOpen, HelpCircle, BookAlert, RefreshCcw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import
-{
-  HoverCard,
-  HoverCardTrigger,
-  HoverCardContent,
-} from "@/components/ui/hover-card";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import chroma from "chroma-js";
 
 interface Props
@@ -42,11 +37,11 @@ export default function CalendarView({ game, setGame }: Props)
           <h2 className="font-bold m-1 flex items-center gap-2">
             <GraduationCap className="w-5 h-5" /> Courses
 
-            <HoverCard openDelay={0} closeDelay={0}>
-              <HoverCardTrigger asChild>
+            <Popover>
+              <PopoverTrigger asChild>
                 <HelpCircle className="w-4 h-4 cursor-pointer" />
-              </HoverCardTrigger>
-              <HoverCardContent className="w-64" side="top">
+              </PopoverTrigger>
+              <PopoverContent className="w-64" side="top">
                 <h2 className="font-bold m-1 flex items-center gap-2">
                   <GraduationCap className="w-5 h-5" /> Courses
                 </h2>
@@ -66,8 +61,8 @@ export default function CalendarView({ game, setGame }: Props)
                   <br></br><br></br>
                   You can gain Understanding (U) past the goal of the course: the chance to pass will be capped at 100%.
                 </p>
-              </HoverCardContent>
-            </HoverCard>
+              </PopoverContent>
+            </Popover>
           </h2>
 
           <div className="flex-1 overflow-auto space-y-1">
@@ -115,11 +110,11 @@ export default function CalendarView({ game, setGame }: Props)
       <div className="bg-card p-2 rounded flex flex-col max-w-[400px] w-full h-content">
         <h2 className="font-bold m-1 flex items-center gap-2">
           <BookOpen className="w-5 h-5" /> Next Event
-          <HoverCard openDelay={0} closeDelay={0}>
-            <HoverCardTrigger asChild>
+          <Popover>
+            <PopoverTrigger asChild>
               <HelpCircle className="w-4 h-4 cursor-pointer" />
-            </HoverCardTrigger>
-            <HoverCardContent className="w-64" side="top">
+            </PopoverTrigger>
+            <PopoverContent className="w-64" side="top">
               <h2 className="font-bold m-1 flex items-center gap-2">
                 <BookOpen className="w-5 h-5" /> Lectures
               </h2>
@@ -130,8 +125,8 @@ export default function CalendarView({ game, setGame }: Props)
                   <li><span className="font-bold">Skip</span>: Skipping gives you Procrastinations (P) and restores energy.</li>
                 </ul>
               </p>
-            </HoverCardContent>
-          </HoverCard>
+            </PopoverContent>
+          </Popover>
         </h2>
 
         {/* --- CASE 1: Lectures still remaining --- */}

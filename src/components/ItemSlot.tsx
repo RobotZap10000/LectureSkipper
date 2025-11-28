@@ -1,11 +1,5 @@
-// components/ItemSlot.tsx
-import
-{
-  HoverCard,
-  HoverCardTrigger,
-  HoverCardContent,
-} from "@/components/ui/hover-card";
 import type { Item } from "@/game";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface ItemSlotProps
 {
@@ -61,11 +55,22 @@ export default function ItemSlot({
   if (!item) return slot;
 
   return (
-    <HoverCard openDelay={0} closeDelay={0}>
-      <HoverCardTrigger asChild>{slot}</HoverCardTrigger>
-      <HoverCardContent className="w-64" side="bottom" sideOffset={50}>
+    <Popover>
+      <PopoverTrigger asChild>{slot}</PopoverTrigger>
+      <PopoverContent
+        className={`w-96 p-4 rounded-md bg-popover shadow-lg z-10 ring-2 ${item
+            ? item.rarity === 1
+              ? "ring-green-600"
+              : item.rarity === 2
+                ? "ring-blue-600"
+                : "ring-yellow-600"
+            : "ring-gray-400"
+          }`}
+        side="bottom"
+        sideOffset={75}
+      >
         <div className="flex gap-3 items-start">
-          {Icon && <Icon className="w-8 h-8" />}
+          {Icon && <Icon className="w-16" />}
           <div>
             <h4 className="font-bold">{item.name} - Level {item.level}</h4>
             <p className="text-sm text-muted-foreground">
@@ -73,7 +78,7 @@ export default function ItemSlot({
             </p>
           </div>
         </div>
-      </HoverCardContent>
-    </HoverCard>
+      </PopoverContent>
+    </Popover>
   );
 }
