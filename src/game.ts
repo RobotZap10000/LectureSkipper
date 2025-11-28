@@ -70,6 +70,7 @@ export type GameState = {
   cash: number;
   procrastinations: number;
   items: (Item | null)[]; // 36 slots
+  maxActivatedItems: number;
 };
 
 // Initial state generator
@@ -86,6 +87,7 @@ export function initGame(): GameState
     energyPerSkip: 5,
     nextLecture: null,
     items: Array(36).fill(null),
+    maxActivatedItems: 3,
     unboxedItem: null,
     forgeItem: null,
     selectedItemSlots: [],

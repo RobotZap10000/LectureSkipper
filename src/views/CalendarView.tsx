@@ -303,7 +303,7 @@ export default function CalendarView({ game, setGame }: Props)
       <Inventory
         game={game}
         setGame={setGame}
-        disableTrash={true}
+        mode="calendar"
       />
 
       {/* Log */}

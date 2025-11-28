@@ -1,4 +1,4 @@
-import { Box, HelpCircle, LayoutGrid, Package } from "lucide-react";
+import { Box, Check, HelpCircle, LayoutGrid, Package } from "lucide-react";
 import ItemSlot from "@/components/ItemSlot";
 import type { GameState } from "@/game";
 import type { Dispatch, SetStateAction } from "react";
@@ -8,13 +8,13 @@ interface Props
 {
   game: GameState;
   setGame: Dispatch<SetStateAction<GameState>>;
-  disableTrash?: boolean;
+  mode: "calendar" | "normal";
 }
 
 export default function Inventory({
   game,
   setGame,
-  disableTrash,
+  mode,
 }: Props)
 {
 
@@ -28,6 +28,7 @@ export default function Inventory({
         selected.splice(selected.indexOf(itemSlotID), 1);
       } else
       {
+        if (mode === "calendar" && prev.selectedItemSlots.length >= prev.maxActivatedItems) return prev;
         selected.push(itemSlotID);
       }
       return { ...prev, selectedItemSlots: selected };
@@ -125,6 +126,12 @@ export default function Inventory({
       <div className="flex-1 flex items-center justify-center overflow-auto p-5">
         <div className="flex flex-col items-center">
 
+          {mode === "calendar" && (
+            <h2 className="font-bold m-1 flex items-center gap-2 p-2">
+              <Check className="w-5 h-5" /> Activated {game.selectedItemSlots.length} / {game.maxActivatedItems}
+            </h2>
+          )}
+
           <div className="grid grid-cols-6 grid-rows-6 gap-1">
             {game.items.map((item, i) => (
               <ItemSlot
@@ -147,7 +154,7 @@ export default function Inventory({
           </div>
 
 
-          {!disableTrash && (
+          {mode === "normal" && (
             <button
               onClick={handleTrash}
               disabled={game.selectedItemSlots.length === 0}

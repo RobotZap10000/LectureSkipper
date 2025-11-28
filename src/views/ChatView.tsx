@@ -180,7 +180,7 @@ export default function ChatView({ game, setGame }: Props)
       <Inventory
         game={game}
         setGame={setGame}
-        disableTrash={false}
+        mode="normal"
       />
     </div >
   );

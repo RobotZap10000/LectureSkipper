@@ -177,7 +177,7 @@ export default function MarketView({ game, setGame }: Props)
       <Inventory
         game={game}
         setGame={setGame}
-        disableTrash={false}
+        mode="normal"
       />
     </div>
   );
