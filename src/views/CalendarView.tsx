@@ -3,7 +3,7 @@ import type { GameState } from "@/game";
 import { attendLecture, skipLecture, attendExams, startNewBlock, initGame } from "@/game";
 import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useRef } from "react";
-import { Scroll, GraduationCap, BookOpen, HelpCircle, BookAlert, RefreshCcw } from "lucide-react";
+import { Scroll, GraduationCap, BookOpen, HelpCircle, BookAlert, RefreshCcw, Zap } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -131,7 +131,7 @@ export default function CalendarView({ game, setGame }: Props)
 
         {/* --- CASE 1: Lectures still remaining --- */}
         {game.nextLecture && !game.examsAttended ? (
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex flex-col items-center gap-2">
             {/* Determine course color */}
             {(() =>
             {
@@ -144,7 +144,7 @@ export default function CalendarView({ game, setGame }: Props)
 
               return (
                 <Card
-                  className="w-72 h-80 p-4 flex flex-col justify-between border-2"
+                  className="w-72 h-90 p-4 mt-4 flex flex-col justify-between border-2"
                   style={{
                     backgroundColor: bg,
                     borderColor: border,
@@ -169,7 +169,7 @@ export default function CalendarView({ game, setGame }: Props)
                     {/* Potential Understandings */}
                     <div>
                       <div className="text-sm mb-1">
-                        Potential Understandings: {game.nextLecture.potentialUnderstandings}
+                        Potential Understandings: <span className="font-bold">{game.nextLecture.potentialUnderstandings}</span>
                       </div>
                       <Progress
                         value={game.nextLecture.potentialUnderstandings}
@@ -181,7 +181,7 @@ export default function CalendarView({ game, setGame }: Props)
                     {/* Understand Chance */}
                     <div>
                       <div className="text-sm mb-1">
-                        Understand Chance: {(game.nextLecture.understandChance * 100).toFixed(1)}%
+                        Understand Chance: <span className="font-bold">{(game.nextLecture.understandChance * 100).toFixed(1)}%</span>
                       </div>
                       <Progress
                         value={game.nextLecture.understandChance * 100}
@@ -192,7 +192,7 @@ export default function CalendarView({ game, setGame }: Props)
 
                     {/* Time Cost */}
                     <div>
-                      <div className="text-sm mb-1">Time Cost: {game.nextLecture.timeCost}</div>
+                      <div className="text-sm mb-1">Time Cost: <span className="font-bold">{game.nextLecture.timeCost}</span></div>
                       <Progress
                         value={Math.min((game.nextLecture.timeCost / game.energy) * 100, 100)}
                         className="h-3 rounded-full [&>div]:bg-red-300"
@@ -201,7 +201,7 @@ export default function CalendarView({ game, setGame }: Props)
 
                     {/* Procrastination Value */}
                     <div>
-                      <div className="text-sm mb-1">Procrastination (P) Value: {game.nextLecture.procrastinationValue}</div>
+                      <div className="text-sm mb-1">Procrastination (P) Value: <span className="font-bold">{game.nextLecture.procrastinationValue}</span></div>
                       <Progress
                         value={game.nextLecture.procrastinationValue}
                         max={10} // placeholder max
@@ -216,7 +216,7 @@ export default function CalendarView({ game, setGame }: Props)
 
 
             {/* Buttons */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 m-2">
               <Button
                 onClick={() => setGame(g => attendLecture(g))}
                 className={`${game.energy < game.nextLecture.timeCost ? "bg-neutral-500 hover:bg-neutral-500" : "bg-green-500 hover:bg-green-600"} text-white px-4 py-2 rounded`}
@@ -231,9 +231,21 @@ export default function CalendarView({ game, setGame }: Props)
               </Button>
             </div>
 
-            <h1 className="font-bold m-1 flex items-center gap-2">
+            <h1 className="font-bold flex items-center p-0 m-0">
               Lectures until Exams: {game.lecturesLeft}
             </h1>
+
+            <div className="flex flex-col gap-1 w-full max-w-sm p-3">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <Zap className="w-4 h-4" /> Energy: {game.energy} E / {game.maxEnergy} E
+              </div>
+              <Progress
+                value={game.energy}
+                max={game.maxEnergy}
+                className="h-3 rounded-full"
+              />
+            </div>
+
           </div>
         ) : null}
 

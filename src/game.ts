@@ -280,7 +280,7 @@ const courseTopics = [
   "Religion",
 ];
 
-export function generateCourse(state: GameState): Course
+export function generateCourse(state: GameState, hue: number): Course
 {
   // Pick a random template
   const template =
@@ -298,7 +298,7 @@ export function generateCourse(state: GameState): Course
     goal: 10 + state.block * 2,
     understandings: 0,
     color: chroma.hsv(
-      Math.random() * 360, // random hue 0–360
+      hue, // random hue 0–360
       1,                 // saturation (0–1)
       0.25                 // value/brightness (0–1)
     ).hex(),
@@ -350,11 +350,21 @@ export function startNewBlock(state: GameState): GameState
 
   newState.block += 1;
 
+  const hues: number[] = [];
+  const minDistance = 25;
+  while (hues.length < 3) {
+    const h = Math.floor(Math.random() * 360);
+    if (hues.every(existing => Math.abs(existing - h) >= minDistance &&
+                              Math.abs(existing - h) <= 360 - minDistance)) {
+      hues.push(h);
+    }
+  }
+
   // Create 3 new courses
   const newCourses: Course[] = [
-    generateCourse(newState),
-    generateCourse(newState),
-    generateCourse(newState),
+    generateCourse(newState, hues[0]),
+    generateCourse(newState, hues[1]),
+    generateCourse(newState, hues[2]),
   ];
   newState.courses = newCourses;
 

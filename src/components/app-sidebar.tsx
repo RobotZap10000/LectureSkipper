@@ -27,12 +27,12 @@ const items = [
     icon: BadgeDollarSign,
   },
   {
-    title: "Chat",
-    icon: MessageCircleMore,
-  },
-  {
     title: "Forge",
     icon: Anvil,
+  },
+  {
+    title: "Chat",
+    icon: MessageCircleMore,
   },
   {
     title: "Settings",
@@ -59,7 +59,8 @@ export function AppSidebar({ setGame, currentView, setView }: Props)
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <button onClick={() => {
+                    <button onClick={() =>
+                    {
                       setView(item.title as View);
                       setGame((g) => ({ ...g, selectedItemSlots: [] }));
                     }} className={`flex items-center gap-2 p-1 ${currentView === item.title ? "ring-1 ring-gray-500" : ""}`}>
