@@ -21,7 +21,6 @@ interface Props
 
 export default function MarketView({ game, setGame }: Props)
 {
-  // Example shop items
   const shopListings = [
     { name: "Mild Box", cost: 5, border: "border-green-700", bg: "bg-green-950" },
     { name: "Anxiety Box", cost: 30, border: "border-yellow-700", bg: "bg-yellow-950" },
@@ -29,26 +28,21 @@ export default function MarketView({ game, setGame }: Props)
     { name: "Breakdown Box", cost: 1000, border: "border-purple-700", bg: "bg-purple-950" },
   ];
 
-  // Buy a box: consumes procrastination and generates an item
+  // Buy a box: consumes procrastinations and generates an item
   const handleBuy = (cost: number) =>
   {
-    if (game.procrastinations < cost)
-    {
-      return;
-    }
+    if (game.procrastinations < cost) return;
 
-    // Pick random item from items record
     const keys = Object.keys(items);
     const randomKey = keys[Math.floor(Math.random() * keys.length)];
     const randomItem = items[randomKey];
 
-    // Create an instance (so every item has its own level, etc.)
     const newItem = {
       ...randomItem,
-      id: generateUUID(), // ensure unique inventory instance
+      id: generateUUID(),
+      memory: {},
     };
 
-    // Update game state properly
     setGame((prev) => ({
       ...prev,
       unboxedItem: newItem,
@@ -60,18 +54,25 @@ export default function MarketView({ game, setGame }: Props)
   const handlePlaceItem = () =>
   {
     if (!game.unboxedItem) return;
-    for (let i = 0; i < game.items.length; i++)
-    {
-      if (!game.items[i])
-      {
-        game.items[i] = game.unboxedItem;
-        break;
-      }
-    }
-    game.unboxedItem = null;
 
-    setGame((prev) => ({ ...prev }));
+    setGame((prev) =>
+    {
+      const newItems = [...prev.items];
+      const emptyIndex = newItems.findIndex((slot) => !slot);
+
+      if (emptyIndex >= 0 && emptyIndex < newItems.length)
+      {
+        newItems[emptyIndex] = prev.unboxedItem;
+      }
+
+      return {
+        ...prev,
+        items: newItems,
+        unboxedItem: null,
+      };
+    });
   };
+
 
   // Trash the unboxed item
   const handleTrash = () =>

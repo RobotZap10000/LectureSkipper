@@ -8,6 +8,8 @@ import
   HoverCardTrigger,
   HoverCardContent,
 } from "@/components/ui/hover-card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import chroma from "chroma-js";
 
 interface Props
 {
@@ -17,24 +19,32 @@ interface Props
 
 export default function ChatView({ game, setGame }: Props)
 {
-  const handleProvideNotes = (quest: Quest) =>
+  const haveRequirements = (quest: Quest): boolean =>
   {
-    const hasRequirements = quest.requirements.every((req) =>
+    return quest.requirements.every((req) =>
     {
       if (req.type === "understandings" && req.courseIndex !== undefined)
         return game.courses[req.courseIndex].understandings >= req.amount;
       if (req.type === "procrastinations")
         return game.procrastinations >= req.amount;
+      if (req.type === "cash")
+        return game.cash >= req.amount;
       return false;
     });
+  };
 
-    if (!hasRequirements) return alert("Requirements not met!");
+  const handleProvideNotes = (quest: Quest) =>
+  {
+    const hasRequirements = haveRequirements(quest);
+
+    if (!hasRequirements) return;
 
     // Deduct requirements
-    setGame((g) =>
+    setGame((state) =>
     {
-      const newCourses = g.courses.map((c) => ({ ...c }));
-      let newProcrastinations = g.procrastinations;
+      const newCourses = state.courses.map((c) => ({ ...c }));
+      let newProcrastinations = state.procrastinations;
+      let newCash = state.cash;
       quest.requirements.forEach((req) =>
       {
         if (req.type === "understandings" && req.courseIndex !== undefined)
@@ -45,26 +55,35 @@ export default function ChatView({ game, setGame }: Props)
         {
           newProcrastinations -= req.amount;
         }
+        if (req.type === "cash")
+        {
+          newCash -= req.amount;
+        }
       });
 
       // Give rewards
-      let newCash = g.cash;
-      let newProcrast = newProcrastinations;
       quest.rewards.forEach((rew) =>
       {
+        if (rew.type === "understandings") newCourses[rew.courseIndex].understandings += rew.amount;
+        if (rew.type === "procrastinations") newProcrastinations += rew.amount;
         if (rew.type === "cash") newCash += rew.amount;
-        if (rew.type === "procrastinations") newProcrast += rew.amount;
       });
 
-      return { ...g, courses: newCourses, cash: newCash, procrastinations: newProcrast };
+      // Remove quest
+      const newQuests = state.quests.map((q) => ({ ...q }));
+      newQuests.splice(state.quests.indexOf(quest), 1);
+
+      return { ...state, courses: newCourses, cash: newCash, procrastinations: newProcrastinations, quests: newQuests };
     });
   };
+
+
 
   return (
     <div className="flex flex-wrap justify-center gap-4 p-4">
 
       {/* Quests */}
-      <div className="bg-card p-2 rounded flex flex-col max-w-[400px] w-full h-content max-h-[500px]">
+      <div className="bg-card p-2 rounded flex flex-col max-w-[1000px] w-full h-content max-h-[650px] overflow-auto">
         <h2 className="font-bold m-1 flex items-center gap-2">
           <MessagesSquare className="w-5 h-5" /> Course Group Chat
 
@@ -89,32 +108,80 @@ export default function ChatView({ game, setGame }: Props)
         {game.quests.length === 0 ? (
           <div className="p-3 italic text-gray-400">No offers available.</div>
         ) : (
-          <div className="grid grid-cols-1 gap-2">
-            {game.quests.map((quest) => (
-              <div key={quest.id} className="bg-accent p-2 rounded">
-                <div className="mb-1 font-semibold">Requirements:</div>
-                {quest.requirements.map((req, i) => (
-                  <div key={i}>
-                    {req.type === "understandings"
-                      ? `Course ${req.courseIndex! + 1}: ${req.amount} Understandings`
-                      : `${req.amount} Procrastinations`}
-                  </div>
-                ))}
-                <div className="mb-1 mt-2 font-semibold">Rewards:</div>
-                {quest.rewards.map((rew, i) => (
-                  <div key={i}>
-                    {rew.type === "cash" ? `$${rew.amount}` : `${rew.amount} Procrastinations`}
-                  </div>
-                ))}
-                <button
-                  className="mt-2 bg-green-500 text-white px-2 py-1 rounded"
-                  onClick={() => handleProvideNotes(quest)}
+          <div className="flex flex-wrap gap-2">
+            {game.quests.map((quest) =>
+            {
+              const baseColor = quest.color || "#4b5563"; // fallback
+              const bg = chroma(baseColor).brighten(1.2).hex();
+              const border = chroma(baseColor).brighten(2).hex();
+              const text = chroma.contrast(bg, "white") > 4.5 ? "white" : "black";
+
+              return (
+                <Card
+                  key={quest.id}
+                  className="flex flex-col border-2 gap-1 p-3 basis-[32%] min-w-[200px] h-content"
+                  style={{
+                    backgroundColor: bg,
+                    borderColor: border,
+                    color: text,
+                  }}
                 >
-                  Provide Notes
-                </button>
-              </div>
-            ))}
-          </div>)}
+                  <CardTitle className="text-sm font-bold" style={{ color: text }}>
+                    Trade Offer
+                  </CardTitle>
+
+                  <CardTitle className="text-sm font-semibold" style={{ color: text }}>
+                    Requirements
+                  </CardTitle>
+
+                  <CardContent className="text-sm">
+                    <ul className="list-disc">
+                      {quest.requirements.map((req, i) => (
+                        <li key={i}>
+                          {req.type === "understandings" && `${req.amount} U in ${game.courses[req.courseIndex].title}`}
+                          {req.type === "procrastinations" && `${req.amount} P`}
+                          {req.type === "cash" && `${req.amount}$`}
+                        </li>
+
+                      ))}
+                    </ul>
+                  </CardContent>
+
+                  <CardTitle className="text-sm font-semibold" style={{ color: text }}>
+                    Rewards
+                  </CardTitle>
+
+                  <CardContent className="text-sm flex-1">
+                    <ul className="list-disc">
+                      {quest.rewards.map((rew, i) => (
+                        <li key={i}>
+                          {rew.type === "cash"
+                            ? `$${rew.amount}`
+                            : `${rew.amount} Procrastinations`}
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+
+                  <CardFooter className="">
+                    <button
+                      className="w-full px-2 py-1 rounded text-sm"
+                      style={{
+                        backgroundColor: haveRequirements(quest) ? "rgba(0, 197, 10, 1)" : "rgba(0, 0, 0, 0.25)",
+                        color: text,
+                      }}
+                      onClick={() => handleProvideNotes(quest)}
+                    >
+                      Provide Notes
+                    </button>
+                  </CardFooter>
+                </Card>
+              );
+            })}
+          </div>
+
+        )}
+
       </div>
 
       {/* Inventory */}

@@ -25,66 +25,47 @@ export default function ForgeView({ game, setGame }: Props)
 
   const putItemIntoForge = () =>
   {
-    setGame(prev =>
+    setGame(state =>
     {
-      const items = [...prev.items];
-      const selected = [...prev.selectedItemSlots];
-      let forgeItem = prev.forgeItem;
+      const newState = { ...state };
 
-      if (selected.length === 1 && !forgeItem)
+      if (newState.selectedItemSlots.length === 1 && !newState.forgeItem)
       {
-        const sourceIndex = selected[0];
-        const item = items[sourceIndex];
+        const sourceIndex = newState.selectedItemSlots[0];
+        const item = newState.items[sourceIndex];
         if (item)
         {
-          forgeItem = item;       // assign to new variable
-          items[sourceIndex] = null; // remove from inventory
+          newState.forgeItem = item;
+          newState.items = [...newState.items];
+          newState.items[sourceIndex] = null;
         }
       }
 
-      return {
-        ...prev,
-        items,
-        selectedItemSlots: [],
-        forgeItem, // use the updated forgeItem
-      };
+      newState.selectedItemSlots = [];
+
+      return newState;
     });
   };
-
 
   const handleUpgrade = () =>
   {
-    if (!game.forgeItem) return; // no item selected in forge
-    const cost = calculateUpgradeCost(game.forgeItem);
-    if (game.cash < cost) return;
-
-    setGame((g: GameState) =>
+    setGame((state) =>
     {
-      if (!g.forgeItem) return g; // safety check
+      if (!state.forgeItem) return state;
 
-      const cost = calculateUpgradeCost(game.forgeItem!);
-      if (g.cash < cost)
-      {
-        alert("Not enough cash!");
-        return g;
-      }
+      const cost = calculateUpgradeCost(state.forgeItem!);
+      if (state.cash < cost) return state;
 
-      const upgradedItem = { ...g.forgeItem, level: g.forgeItem.level + 1 };
-
-      const newItems = g.items.map((it) =>
-        it === g.forgeItem ? upgradedItem : it
-      );
+      const upgradedItem = { ...state.forgeItem, level: state.forgeItem.level + 1 };
 
       return {
-        ...g,
-        items: newItems,
+        ...state,
         forgeItem: upgradedItem,
-        cash: g.cash - cost,
+        cash: state.cash - cost,
       };
     });
 
   };
-
 
   return (
     <div className="flex flex-wrap justify-center gap-4 p-4">

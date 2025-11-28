@@ -16,7 +16,7 @@ export const items: Record<string, Item> = {
     startingLevel: 1,
     description: "On attendance: Doubles understand chance but halves understandings gained.",
     icon: Bot,
-    memory: [],
+    memory: {},
   },
   Apple: {
     id: "",
@@ -54,7 +54,7 @@ export const items: Record<string, Item> = {
   GPS: {
     id: "",
     name: "GPS",
-    rarity: 1,
+    rarity: 2,
     level: 1,
     startingLevel: 1,
     description: "On attendance: You have a +10% chance of understanding this lecture.",
@@ -64,7 +64,7 @@ export const items: Record<string, Item> = {
   Hacking: {
     id: "",
     name: "Hacking",
-    rarity: 1,
+    rarity: 2,
     level: 1,
     startingLevel: 1,
     description: "On attendance: this lecture cannot appear the next 5 times. Can only be used once per block.",
@@ -74,7 +74,7 @@ export const items: Record<string, Item> = {
   CourseMaterial: {
     id: "",
     name: "Course Material",
-    rarity: 1,
+    rarity: 2,
     level: 1,
     startingLevel: 1,
     description: "After attending: permanently 4x the amount of understandings that this lecture gives, but now it's 4x less likely to appear. Can be used once per block.",
@@ -84,7 +84,7 @@ export const items: Record<string, Item> = {
   Brain: {
     id: "",
     name: "Brain",
-    rarity: 1,
+    rarity: 2,
     level: 1,
     startingLevel: 1,
     description: "On attendance: if you understand this lecture, gain all the required Understandings. Otherwise, lose all Understandings. Cannot go past the goal understandings of the course. Can only be used once block.",
@@ -94,7 +94,7 @@ export const items: Record<string, Item> = {
   Cart: {
     id: "",
     name: "Cart",
-    rarity: 1,
+    rarity: 2,
     level: 1,
     startingLevel: 1,
     description: "After attending: whenever this lecture appears, gain +40$. Can only be used once per block.",
@@ -107,7 +107,7 @@ export const items: Record<string, Item> = {
   ScheduleEditor: {
     id: "",
     name: "Schedule Editor",
-    rarity: 1,
+    rarity: 3,
     level: 1,
     startingLevel: 1,
     description: "On attend: this lecture is now guaranteed to appear the next 5 times. Can only be used once per block.",
@@ -117,7 +117,7 @@ export const items: Record<string, Item> = {
   TimeMachine: {
     id: "",
     name: "TimeMachine",
-    rarity: 1,
+    rarity: 3,
     level: 1,
     startingLevel: 1,
     description: "On attendance: Resets your understandings for this course, but adds +10 lectures.",

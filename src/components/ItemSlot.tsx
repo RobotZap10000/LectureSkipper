@@ -31,8 +31,18 @@ export default function ItemSlot({
       flex items-center justify-center rounded bg-accent cursor-pointer
       ${selected ? "ring-2 ring-green-500" : ""}
     `}
-      style={{ width: size, height: size }}
       onClick={onClick}
+      style={{
+        width: size,
+        height: size,
+        background: item
+          ? item.rarity === 1
+            ? "rgba(40, 93, 40, 1)"
+            : item.rarity === 2
+              ? "rgba(40, 77, 132, 1)"
+              : "rgba(134, 116, 28, 1)"
+          : undefined, // keeps bg-accent gray
+      }}
     >
       {Icon && <Icon style={{ width: size * 0.6, height: size * 0.6 }} />}
 

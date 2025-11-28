@@ -41,8 +41,8 @@ export default function App()
           {/* Footer — no fixed positioning, sits to the right of the sidebar automatically */}
           <div className="bg-sidebar p-2 flex justify-around items-center z-50 flex-shrink-0">
             <div className="flex items-center gap-2"><CircleDollarSign /> Cash: {game.cash}$</div>
-            <div className="flex items-center gap-2"><Sparkles /> Procrastinations: {game.procrastinations}</div>
-            <div className="flex items-center gap-2"><Zap /> Energy: {game.energy}/{game.maxEnergy}</div>
+            <div className="flex items-center gap-2"><Sparkles /> Procrastinations: {game.procrastinations} P</div>
+            <div className="flex items-center gap-2"><Zap /> Energy: {game.energy} E / {game.maxEnergy} E</div>
           </div>
         </main>
 

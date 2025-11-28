@@ -1,0 +1,23 @@
+- Generic Beer -
+On attendance: applies one stack of Alcoholism to the course that you use it on, permanently halving the chance to understand it.
+
+- Inverter -
+On attendance: if your Chance of Understanding is below 50%, invert it.
+
+- Epic Beer -
+On attendance: gives you one Master Professor item. Has a 10% chance of applying Alcoholism to the course that you use it on, permanently halving the chance to understand it.
+
+- Master Professor -
+On attendance: Gives you 2^n Understandings where n is the amount of active Master Professors.
+
+- A Window -
+On use: Restarts your run with your current items.
+
+- Grass -
+On touch: adds 1 Procrastination.
+
+- Cookie -
+On use: gives you a cookie.
+
+- Pot -
+On attendance: gives you 1 item from a Mild Box.

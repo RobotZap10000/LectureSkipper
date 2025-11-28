@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { itemBonuses, items } from "@/items";
+import { itemBonuses } from "@/items";
 import Mustache from "mustache";
 import chroma from "chroma-js";
 
@@ -12,7 +12,7 @@ export type Course = {
 };
 
 export type Lecture = {
-  title: string;
+  courseIndex: number;
   startTime: string;
   endTime: string;
   potentialUnderstandings: number;
@@ -22,6 +22,7 @@ export type Lecture = {
 };
 
 export type Item = {
+  // Set randomly when the item is made
   id: string;
   name: string;
   rarity: number;
@@ -30,7 +31,7 @@ export type Item = {
   description: string;
   icon: LucideIcon;
   // Used by items to keep track of their functionality throughout the game
-  memory: string[];
+  memory: object;
 };
 
 export type Currency =
@@ -39,9 +40,11 @@ export type Currency =
   | { type: "procrastinations"; amount: number };
 
 export type Quest = {
+  // Set randomly when the quest is made
   id: string;
   requirements: Currency[];
   rewards: Currency[];
+  color: string;
 };
 
 export type GameState = {
@@ -87,7 +90,7 @@ export function initGame(): GameState
     forgeItem: null,
     selectedItemSlots: [],
     quests: [],
-    log: ["Welcome to Lecture Skipper!"],
+    log: [],
     examsAttended: true,
     examResults: [],
   };
@@ -97,100 +100,102 @@ export function initGame(): GameState
   return game;
 };
 
-// Generate a random lecture
 export function generateLecture(game: GameState): Lecture
 {
-  const courseNames = game.courses.map((c) => c.title);
-  const course = courseNames[Math.floor(Math.random() * 3)];
-  const lecture = {
-    title: `${course} Lecture`,
+  const courseIndex = Math.floor(Math.random() * 3);
+  const lecture: Lecture = {
+    courseIndex: courseIndex,
     startTime: "09:00",
     endTime: "10:00",
-    potentialUnderstandings: Math.floor(Math.random() * 10) + 5,
-    understandChance: Math.random() * 0.5 + 0.25, // 25%-75%
+    potentialUnderstandings: Math.floor(Math.random() * 10) + 5 * game.block,
+    understandChance: Math.random() * 0.99 + 0.01,
     timeCost: Math.floor(Math.random() * 10) + 5,
     procrastinationValue: Math.floor(Math.random() * 5) + 1,
   };
-  game.nextLecture = lecture;
   return lecture;
 }
 
-// Apply lecture result
 export function attendLecture(state: GameState): GameState
 {
   if (!state.nextLecture) return state;
   if (state.energy < state.nextLecture.timeCost) return state;
 
-  let lecture = state.nextLecture;
+  const newState: GameState = { ...state };
+  let lecture = { ...newState.nextLecture! };
 
   // Apply item bonuses
-  state.selectedItemSlots.forEach((itemSlotID) =>
+  newState.selectedItemSlots.forEach((itemSlotID) =>
   {
-    const bonusFn = itemBonuses[items[itemSlotID].name];
+    const item = newState.items[itemSlotID];
+    if (!item) return;
+
+    const bonusFn = itemBonuses[item.name];
     if (bonusFn)
     {
-      lecture = bonusFn(lecture, items[itemSlotID]);
+      lecture = bonusFn(lecture, item);
     }
   });
 
-  const gainedUnderstandings =
-    Math.random() < lecture.understandChance
-      ? Math.floor(lecture.potentialUnderstandings)
-      : 0;
+  const gainedUnderstandings = Math.random() < lecture.understandChance ? lecture.potentialUnderstandings : 0;
 
-  const courseIndex = state.courses.findIndex((c) =>
-    lecture.title.includes(c.title)
-  );
-
-  const newCourses = [...state.courses];
-  if (courseIndex >= 0)
+  // Update course
+  if (lecture.courseIndex >= 0)
   {
-    newCourses[courseIndex] = {
-      ...newCourses[courseIndex],
-      understandings: newCourses[courseIndex].understandings + gainedUnderstandings,
+    newState.courses = [...newState.courses];
+    const oldCourse = newState.courses[lecture.courseIndex];
+
+    newState.courses[lecture.courseIndex] = {
+      ...oldCourse,
+      understandings: oldCourse.understandings + gainedUnderstandings,
     };
   }
 
+  // Build log
+  const courseTitle = newState.courses[lecture.courseIndex].title;
+
   const logMessage =
     gainedUnderstandings > 0
-      ? `Attended ${lecture.title}, gained ${gainedUnderstandings} Understandings.`
-      : `Attended ${lecture.title}, but gained no Understandings.`;
+      ? `+${gainedUnderstandings} Understandings in ${courseTitle}.`
+      : `Could not understand ${courseTitle}.`;
 
-  return {
-    ...state,
-    courses: newCourses,
-    energy: state.energy - lecture.timeCost,
-    lecturesLeft: state.lecturesLeft - 1,
-    log: [logMessage, ...state.log],
-    nextLecture: state.lecturesLeft - 1 > 0 ? generateLecture(state) : null,
-    selectedItemSlots: [],
-  };
+  newState.log = [logMessage, ...newState.log];
+
+  // Update basic stats
+  newState.energy -= lecture.timeCost;
+  newState.lecturesLeft -= 1;
+
+  // Generate next lecture
+  newState.nextLecture = newState.lecturesLeft > 0 ? generateLecture(newState) : null;
+
+  return newState;
 }
+
 
 export function skipLecture(state: GameState): GameState
 {
   if (!state.nextLecture) return state;
 
-  const lecture = state.nextLecture;
+  const newState: GameState = { ...state };
+  let lecture = { ...newState.nextLecture! };
 
-  let newEnergy = state.energy;
-
-  if ((state.energy / state.maxEnergy) < 0.5)
+  let newEnergy = newState.energy;
+  if ((newState.energy / newState.maxEnergy) < 0.5)
   {
-    newEnergy = Math.min(state.energy + state.energyPerSkip, state.maxEnergy)
+    newEnergy = Math.min(newState.energy + newState.energyPerSkip, newState.maxEnergy)
   } else
   {
-    newEnergy = Math.max(state.energy + Math.round(state.energyPerSkip / 2), state.maxEnergy)
+    newEnergy = Math.min(newState.energy + Math.round(newState.energyPerSkip / 2), newState.maxEnergy)
   }
 
-  return {
-    ...state,
-    energy: newEnergy,
-    procrastinations: state.procrastinations + lecture.procrastinationValue,
-    lecturesLeft: state.lecturesLeft - 1,
-    log: [`Skipped ${lecture.title}, gained ${lecture.procrastinationValue} Procrastination.`, ...state.log],
-    nextLecture: state.lecturesLeft - 1 > 0 ? generateLecture(state) : null,
-  };
+  newState.energy = newEnergy;
+  newState.procrastinations += lecture.procrastinationValue;
+  newState.lecturesLeft--;
+  newState.log = [`Skipped ${newState.courses[lecture.courseIndex].title}.`, ...newState.log];
+
+  // Generate next lecture
+  newState.nextLecture = newState.lecturesLeft > 0 ? generateLecture(newState) : null;
+
+  return newState;
 }
 
 export function generateUUID(): string
@@ -209,26 +214,22 @@ export function attendExams(state: GameState): GameState
   if (state.examsAttended)
     return state;
 
+  const newState: GameState = { ...state };
+
   // Calculate results
-  const results = state.courses.map(c =>
+  const results = newState.courses.map(c =>
   {
     const passChance = Math.min(c.understandings / c.goal, 1);
-    return Math.random() < passChance;
+    return Math.random() <= passChance;
   });
 
-  const fails = results.filter(r => !r).length;
+  const logMessage = `You passed ${results.filter(r => r).length} exams.`;
 
-  const logMessage =
-    fails >= 2
-      ? `You failed ${fails} exams.`
-      : `You passed ${results.filter(r => r).length} exams.`;
+  newState.examsAttended = true;
+  newState.examResults = results;
+  newState.log = [logMessage, ...newState.log];
 
-  return {
-    ...state,
-    examsAttended: true,
-    examResults: results,
-    log: [logMessage, ...state.log],
-  };
+  return newState;
 }
 
 const courseTemplates = [
@@ -303,17 +304,39 @@ export function generateCourse(state: GameState): Course
   };
 }
 
-
 function generateQuest(state: GameState): Quest
 {
+  let requirements: Currency[] = [];
+  let rewards: Currency[] = [];
+  let colors = [];
+
+  // Generating requirements
+  let randomCourseIndex = Math.floor(Math.random() * state.courses.length);
+  requirements.push({
+    type: "understandings",
+    amount: 5 + state.block * 2,
+    courseIndex: randomCourseIndex
+  });
+  colors.push(state.courses[randomCourseIndex].color);
+
+  if(Math.random() < 0.25) {
+    requirements.push({
+      type: "procrastinations",
+      amount: 5 + state.block * 2
+    });
+  }
+
+  // Generating rewards
+  rewards.push({
+    type: "cash",
+    amount: 10 + state.block * 3
+  });
+
   return {
     id: generateUUID(),
-    requirements: [
-      { type: "procrastinations", amount: 5 + state.block * 2 }
-    ],
-    rewards: [
-      { type: "cash", amount: 10 + state.block * 3 }
-    ],
+    requirements: requirements,
+    rewards: rewards,
+    color: chroma.average(colors).hex(),
   };
 }
 
@@ -321,43 +344,43 @@ export function startNewBlock(state: GameState): GameState
 {
   if (!state.examsAttended) return state;
 
-  state.block += 1;
+  const newState: GameState = { ...state };
+
+  newState.block += 1;
 
   // Create 3 new courses
   const newCourses: Course[] = [
-    generateCourse(state),
-    generateCourse(state),
-    generateCourse(state),
+    generateCourse(newState),
+    generateCourse(newState),
+    generateCourse(newState),
   ];
+  newState.courses = newCourses;
 
   // Create new quests (example)
   const newQuests: Quest[] = [
-    generateQuest(state),
-    generateQuest(state),
+    generateQuest(newState),
+    generateQuest(newState),
+    generateQuest(newState),
+    generateQuest(newState),
+    generateQuest(newState),
+    generateQuest(newState),
+    generateQuest(newState),
+    generateQuest(newState),
+    generateQuest(newState),
+    generateQuest(newState),
+    generateQuest(newState),
+    generateQuest(newState),
   ];
-
-  state.courses = newCourses;
-  state.quests = newQuests;
+  newState.quests = newQuests;
 
   const nextLecture: Lecture = generateLecture(state);
+  newState.nextLecture = nextLecture;
 
-  return {
-    ...state,
-    block: state.block,
-    courses: newCourses,
-    quests: newQuests,
+  newState.lecturesLeft = 12;
+  newState.examsAttended = false;
+  newState.examResults = [];
 
-    // Reset lectures for the new block
-    lecturesLeft: 12, // or whatever your block size should be
-    nextLecture: nextLecture,
+  newState.log = [`Welcome to Block ${newState.block}.`, ...newState.log,];
 
-    // Reset exam state
-    examsAttended: false,
-    examResults: [],
-
-    log: [
-      `Welcome to Block ${state.block + 1}.`,
-      ...state.log,
-    ],
-  };
+  return newState;
 }

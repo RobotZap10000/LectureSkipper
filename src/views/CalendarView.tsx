@@ -52,7 +52,7 @@ export default function CalendarView({ game, setGame }: Props)
                 </h2>
 
                 <p className="text-sm">
-                  Every block, you have 3 courses and a set amount of lectures before exams. Attend lectures to acquire units of Understanding.
+                  Every block, you have 3 courses and a set amount of lectures before exams. Attend lectures to acquire Understanding (U).
                 </p>
 
                 <br></br>
@@ -62,9 +62,9 @@ export default function CalendarView({ game, setGame }: Props)
                 </h2>
 
                 <p className="text-sm">
-                  Your chance of passing a course depends on the amount of Understandings acquired during the block. <span className="italic text-red-500">Failing 2 or more exams in a block results in a game over.</span>
+                  Your chance of passing a course depends on the amount of Understanding (U) acquired during the block. <span className="italic text-red-500">Failing 2 or more exams in a block results in a game over.</span>
                   <br></br><br></br>
-                  You can gain Understandings past the goal of the course: the chance to pass will be capped at 100%.
+                  You can gain Understanding (U) past the goal of the course: the chance to pass will be capped at 100%.
                 </p>
               </HoverCardContent>
             </HoverCard>
@@ -95,8 +95,7 @@ export default function CalendarView({ game, setGame }: Props)
                     <CardDescription
                       style={{ color: textColor === "white" ? "#e5e5e5" : "#333" }}
                     >
-                      {c.understandings} / {c.goal} Understandings • Chance to pass:{" "}
-                      {progress.toFixed(1)}%
+                      {c.understandings} U / {c.goal} U • Chance to pass: {progress.toFixed(0)}%
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -128,7 +127,7 @@ export default function CalendarView({ game, setGame }: Props)
               <p className="text-sm">
                 <ul className="list-disc pl-4 pt-2">
                   <li><span className="font-bold">Attend</span>: Attending a lecture has a chance of giving you units of Understanding for a course. Attending takes time, which reduces your energy. <span className="italic text-red-500">You cannot attend if you don't have enough energy. You restore energy half as fast if you have less than 50% of your maximum.</span></li>
-                  <li><span className="font-bold">Skip</span>: Skipping gives you units of Procrastination and restores energy.</li>
+                  <li><span className="font-bold">Skip</span>: Skipping gives you Procrastinations (P) and restores energy.</li>
                 </ul>
               </p>
             </HoverCardContent>
@@ -141,9 +140,7 @@ export default function CalendarView({ game, setGame }: Props)
             {/* Determine course color */}
             {(() =>
             {
-              const course = game.courses.find(c =>
-                game.nextLecture?.title.includes(c.title)
-              );
+              const course = game.courses[game.nextLecture.courseIndex];
 
               const baseColor = course ? course.color : "#4b5563"; // fallback gray
               const bg = chroma(baseColor).brighten(1.2).hex();
@@ -161,7 +158,7 @@ export default function CalendarView({ game, setGame }: Props)
                 >
                   <CardHeader>
                     <CardTitle className="text-lg font-bold" style={{ color: text }}>
-                      {game.nextLecture.title}
+                      {course.title} Lecture
                     </CardTitle>
                     <CardDescription
                       className="text-sm"
@@ -209,7 +206,7 @@ export default function CalendarView({ game, setGame }: Props)
 
                     {/* Procrastination Value */}
                     <div>
-                      <div className="text-sm mb-1">Procrastination Value: {game.nextLecture.procrastinationValue}</div>
+                      <div className="text-sm mb-1">Procrastination (P) Value: {game.nextLecture.procrastinationValue}</div>
                       <Progress
                         value={game.nextLecture.procrastinationValue}
                         max={10} // placeholder max

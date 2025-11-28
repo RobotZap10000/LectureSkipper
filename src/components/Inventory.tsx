@@ -78,20 +78,21 @@ export default function Inventory({
     });
   };
 
-
   const handleTrash = () =>
   {
     setGame(prev =>
     {
       const items = [...prev.items];
-      prev.selectedItemSlots.forEach(slotID =>
+      const selected = [...prev.selectedItemSlots];
+
+      selected.forEach(slotID =>
       {
         items[slotID] = null;
       });
+
       return { ...prev, items, selectedItemSlots: [] };
     });
   };
-
 
   return (
     <div className="bg-card p-2 rounded flex flex-col max-w-[400px] w-full">
