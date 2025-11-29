@@ -1,6 +1,6 @@
 import Inventory from "@/components/Inventory";
 import type { GameState } from "@/game";
-import { attendLecture, skipLecture, attendExams, startNewBlock, initGame } from "@/game";
+import { startRound, attendExams, startNewBlock, initGame } from "@/game";
 import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useRef } from "react";
 import { Scroll, GraduationCap, BookOpen, HelpCircle, BookAlert, RefreshCcw, Zap } from "lucide-react";
@@ -107,7 +107,7 @@ export default function CalendarView({ game, setGame }: Props)
       </div>
 
       {/* Next Event */}
-      <div className="bg-card p-2 rounded flex flex-col max-w-[400px] h-[580px] w-full">
+      <div className="bg-card p-2 rounded flex flex-col max-w-[400px] h-[540px] w-full">
         <h2 className="font-bold m-1 flex items-center gap-2">
           <BookOpen className="w-5 h-5" /> Next Event
           <Popover>
@@ -144,7 +144,7 @@ export default function CalendarView({ game, setGame }: Props)
 
               return (
                 <Card
-                  className="w-80 h-90 p-4 pl-0 pr-0 mt-4 flex flex-col justify-between border-2"
+                  className="w-80 h-80 p-4 pl-0 pr-0 mt-4 flex flex-col justify-between border-2"
                   style={{
                     backgroundColor: bg,
                     borderColor: border,
@@ -219,13 +219,13 @@ export default function CalendarView({ game, setGame }: Props)
             {/* Buttons */}
             <div className="flex gap-2 m-2">
               <Button
-                onClick={() => setGame(g => attendLecture(g))}
+                onClick={() => setGame(g => startRound(g, "attend"))}
                 className={`${game.energy < game.nextLecture.energyCost ? "bg-neutral-500 hover:bg-neutral-500" : "bg-green-500 hover:bg-green-600"} text-white px-4 py-2 rounded`}
               >
                 Attend
               </Button>
               <Button
-                onClick={() => setGame(g => skipLecture(g))}
+                onClick={() => setGame(g => startRound(g, "skip"))}
                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
               >
                 Skip

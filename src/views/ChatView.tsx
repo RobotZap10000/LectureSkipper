@@ -94,7 +94,7 @@ export default function ChatView({ game, setGame }: Props)
               <p className="text-sm">
                 Every block, there will be a certain number of trade offers available. Spend Understandings to write notes for your fellow students in exchange for cash and other currencies.
                 <br></br><br></br>
-                Trade offers appear at the start of a block and don't change until next block, unless you have some special items.
+                Trade offers appear at the start of a block and remain until exams have been attended.
               </p>
             </PopoverContent>
           </Popover>

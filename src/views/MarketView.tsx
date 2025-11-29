@@ -1,12 +1,13 @@
 import Inventory from "@/components/Inventory";
 import type { GameState } from "@/game";
 import { generateUUID } from "@/game";
-import { items } from "@/items";
 import type { Dispatch, SetStateAction } from "react";
 import { HelpCircle, PackageOpen, Store, Gift } from "lucide-react";
 import ItemSlot from "@/components/ItemSlot";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Item as ShadItem, ItemGroup } from "@/components/ui/item";
+import { itemsByRarity } from "@/itemRegistry";
+import type { ItemData } from "@/item";
 
 interface Props
 {
@@ -16,34 +17,63 @@ interface Props
 
 export default function MarketView({ game, setGame }: Props)
 {
-  const shopListings = [
-    { name: "Mild Box", cost: 5, border: "border-green-700", bg: "bg-green-950" },
-    { name: "Anxiety Box", cost: 30, border: "border-yellow-700", bg: "bg-yellow-950" },
-    { name: "Stress Box", cost: 150, border: "border-red-700", bg: "bg-red-950" },
-    { name: "Breakdown Box", cost: 1000, border: "border-purple-700", bg: "bg-purple-950" },
+  type Box = {
+    name: string;
+    cost: number;
+    border: string;
+    bg: string;
+    rarityWeights: [number, number, number]; // [common, rare, legendary]
+  };
+
+  // Example shop listing
+  const shopListings: Box[] = [
+    { name: "Mild Box", cost: 5, border: "border-green-700", bg: "bg-green-950", rarityWeights: [100, 0, 0] },
+    { name: "Anxiety Box", cost: 30, border: "border-yellow-700", bg: "bg-yellow-950", rarityWeights: [50, 49, 1] },
+    { name: "Stress Box", cost: 150, border: "border-red-700", bg: "bg-red-950", rarityWeights: [0, 80, 20] },
+    { name: "Breakdown Box", cost: 1000, border: "border-purple-700", bg: "bg-purple-950", rarityWeights: [0, 0, 100] },
   ];
 
-  // Buy a box: consumes procrastinations and generates an item
-  const handleBuy = (cost: number) =>
+  // Weighted random helper
+  function weightedRandom<T>(items: T[], weights: number[]): T
   {
-    if (game.procrastinations < cost) return;
+    let sum = 0;
+    weights.forEach(w => sum += w);
+    let rnd = Math.random() * sum;
+    for (let i = 0; i < items.length; i++)
+    {
+      if (rnd < weights[i]) return items[i];
+      rnd -= weights[i];
+    }
+    return items[items.length - 1];
+  }
 
-    const keys = Object.keys(items);
-    const randomKey = keys[Math.floor(Math.random() * keys.length)];
-    const randomItem = items[randomKey];
+  // Buy a box
+  const handleBuy = (box: Box) =>
+  {
+    if (game.procrastinations < box.cost) return;
 
-    const newItem = {
-      ...randomItem,
+    // Pick rarity based on box weights
+    const chosenRarity = weightedRandom([1, 2, 3], box.rarityWeights);
+
+    // Pick item from chosen rarity using item dropWeight
+    const itemWeights = itemsByRarity[chosenRarity].map((i) => i.dropWeight);
+    const chosenItem = weightedRandom(itemsByRarity[chosenRarity], itemWeights);
+
+    // Create unique instance
+    const newItem: ItemData = {
+      ...chosenItem,
       id: generateUUID(),
       memory: {},
     };
 
+    // Update game state
     setGame((prev) => ({
       ...prev,
       unboxedItem: newItem,
-      procrastinations: prev.procrastinations - cost,
+      procrastinations: prev.procrastinations - box.cost,
     }));
   };
+
 
   // Place item into inventory
   const handlePlaceItem = () =>
@@ -101,24 +131,31 @@ export default function MarketView({ game, setGame }: Props)
         </h2>
 
         <ItemGroup className="space-y-2">
-          {shopListings.map((item, i) => (
+          {shopListings.map((box, i) => (
             <ShadItem
               key={i}
-              className={`flex justify-between items-center rounded p-2 border ${item.border} ${item.bg}`}
+              className={`flex justify-between items-center rounded p-2 border ${box.border} ${box.bg}`}
             >
-              <div className="flex items-center gap-2">
-                <Gift className="w-5 h-5 text-yellow-400" />
-                <span>{item.name} (Cost: {item.cost})</span>
+              <div className="flex gap-3 items-center">
+                <Gift className="w-8 h-8 shrink-0 inline-block text-yellow-400" />
+                <div className="flex flex-col">
+                  <h4 className="font-bold">{box.name} (Cost: {box.cost} P)</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Common: {box.rarityWeights[0]}%, Rare: {box.rarityWeights[1]}%, Legendary: {box.rarityWeights[2]}%
+                  </p>
+                </div>
               </div>
+
               <button
-                className={`px-2 py-1 rounded text-white ${game.procrastinations < item.cost ? "bg-red-500" : "bg-green-500"}`}
-                onClick={() => handleBuy(item.cost)}
+                className={`px-2 py-1 rounded text-white ${game.procrastinations < box.cost ? "bg-red-500" : "bg-green-500"}`}
+                onClick={() => handleBuy(box)}
               >
                 Buy
               </button>
             </ShadItem>
           ))}
         </ItemGroup>
+
 
       </div>
 

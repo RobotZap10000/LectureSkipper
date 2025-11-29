@@ -1,7 +1,8 @@
-import { Box, Check, StepForward, X, type LucideIcon, type LucideProps } from "lucide-react";
-import { itemBonuses } from "@/items";
+import { Box, Check, StepForward, X, type LucideProps } from "lucide-react";
 import Mustache from "mustache";
 import chroma from "chroma-js";
+import { behaviorRegistry, itemMetaRegistry } from "@/itemRegistry";
+import type { ItemData } from "./item";
 
 export type Course = {
   title: string;
@@ -25,18 +26,14 @@ export type Lecture = {
   procrastinationValue: number;
 };
 
-export type Item = {
-  // Set randomly when the item is made
-  id: string;
-  name: string;
-  rarity: number;
-  level: number;
-  startingLevel: number;
-  description: string;
-  icon: LucideIcon;
-  // Used by items to keep track of their functionality throughout the game
-  memory: object;
-};
+export type LectureResult = {
+  action: "attend" | "skip";
+  result: "success" | "failure";
+  courseIndex: number;
+  gainedUnderstandings: number;
+  gainedProcrastinations: number;
+  energyChange: number;
+}
 
 export type Currency =
   { type: "cash"; amount: number }
@@ -70,8 +67,8 @@ export type GameState = {
   examResults: boolean[];
   log: LogEntry[];
   quests: Quest[];
-  unboxedItem: Item | null;
-  forgeItem: Item | null;
+  unboxedItem: ItemData | null;
+  forgeItem: ItemData | null;
   selectedItemSlots: number[];
 
   // Player Stats
@@ -80,7 +77,7 @@ export type GameState = {
   energyPerSkip: number;
   cash: number;
   procrastinations: number;
-  items: (Item | null)[]; // 36 slots
+  items: (ItemData | null)[]; // 36 slots
   maxActivatedItems: number;
 };
 
@@ -128,97 +125,174 @@ export function generateLecture(game: GameState): Lecture
   return lecture;
 }
 
-export function attendLecture(state: GameState): GameState
+export function startRound(state: GameState, action: "attend" | "skip"): GameState
 {
   if (!state.nextLecture) return state;
-  if (state.energy < state.nextLecture.energyCost) return state;
+  if (action === "attend" && state.energy < state.nextLecture.energyCost) return state;
 
   const newState: GameState = { ...state };
   let lecture = { ...newState.nextLecture! };
 
-  // Apply item bonuses
-  newState.selectedItemSlots.forEach((itemSlotID) =>
-  {
-    const item = newState.items[itemSlotID];
-    if (!item) return;
+  newState.log = [];
 
-    const bonusFn = itemBonuses[item.name];
-    if (bonusFn)
+  // BEFORE ROUND HOOKS
+  for (let i = 0; i < newState.items.length; i++)
+  {
+    let item = newState.items[i];
+    if (item === null) continue;
+    if (behaviorRegistry[item.name].beforeRound !== undefined)
     {
-      lecture = bonusFn(lecture, item);
+      let itemLogEntry: LogEntry = {
+        icon: itemMetaRegistry[item.name].icon, color: "white", message: ""
+      };
+      behaviorRegistry[item.name].beforeRound!({ state: newState, item, lecture, logEntry: itemLogEntry });
+      if (itemLogEntry.message !== "")
+        newState.log.push(itemLogEntry);
     }
-  });
 
-  const gainedUnderstandings = Math.random() < lecture.understandChance ? lecture.potentialUnderstandings : 0;
+    if (newState.selectedItemSlots.includes(i) == false) continue;
 
-  // Update course
-  if (lecture.courseIndex >= 0)
+    if (behaviorRegistry[item.name].beforeUse !== undefined)
+    {
+      let itemLogEntry: LogEntry = {
+        icon: itemMetaRegistry[item.name].icon, color: "white", message: ""
+      };
+      behaviorRegistry[item.name].beforeUse!({ state: newState, item, lecture, logEntry: itemLogEntry });
+      if (itemLogEntry.message !== "")
+        newState.log.push(itemLogEntry);
+    }
+    if (behaviorRegistry[item.name].beforeSkipLecture !== undefined)
+    {
+      let itemLogEntry: LogEntry = {
+        icon: itemMetaRegistry[item.name].icon, color: "white", message: ""
+      };
+      behaviorRegistry[item.name].beforeSkipLecture!({ state: newState, item, lecture, logEntry: itemLogEntry });
+      if (itemLogEntry.message !== "")
+        newState.log.push(itemLogEntry);
+    }
+    if (behaviorRegistry[item.name].beforeAttendLecture !== undefined)
+    {
+      let itemLogEntry: LogEntry = {
+        icon: itemMetaRegistry[item.name].icon, color: "white", message: ""
+      };
+      behaviorRegistry[item.name].beforeAttendLecture!({ state: newState, item, lecture, logEntry: itemLogEntry });
+      if (itemLogEntry.message !== "")
+        newState.log.push(itemLogEntry);
+    }
+  }
+
+  let lectureResult: LectureResult;
+
+  if (action == "attend")
   {
-    newState.courses = [...newState.courses];
-    const oldCourse = newState.courses[lecture.courseIndex];
+    const understood = Math.random() < lecture.understandChance ? "success" : "failure";
+    const gainedUnderstandings = understood == "success" ? lecture.potentialUnderstandings : 0;
+    const energyChange = -lecture.energyCost;
 
-    newState.courses[lecture.courseIndex] = {
-      ...oldCourse,
-      understandings: oldCourse.understandings + gainedUnderstandings,
+    lectureResult = {
+      action: action,
+      result: understood,
+      courseIndex: lecture.courseIndex,
+      gainedUnderstandings: gainedUnderstandings,
+      gainedProcrastinations: 0,
+      energyChange: energyChange,
+    };
+  } else // Skip
+  {
+    const gainedProcrastinations = lecture.procrastinationValue;
+    const energyChange =
+      newState.energy / newState.maxEnergy < 0.5
+        ? newState.energyPerSkip
+        : Math.round(newState.energyPerSkip / 2);
+
+    lectureResult = {
+      action: action,
+      result: "success",
+      courseIndex: lecture.courseIndex,
+      gainedUnderstandings: 0,
+      gainedProcrastinations: gainedProcrastinations,
+      energyChange: energyChange,
     };
   }
 
-  // Build log
-  const courseTitle = newState.courses[lecture.courseIndex].title;
-
-  const logMessage: LogEntry =
-    gainedUnderstandings > 0
-      ? {
-        icon: Check,
-        color: "LawnGreen",
-        message: `+${gainedUnderstandings} Understandings in ${courseTitle}.`,
-      }
-      : {
-        icon: X,
-        color: "red",
-        message: `Could not understand ${courseTitle}.`
-      };
-
-  newState.log = [logMessage];
-
-  // Update basic stats
-  newState.energy -= lecture.energyCost;
+  // Update GameState based on LectureResult
+  if (lectureResult.courseIndex >= 0)
+  {
+    newState.courses = [...newState.courses];
+    const oldCourse = newState.courses[lectureResult.courseIndex];
+    newState.courses[lectureResult.courseIndex] = {
+      ...oldCourse,
+      understandings: oldCourse.understandings + lectureResult.gainedUnderstandings,
+    };
+  }
+  newState.energy = Math.min(Math.max(newState.energy + lectureResult.energyChange, 0), newState.maxEnergy);
+  newState.procrastinations += lectureResult.gainedProcrastinations;
   newState.lecturesLeft -= 1;
 
   // Generate next lecture
   newState.nextLecture = newState.lecturesLeft > 0 ? generateLecture(newState) : null;
 
-  return newState;
-}
-
-
-export function skipLecture(state: GameState): GameState
-{
-  if (!state.nextLecture) return state;
-
-  const newState: GameState = { ...state };
-  let lecture = { ...newState.nextLecture! };
-
-  let newEnergy = newState.energy;
-  if ((newState.energy / newState.maxEnergy) < 0.5)
+  // Log
+  const courseTitle = newState.courses[lecture.courseIndex].title;
+  if (action == "attend")
   {
-    newEnergy = Math.min(newState.energy + newState.energyPerSkip, newState.maxEnergy)
+    newState.log.push(lectureResult.result == "success"
+      ? { icon: Check, color: "LawnGreen", message: `+${lectureResult.gainedUnderstandings} Understandings in ${courseTitle}.` }
+      : { icon: X, color: "red", message: `Could not understand ${courseTitle}.` });
   } else
   {
-    newEnergy = Math.min(newState.energy + Math.round(newState.energyPerSkip / 2), newState.maxEnergy)
+    newState.log.push(lectureResult.result == "success"
+      ? { icon: StepForward, color: "gray", message: `Skipped ${courseTitle}.` }
+      : { icon: X, color: "red", message: `Could not skip ${courseTitle}.` });
   }
 
-  newState.energy = newEnergy;
-  newState.procrastinations += lecture.procrastinationValue;
-  newState.lecturesLeft--;
-  newState.log = [{
-    icon: StepForward,
-    color: "gray",
-    message: `Skipped ${newState.courses[lecture.courseIndex].title}.`,
-  }];
+  // AFTER ROUND HOOKS
+  for (let i = 0; i < newState.items.length; i++)
+  {
+    let item = newState.items[i];
+    if (item === null) continue;
+    if (behaviorRegistry[item.name].afterRound !== undefined)
+    {
+      let itemLogEntry: LogEntry = {
+        icon: itemMetaRegistry[item.name].icon, color: "white", message: ""
+      };
+      behaviorRegistry[item.name].afterRound!({ state: newState, item, lecture, nextLecture: newState.nextLecture, result: lectureResult, logEntry: itemLogEntry });
+      if (itemLogEntry.message !== "")
+        newState.log.push(itemLogEntry);
+    }
 
-  // Generate next lecture
-  newState.nextLecture = newState.lecturesLeft > 0 ? generateLecture(newState) : null;
+    if (newState.selectedItemSlots.includes(i) == false) continue;
+
+    if (behaviorRegistry[item.name].afterUse !== undefined)
+    {
+      let itemLogEntry: LogEntry = {
+        icon: itemMetaRegistry[item.name].icon, color: "white", message: ""
+      };
+      behaviorRegistry[item.name].afterUse!({ state: newState, item, lecture, nextLecture: newState.nextLecture, result: lectureResult, logEntry: itemLogEntry });
+      if (itemLogEntry.message !== "")
+        newState.log.push(itemLogEntry);
+    }
+    if (behaviorRegistry[item.name].afterSkipLecture !== undefined)
+    {
+      let itemLogEntry: LogEntry = {
+        icon: itemMetaRegistry[item.name].icon, color: "white", message: ""
+      };
+      behaviorRegistry[item.name].afterSkipLecture!({ state: newState, item, lecture, nextLecture: newState.nextLecture, result: lectureResult, logEntry: itemLogEntry });
+      if (itemLogEntry.message !== "")
+        newState.log.push(itemLogEntry);
+    }
+    if (behaviorRegistry[item.name].afterAttendLecture !== undefined)
+    {
+      let itemLogEntry: LogEntry = {
+        icon: itemMetaRegistry[item.name].icon, color: "white", message: ""
+      };
+      behaviorRegistry[item.name].afterAttendLecture!({ state: newState, item, lecture, nextLecture: newState.nextLecture, result: lectureResult, logEntry: itemLogEntry });
+      if (itemLogEntry.message !== "")
+        newState.log.push(itemLogEntry);
+    }
+  }
+
+  newState.log.reverse();
 
   return newState;
 }
@@ -240,6 +314,9 @@ export function attendExams(state: GameState): GameState
     return state;
 
   const newState: GameState = { ...state };
+
+  // Remove Quests
+  newState.quests = [];
 
   // Calculate results
   const results = newState.courses.map(c =>

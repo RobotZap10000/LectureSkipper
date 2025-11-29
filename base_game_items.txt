@@ -1,0 +1,30 @@
+
+// COMMON
+AI Assistant - On Attend: Doubles understand chance but halves understandings gained.
+Apple - On Attend: increase your max energy by 1%.
+Pizza - On Attend: lose 25% less energy from that lecture.
+Video Game - On Skip: gain +5% extra energy.
+
+// RARE
+
+GPS - On Attend: You have a +10% chance of understanding this lecture.
+Hacking - On Attend: this lecture cannot appear the next 5 times. Can only be used once per block.
+Course Material - After Attend: permanently 4x the amount of understandings that this lecture gives, but now it's 4x less likely to appear. Can be used once per block.
+Brain - On Attend: if you understand this lecture, gain all the required Understandings. Otherwise, lose all Understandings. Cannot go past the goal understandings of the course. Can only be used once block.
+Cart - After Attend: whenever this lecture appears, gain +40$. Can only be used once per block.
+
+// LEGENDARY
+
+Schedule Editor - On Attend: this lecture is now guaranteed to appear the next 5 times. Can only be used once per block.
+Time Machine - On Attend: Resets your understandings for this course, but adds +10 lectures.
+Inverter - On Attend: if your Chance of Understanding is below 50%, invert it.
+
+// ??
+
+Generic Beer - On Attend: applies one stack of Alcoholism to the course that you use it on, permanently halving the chance to understand it.
+Epic Beer -On Attend: gives you one Master Professor item. Has a 10% chance of applying Alcoholism to the course that you use it on, permanently halving the chance to understand it.
+Master Professor - On Attend: Gives you 2^n Understandings where n is the amount of active Master Professors.
+A Window - On Use: Restarts your run with your current items.
+Grass - On Touch: adds 1 Procrastination.
+Cookie - On Use: gives you a cookie.
+Pot - On Attend: gives you 1 item from a Mild Box.

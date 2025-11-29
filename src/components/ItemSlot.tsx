@@ -1,9 +1,10 @@
-import type { Item } from "@/game";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import type { ItemData } from "@/item";
+import { itemMetaRegistry } from "@/itemRegistry";
 
 interface ItemSlotProps
 {
-  item: Item | null;
+  item: ItemData | null;
   selected: boolean;
   onClick: () => void;
   size: number;
@@ -16,7 +17,8 @@ export default function ItemSlot({
   size = 40,
 }: ItemSlotProps)
 {
-  const Icon = item?.icon;
+  let Icon = null;
+  if (item) Icon = itemMetaRegistry[item.name].icon;
 
   const slot = (
     <div
@@ -51,30 +53,38 @@ export default function ItemSlot({
     </div>
   );
 
-
   if (!item) return slot;
+
+  function renderDescription(desc: string)
+  {
+    const parts = desc.split(/\*\*(.+?)\*\*/); // split on **bold**
+    return parts.map((part, i) =>
+      i % 2 === 1 ? <strong key={i}>{part}</strong> : part
+    );
+  }
+
 
   return (
     <Popover>
       <PopoverTrigger asChild>{slot}</PopoverTrigger>
       <PopoverContent
         className={`w-96 p-4 rounded-md bg-popover shadow-lg z-10 ring-2 ${item
-            ? item.rarity === 1
-              ? "ring-green-600"
-              : item.rarity === 2
-                ? "ring-blue-600"
-                : "ring-yellow-600"
-            : "ring-gray-400"
+          ? item.rarity === 1
+            ? "ring-green-600"
+            : item.rarity === 2
+              ? "ring-blue-600"
+              : "ring-yellow-600"
+          : "ring-gray-400"
           }`}
         side="bottom"
         sideOffset={75}
       >
-        <div className="flex gap-3 items-start">
-          {Icon && <Icon className="w-16" />}
+        <div className="flex gap-3 items-center">
+          {Icon && <Icon className="w-8 h-8 shrink-0 inline-block" />}
           <div>
-            <h4 className="font-bold">{item.name} - Level {item.level}</h4>
-            <p className="text-sm text-muted-foreground">
-              {item.description}
+            <h4 className="font-bold p-1 text-lg">/ {item.name} - Level {item.level} /</h4>
+            <p className="text-sm">
+              {renderDescription(itemMetaRegistry[item.name].getDescription(item))}
             </p>
           </div>
         </div>
