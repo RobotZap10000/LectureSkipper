@@ -102,7 +102,8 @@ export default function SettingsView({ game, setGame, topRuns }: Props)
                       <li>Cash: ${run.cash}</li>
                       <li>Procrastinations: {run.procrastinations}</li>
                       <li>Energy gain per Skip: {run.energyPerSkip}</li>
-                      <li>Max Items: {run.maxActivatedItems}</li>
+                      <li>Max Active Items: {run.maxActivatedItems}</li>
+                      <li>Total Items in Inventory: {run.items.length}</li>
                     </ul>
 
                     <div className="flex flex-wrap gap-2">
