@@ -93,8 +93,8 @@ export function initGame(): GameState
     block: 0,
     lecturesLeft: 0,
     courses: [],
-    cash: 1000,
-    procrastinations: 35,
+    cash: 0,
+    procrastinations: 0,
     energy: 100,
     maxEnergy: 100,
     energyPerSkip: 5,
@@ -229,12 +229,15 @@ export function generateLecture(state: GameState): Lecture
     }
   }
 
+  let startHour = Math.floor(Math.random() * 12 + state.block);
+  let endHour = startHour + Math.min(2 ** state.block, 1000);
+
   const lecture: Lecture = {
     courseIndex: courseIndex,
-    startTime: "09:00",
-    endTime: "10:00",
+    startTime: `${startHour}:00`,
+    endTime: `${endHour}:00`,
     potentialUnderstandings: Math.ceil(Math.random() * state.courses[courseIndex].maxUnderstandingsPerLecture),
-    understandChance: Math.random() * 0.99 + 0.01,
+    understandChance: Math.random(),
     energyCost: Math.ceil(Math.random() * state.courses[courseIndex].maxEnergyCostPerLecture),
     procrastinationValue: Math.ceil(Math.random() * state.courses[courseIndex].maxProcrastinationsPerLecture),
   };
@@ -358,7 +361,7 @@ export function startRound(state: GameState, action: "attend" | "skip"): GameSta
   if (action == "attend")
   {
     newState.log.push(lectureResult.result == "success"
-      ? { icon: Check, color: "LawnGreen", message: `+${lectureResult.gainedUnderstandings} Understandings in ${courseTitle}.` }
+      ? { icon: Check, color: "LawnGreen", message: `+${lectureResult.gainedUnderstandings} Understanding (U) in ${courseTitle}.` }
       : { icon: X, color: "red", message: `Could not understand ${courseTitle}.` });
   } else
   {
@@ -558,19 +561,17 @@ export function generateCourse(state: GameState, hue: number): Course
   // Render with Mustache
   const title = Mustache.render(template, { topic });
 
+  let courseDifficulty = Math.random();
+
   return {
     title,
-    goal: 10 + state.block * 2,
+    goal: 10 * state.block + Math.floor(courseDifficulty * (3 ** state.block)),
     understandings: 0,
-    color: chroma.hsv(
-      hue, // random hue 0–360
-      1,                 // saturation (0–1)
-      0.25                 // value/brightness (0–1)
-    ).hex(),
+    color: chroma.hsv(hue, 1, 0.25).hex(),
     effects: {},
-    maxUnderstandingsPerLecture: 50,
-    maxProcrastinationsPerLecture: 50,
-    maxEnergyCostPerLecture: 5
+    maxUnderstandingsPerLecture: 2 * state.block + Math.floor(courseDifficulty * (2 ** state.block)),
+    maxProcrastinationsPerLecture: 5 * state.block + Math.floor(courseDifficulty * (2 ** state.block)),
+    maxEnergyCostPerLecture: 10 * state.block
   };
 }
 
@@ -579,28 +580,32 @@ function generateQuest(state: GameState): Quest
   let requirements: Currency[] = [];
   let rewards: Currency[] = [];
   let colors = [];
-
+  
+  let questDifficulty = Math.random() + 0.5;
+  
   // Generating requirements
   let randomCourseIndex = Math.floor(Math.random() * state.courses.length);
+  let targetCourse = state.courses[randomCourseIndex];
+  
   requirements.push({
     type: "understandings",
-    amount: 5 + state.block * 2,
+    amount: Math.round(questDifficulty * targetCourse.goal),
     courseIndex: randomCourseIndex
   });
-  colors.push(state.courses[randomCourseIndex].color);
+  colors.push(targetCourse.color);
 
   if (Math.random() < 0.25)
   {
     requirements.push({
       type: "procrastinations",
-      amount: 5 + state.block * 2
+      amount: Math.round(targetCourse.maxProcrastinationsPerLecture * questDifficulty)
     });
   }
 
   // Generating rewards
   rewards.push({
     type: "cash",
-    amount: 10 + state.block * 3
+    amount: Math.round(10 * state.block + 5 * questDifficulty * (2 ** state.block))
   });
 
   return {
@@ -640,26 +645,18 @@ export function startNewBlock(state: GameState): GameState
   newState.courses = newCourses;
 
   // Create new quests (example)
-  const newQuests: Quest[] = [
-    generateQuest(newState),
-    generateQuest(newState),
-    generateQuest(newState),
-    generateQuest(newState),
-    generateQuest(newState),
-    generateQuest(newState),
-    generateQuest(newState),
-    generateQuest(newState),
-    generateQuest(newState),
-    generateQuest(newState),
-    generateQuest(newState),
-    generateQuest(newState),
-  ];
+  const newQuests: Quest[] = [];
+  const questCount = Math.min(4 + newState.block * 2 + Math.floor(Math.random() * 4), 40);
+  for (let i = 0; i < questCount; i++)
+  {
+    newQuests.push(generateQuest(newState));
+  }
   newState.quests = newQuests;
 
   const nextLecture: Lecture = generateLecture(newState);
   newState.nextLecture = nextLecture;
 
-  newState.lecturesLeft = 12;
+  newState.lecturesLeft = 12 + state.block * 2;
   newState.examsAttended = false;
   newState.examResults = [];
 
