@@ -49,6 +49,14 @@ export default function SettingsView({ game, setGame, topRuns }: Props)
             <CardContent className="flex flex-col gap-4">
               <p className="text-sm">A 75% vibe-coded game made in 4 days while skipping lectures. Made by Kris Puusepp.</p>
               <p className="text-sm">On a real note, unless you have good reasons, don't skip lectures. It doesn't give you bragging rights, you are just refraining from going to lectures which you paid for.</p>
+              <Button
+                variant="outline"
+                className="flex items-center gap-2 w-fit"
+                onClick={() => window.open("https://github.com/KrisPuusepp/LectureSkipper", "_blank")}
+              >
+                <img src="./src/assets/github-mark-white.svg" className="w-4 h-4" />
+                View Source on GitHub
+              </Button>
               <h2 className="font-bold text-lg">Current Game Version: {gameUpdates[0].version}</h2>
             </CardContent>
           </Card>
