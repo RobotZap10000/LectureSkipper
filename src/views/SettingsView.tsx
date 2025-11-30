@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Settings, RefreshCcw, PenOff, ScrollText, Box, Trophy } from "lucide-react";
 import type { GameState, Run } from "@/game";
 import { initGame } from "@/game";
-import { itemMetaRegistry, itemRegistry, itemsByRarity } from "@/itemRegistry";
+import { itemsByRarity } from "@/itemRegistry";
 import ItemSlot from "@/components/ItemSlot";
+import githubIcon from "@/assets/github-mark-white.svg";
 
 interface Props
 {
@@ -54,7 +55,7 @@ export default function SettingsView({ game, setGame, topRuns }: Props)
                 className="flex items-center gap-2 w-fit"
                 onClick={() => window.open("https://github.com/KrisPuusepp/LectureSkipper", "_blank")}
               >
-                <img src="./src/assets/github-mark-white.svg" className="w-4 h-4" />
+                <img src={githubIcon} className="w-4 h-4" />
                 View Source on GitHub
               </Button>
               <h2 className="font-bold text-lg">Current Game Version: {gameUpdates[0].version}</h2>
