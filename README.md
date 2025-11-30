@@ -1,73 +1,107 @@
-# React + TypeScript + Vite
+<a id="readme-top"></a>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<br />
+<div align="center">
+  <a href="https://github.com/KrisPuusepp/LectureSkipper">
+    <img src="src/assets/pen-off.svg" alt="Logo" width="80" height="80">
+  </a>
 
-Currently, two official plugins are available:
+<h3 align="center">Lecture Skipper</h3>
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+  <p align="center">
+    A roguelike about skipping lectures and breaking the game.
+    <br />
+    <a href="https://lectureskipper.netlify.app">Play</a>
+    &middot;
+    <a href="https://github.com/KrisPuusepp/LectureSkipper/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
+    &middot;
+    <a href="https://github.com/KrisPuusepp/LectureSkipper/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+  </p>
+</div>
 
-## React Compiler
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-## Expanding the ESLint configuration
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Installation</a></li>
+      </ul>
+    </li>
+    <li><a href="#license">License</a></li>
+  </ol>
+</details>
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## About The Project
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Lecture Skipper is a roguelike game about skipping lectures. It takes inspiration from popular roguelikes where you get to break the game with over-powered items. It is 75% vibe-coded and made in 4 days while skipping lectures.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+On a real note, unless you have good reasons, don't skip lectures. It doesn't give you bragging rights, you are just refraining from going to lectures which you paid for.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+
+
+### Built With
+
+* TypeScript
+* Vite
+* Tailwind
+* React
+* ShadCN
+* chroma-js
+* Lucide React icons
+* Mustache
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+## Getting Started
+
+The game can be played <a href="https://lectureskipper.netlify.app">here</a>, but if you would like to run a local copy of the game or modify it then follow the steps below.
+
+### Prerequisites
+
+Lecture Skipper is built and developed with Node.js, so you'll need to <a href="https://nodejs.org/">install</a> it if you haven't already.
+
+### Installation
+
+1. Clone the repo (or download a .zip from the green "Code" button near the top)
+   ```sh
+   git clone https://github.com/KrisPuusepp/LectureSkipper.git
+   ```
+2. Install NPM packages (with Command Prompt or some other terminal open in the folder)
+   ```sh
+   npm install
+   ```
+3. Start a Vite local server (with Command Prompt or some other terminal open in the folder)
+   ```sh
+   npm run dev
+   ```
+4. Open `http://localhost:5173/`
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+
+
+
+
+## License
+
+Distributed under the MIT license. See `LICENSE.txt` for more information.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
