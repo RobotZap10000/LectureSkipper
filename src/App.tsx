@@ -23,26 +23,40 @@ export default function App()
     {
       setGame((prev) =>
       {
-        let slots: number[] = [];
+        const newState: GameState = {
+          ...prev,
+          selectedItemSlots: [],
+        };
 
+        // Filter out deleted items
+        newState.calendarViewSelectedItemIDs = newState.calendarViewSelectedItemIDs.filter(id => {
+          for(let i = 0; i < prev.items.length; i++) {
+            let item = prev.items[i];
+            if (item && item.id === id) return true;
+          }
+          return false;
+        });
+
+        // Limit selection
+        if (newState.calendarViewSelectedItemIDs.length > newState.maxActivatedItems)
+        {
+          newState.calendarViewSelectedItemIDs = newState.calendarViewSelectedItemIDs.slice(0, newState.maxActivatedItems);
+        }
+
+        // Set selection to calendarViewSelectedItemIDs
         for (let i = 0; i < prev.items.length; i++)
         {
           const item = prev.items[i];
           if (item && prev.calendarViewSelectedItemIDs.includes(item.id))
           {
-            slots.push(i);
+            newState.selectedItemSlots.push(i);
+
+            if (newState.selectedItemSlots.length > prev.maxActivatedItems)
+            {
+              break;
+            }
           }
         }
-
-        const newState: GameState = {
-          ...prev,
-          selectedItemSlots: slots,
-        };
-
-        // Recreate calendarViewSelectedItemIDs because deleted items may be in the list
-        newState.calendarViewSelectedItemIDs = newState.selectedItemSlots.map(slotID => newState.items[slotID]?.id || "");
-
-        console.log(newState.calendarViewSelectedItemIDs);
 
         return newState;
       });
@@ -50,6 +64,7 @@ export default function App()
     {
       setGame((prev) =>
       {
+        // Clear selection
         const newState: GameState = {
           ...prev,
           selectedItemSlots: [],

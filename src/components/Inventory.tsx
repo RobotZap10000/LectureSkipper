@@ -26,6 +26,7 @@ export default function Inventory({
       const item = prev.items[itemSlotID];
       if (selected.includes(itemSlotID))
       {
+        // Remove item selection
         selected.splice(selected.indexOf(itemSlotID), 1);
 
         // Calendar View selected items
@@ -35,13 +36,12 @@ export default function Inventory({
         }
       } else
       {
-        selected.push(itemSlotID);
+        if(mode !== "calendar" || selected.length < prev.maxActivatedItems)
+          selected.push(itemSlotID);
 
         // Calendar View selected items
         if (mode === "calendar")
         {
-          if (prev.selectedItemSlots.length >= prev.maxActivatedItems) return prev;
-
           if (item && !prev.calendarViewSelectedItemIDs.includes(item.id))
           {
             prev.calendarViewSelectedItemIDs.push(item.id);
