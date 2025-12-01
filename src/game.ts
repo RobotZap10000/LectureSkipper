@@ -118,7 +118,7 @@ export function initGame(): GameState
 };
 
 const LOCAL_STORAGE_KEY = "myGameState";
-const CURRENT_SAVE_VERSION = 1;
+const CURRENT_SAVE_VERSION = 2;
 
 export function saveGame(game: GameState)
 {
@@ -145,6 +145,11 @@ export function loadGame(): GameState
     if (!data) return initGame();
 
     const parsed: GameState = JSON.parse(data);
+
+    if(parsed.saveVersion == 1) {
+      parsed.saveVersion = 2;
+      parsed.calendarViewSelectedItemIDs = [];
+    }
 
     parsed.log = [];
 
