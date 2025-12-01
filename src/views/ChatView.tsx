@@ -144,7 +144,8 @@ export default function ChatView({ game, setGame }: Props)
                         <li key={i}>
                           {req.type === "understandings" && `${req.amount} U in ${game.courses[req.courseIndex].title}`}
                           {req.type === "procrastinations" && `${req.amount} P`}
-                          {req.type === "cash" && `${req.amount}$`}
+                          {req.type === "cash" && `$${req.amount}`}
+                          {req.type === "maxActivatedItems" && `${req.amount} Max Active Items`}
                         </li>
 
                       ))}
@@ -159,11 +160,10 @@ export default function ChatView({ game, setGame }: Props)
                     <ul className="list-disc">
                       {quest.rewards.map((rew, i) => (
                         <li key={i}>
-                          {rew.type === "cash"
-                            ? `$${rew.amount}`
-                            : (rew.type === "procrastinations"
-                              ? `$${rew.amount} Procrastinations`
-                              : `${rew.amount} Max Active Items`)}
+                          {rew.type === "understandings" && `${rew.amount} U in ${game.courses[rew.courseIndex].title}`}
+                          {rew.type === "procrastinations" && `${rew.amount} P`}
+                          {rew.type === "cash" && `$${rew.amount}`}
+                          {rew.type === "maxActivatedItems" && `${rew.amount} Max Active Items`}
                         </li>
                       ))}
                     </ul>
