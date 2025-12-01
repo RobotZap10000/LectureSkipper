@@ -17,8 +17,6 @@ Stat increases and simple boosts. Meant to help in the early game and support so
 
 ###### Miscellanous
 
-The Cookie is an incredibly rare joke item. It serves no purpose.
-
 - [x] Cookie - On Use: has a x% chance of giving you a cookie. Going over 100% can give you more cookies per use.
 
 

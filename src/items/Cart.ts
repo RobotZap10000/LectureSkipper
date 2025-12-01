@@ -28,6 +28,6 @@ export const itemBehavior: ItemBehavior = {
 
     itemUtils.addEffectStacksToCourse(params.state, params.lecture.courseIndex, "Cash", params.item.level * 30);
 
-    params.logEntry.message = `+${params.item.level * 10}$ whenever ${params.state.courses[params.lecture.courseIndex].title} appears`;
+    params.logEntry.message = `+${params.item.level * 30}$ whenever ${params.state.courses[params.lecture.courseIndex].title} appears`;
   },
 };
