@@ -38,7 +38,7 @@ export default function App()
 
           {/* Footer  */}
           <div className="bg-background p-2 flex justify-around items-center z-10 flex-shrink-0">
-            <div className="flex items-center gap-2"><CircleDollarSign /> Cash: {game.cash}$</div>
+            <div className="flex items-center gap-2"><CircleDollarSign /> Cash: ${game.cash}</div>
             <div className="flex items-center gap-2"><Sparkles /> Procrastinations: {game.procrastinations} P</div>
             <div className="flex items-center gap-2"><Zap /> Energy: {game.energy} E / {game.maxEnergy} E</div>
           </div>

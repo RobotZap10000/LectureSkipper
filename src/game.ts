@@ -38,7 +38,8 @@ export type LectureResult = {
 export type Currency =
   { type: "cash"; amount: number }
   | { type: "understandings"; courseIndex: number; amount: number }
-  | { type: "procrastinations"; amount: number };
+  | { type: "procrastinations"; amount: number }
+  | { type: "maxActivatedItems"; amount: number };
 
 export type Quest = {
   // Set randomly when the quest is made
@@ -92,8 +93,8 @@ export function initGame(): GameState
     block: 0,
     lecturesLeft: 0,
     courses: [],
-    cash: 0,
-    procrastinations: 0,
+    cash: 9990,
+    procrastinations: 9990,
     energy: 100,
     maxEnergy: 100,
     energyPerSkip: 5,
@@ -572,6 +573,14 @@ function generateQuest(state: GameState): Quest
     type: "cash",
     amount: Math.round(50 + 20 * state.block + (10 * state.block) ** questDifficulty)
   });
+
+  if (questDifficulty > 1 && Math.random() < 0.25)
+  {
+    rewards.push({
+      type: "maxActivatedItems",
+      amount: 1,
+    });
+  }
 
   return {
     id: generateUUID(),

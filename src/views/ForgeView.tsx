@@ -122,7 +122,7 @@ export default function ForgeView({ game, setGame }: Props)
                   onClick={handleUpgrade}
                   disabled={!item}
                 >
-                  Upgrade for {item ? calculateUpgradeCost(item) : "..."}$
+                  Upgrade for ${item ? calculateUpgradeCost(item) : "..."}
                 </button>
 
                 <MoveDown

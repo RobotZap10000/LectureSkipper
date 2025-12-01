@@ -24,6 +24,8 @@ export default function ChatView({ game, setGame }: Props)
         return game.procrastinations >= req.amount;
       if (req.type === "cash")
         return game.cash >= req.amount;
+      if (req.type === "maxActivatedItems")
+        return game.maxActivatedItems >= req.amount;
       return false;
     });
   };
@@ -40,19 +42,24 @@ export default function ChatView({ game, setGame }: Props)
       const newCourses = state.courses.map((c) => ({ ...c }));
       let newProcrastinations = state.procrastinations;
       let newCash = state.cash;
+      let newMaxActivatedItems = state.maxActivatedItems;
       quest.requirements.forEach((req) =>
       {
         if (req.type === "understandings" && req.courseIndex !== undefined)
         {
           newCourses[req.courseIndex].understandings -= req.amount;
         }
-        if (req.type === "procrastinations")
+        else if (req.type === "procrastinations")
         {
           newProcrastinations -= req.amount;
         }
-        if (req.type === "cash")
+        else if (req.type === "cash")
         {
           newCash -= req.amount;
+        }
+        else if (req.type === "maxActivatedItems")
+        {
+          newMaxActivatedItems -= req.amount;
         }
       });
 
@@ -60,15 +67,16 @@ export default function ChatView({ game, setGame }: Props)
       quest.rewards.forEach((rew) =>
       {
         if (rew.type === "understandings") newCourses[rew.courseIndex].understandings += rew.amount;
-        if (rew.type === "procrastinations") newProcrastinations += rew.amount;
-        if (rew.type === "cash") newCash += rew.amount;
+        else if (rew.type === "procrastinations") newProcrastinations += rew.amount;
+        else if (rew.type === "cash") newCash += rew.amount;
+        else if (rew.type === "maxActivatedItems") newMaxActivatedItems += rew.amount;
       });
 
       // Remove quest
       const newQuests = state.quests.map((q) => ({ ...q }));
       newQuests.splice(state.quests.indexOf(quest), 1);
 
-      const newState = { ...state, courses: newCourses, cash: newCash, procrastinations: newProcrastinations, quests: newQuests };
+      const newState = { ...state, courses: newCourses, cash: newCash, procrastinations: newProcrastinations, maxActivatedItems: newMaxActivatedItems, quests: newQuests };
 
       saveGame(newState);
 
@@ -153,7 +161,9 @@ export default function ChatView({ game, setGame }: Props)
                         <li key={i}>
                           {rew.type === "cash"
                             ? `$${rew.amount}`
-                            : `${rew.amount} Procrastinations`}
+                            : (rew.type === "procrastinations"
+                              ? `$${rew.amount} Procrastinations`
+                              : `${rew.amount} Max Active Items`)}
                         </li>
                       ))}
                     </ul>

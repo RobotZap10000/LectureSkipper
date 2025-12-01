@@ -22,9 +22,11 @@ export default function SettingsView({ game, setGame, topRuns }: Props)
       version: "0.2.0",
       date: "December 2, 2025",
       title: "Second Test Version",
+      description: "Small improvements, bug fixes, new items.",
       majorChanges: [
         "Reduced P gain in the later blocks",
-        "You can now activate one extra item per block",
+        "Quests now may increase your max activated items",
+        "New Item: Notes",
       ],
       smallChanges: [
         "Improved UI on mobile",
