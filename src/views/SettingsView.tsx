@@ -22,7 +22,7 @@ export default function SettingsView({ game, setGame, topRuns }: Props)
       version: "0.1.0a",
       date: "December 1, 2025",
       title: "First Test Version",
-      description: "The first public release of Lecture Skipper Simulator.",
+      description: "The first public release of Lecture Skipper.",
       majorChanges: [
 
       ],
