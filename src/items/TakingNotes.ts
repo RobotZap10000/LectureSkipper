@@ -23,6 +23,7 @@ export const itemMeta: ItemMeta = {
 export const itemBehavior: ItemBehavior = {
   beforeAttendLecture: (params) =>
   {
+    
     let lastEnergy = params.lecture.energyCost;
     params.lecture.energyCost += Math.floor(params.lecture.energyCost * (params.item.level+1)/10);
     let lastUnderstandings = params.lecture.potentialUnderstandings;
