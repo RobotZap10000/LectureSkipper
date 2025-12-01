@@ -146,7 +146,8 @@ export function loadGame(): GameState
 
     const parsed: GameState = JSON.parse(data);
 
-    if(parsed.saveVersion == 1) {
+    if (parsed.saveVersion == 1)
+    {
       parsed.saveVersion = 2;
       parsed.calendarViewSelectedItemIDs = [];
     }
@@ -387,7 +388,16 @@ export function startRound(state: GameState, action: "attend" | "skip"): GameSta
   newState.log.reverse();
 
   // Deselect items that were disabled during the round
-  newState.selectedItemSlots = newState.selectedItemSlots.filter(slotID => newState.items[slotID] !== null && itemMetaRegistry[newState.items[slotID].name].getEnabled(newState.items[slotID], newState));
+  newState.selectedItemSlots = newState.selectedItemSlots.filter(slotID =>
+  {
+    let item = newState.items[slotID];
+    let keepItem = item !== null && itemMetaRegistry[item.name].getEnabled(item, newState);
+    if (!keepItem && item)
+    {
+      newState.calendarViewSelectedItemIDs.splice(newState.calendarViewSelectedItemIDs.indexOf(item.id), 1);
+    }
+    return keepItem;
+  });
 
   saveGame(newState);
 
