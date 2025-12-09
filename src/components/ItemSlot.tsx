@@ -1,6 +1,6 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { GameState } from "@/game";
-import { itemUtils, type ItemData } from "@/item";
+import { type ItemData } from "@/item";
 import { itemMetaRegistry } from "@/itemRegistry";
 
 interface ItemSlotProps

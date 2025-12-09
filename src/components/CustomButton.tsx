@@ -1,0 +1,69 @@
+import React from "react";
+import chroma from "chroma-js";
+import { type LucideIcon } from "lucide-react";
+
+interface CustomButtonProps
+{
+  icon?: LucideIcon;
+  children: React.ReactNode;
+  color?: string;
+  outlineColor?: string;
+  hoverColor?: string;
+  className?: string;
+  onClick?: () => void;
+}
+
+export function CustomButton({
+  icon: Icon,
+  children,
+  color = "#444444",
+  outlineColor,
+  hoverColor,
+  className = "",
+  onClick,
+}: CustomButtonProps)
+{
+
+  // If no hoverColor provided, generate a color automatically
+  const computedHoverColor = hoverColor || chroma(color).darken(0.5).hex();
+  const text = chroma.contrast(color, "white") > 4.5 ? "white" : "black";
+  // If no outlineColor provided, generate a color automatically
+  const computedOutlineColor = outlineColor || chroma(color).darken(1.5).hex();
+
+  return (
+    <button
+      onClick={onClick}
+      className={
+        `px-4 py-2 rounded flex items-center justify-center gap-2 transition-colors  ` +
+        className
+      }
+      style={{
+        backgroundColor: color,
+        color: text,
+        boxShadow: `0 2px 0 1px ${computedOutlineColor}`,
+      }}
+      onMouseEnter={(e) =>
+      {
+        (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+          computedHoverColor;
+      }}
+      onMouseLeave={(e) =>
+      {
+        (e.currentTarget as HTMLButtonElement).style.backgroundColor = color;
+      }}
+      onMouseDown={(e) =>
+      {
+        (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 0 0 1px ${computedOutlineColor}`;
+        (e.currentTarget as HTMLButtonElement).style.translate = "0 2px";
+      }}
+      onMouseUp={(e) =>
+      {
+        (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 2px 0 1px ${computedOutlineColor}`;
+        (e.currentTarget as HTMLButtonElement).style.translate = "0 0";
+      }}
+    >
+      {Icon && <Icon className="w-4 h-4" />}
+      {children}
+    </button>
+  );
+}

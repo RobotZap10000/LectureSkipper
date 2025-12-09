@@ -3,13 +3,14 @@ import type { GameState, Run } from "@/game";
 import { startRound, attendExams, startNewBlock, initGame } from "@/game";
 import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useRef } from "react";
-import { Scroll, GraduationCap, BookOpen, HelpCircle, BookAlert, RefreshCcw, Zap } from "lucide-react";
+import { Scroll, GraduationCap, BookOpen, BookAlert, RefreshCcw, Zap } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import chroma from "chroma-js";
 import { Badge } from "@/components/ui/badge";
+import { CustomInfoCard } from "@/components/CustomInfoCard";
+import { CustomButton } from "@/components/CustomButton";
+import { CoursesCard } from "@/components/CoursesCard";
 
 interface Props
 {
@@ -31,121 +32,43 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
   }, [game.log]);
 
   return (
-    <div className="flex flex-wrap justify-center gap-4 p-4">
+    <div className="flex flex-wrap justify-center p-4">
 
-      {/* Courses */}
-      <div className="bg-card p-2 rounded flex flex-col max-w-[400px] w-full h-content">
-        <div className="col-span-1 flex flex-col h-full">
-          <h2 className="font-bold m-1 flex items-center gap-2">
-            <GraduationCap className="w-5 h-5" /> Courses - Block {game.block}
-
-            <Popover>
-              <PopoverTrigger asChild>
-                <HelpCircle className="w-4 h-4 cursor-pointer" />
-              </PopoverTrigger>
-              <PopoverContent className="w-96" side="top">
-                <h2 className="font-bold m-1 flex items-center gap-2">
-                  <GraduationCap className="w-5 h-5" /> Courses
-                </h2>
-
-                <p className="text-sm">
-                  Every block, you have 3 courses and a set amount of lectures before exams. Attend lectures to acquire Understanding (U).
-                </p>
-
-                <br></br>
-
-                <h2 className="font-bold m-1 flex items-center gap-2">
-                  <BookAlert className="w-5 h-5" /> Exams
-                </h2>
-
-                <p className="text-sm">
-                  Your chance of passing a course depends on the amount of Understanding (U) acquired during the block. <span className="italic text-red-500">Failing 2 or more exams in a block results in a game over.</span>
-                  <br></br><br></br>
-                  You can gain more Understanding (U) than the course requires. The chance to pass will be capped at 100%.
-                </p>
-              </PopoverContent>
-            </Popover>
-          </h2>
-
-          <div className="flex-1 overflow-auto space-y-1">
-            {game.courses.map((c) =>
-            {
-              const progress = Math.min((c.understandings / c.goal) * 100, 100);
-
-              const bg = chroma(c.color).brighten(1.2).hex();
-              const border = chroma(c.color).brighten(2).hex();
-              const textColor = chroma.contrast(bg, "white") > 4.5 ? "white" : "black";
-
-              return (
-                <Card
-                  key={c.title}
-                  className="w-full border-2 gap-2"
-                  style={{
-                    backgroundColor: bg,
-                    borderColor: border,
-                    color: textColor,
-                  }}
-                >
-                  <CardHeader>
-                    <CardTitle>{c.title}</CardTitle>
-
-                    <CardDescription
-                      style={{
-                        color: textColor === "white" ? "#e5e5e5" : "#333",
-                      }}
-                    >
-                      {c.understandings} U / {c.goal} U • Chance to pass: {progress.toFixed(0)}%
-                    </CardDescription>
-
-                    {/* --- Effects Section (Badges) --- */}
-                    {Object.keys(c.effects).length > 0 && (
-                      <div className="flex flex-wrap gap-2 m-0 p-0">
-                        {Object.entries(c.effects).map(([key, value]) => (
-                          <Badge key={key} className="bg-neutral-800 text-white">
-                            {key}: {`${value}`}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </CardHeader>
-
-                  <CardContent>
-                    <Progress value={progress} className="h-4 rounded" />
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-
-          <div className="font-bold m-1 flex flex-col gap-2">
-            <p>Score: {game.score}</p>
-          </div>
-        </div>
-      </div>
+      <CoursesCard game={game} />
 
       {/* Next Event */}
-      <div className="bg-card p-2 rounded flex flex-col max-w-[400px] h-[540px] w-full">
-        <h2 className="font-bold m-1 flex items-center gap-2">
-          <BookOpen className="w-5 h-5" /> Next Event
-          <Popover>
-            <PopoverTrigger asChild>
-              <HelpCircle className="w-4 h-4 cursor-pointer" />
-            </PopoverTrigger>
-            <PopoverContent className="w-96" side="top">
-              <h2 className="font-bold m-1 flex items-center gap-2">
-                <BookOpen className="w-5 h-5" /> Lectures
-              </h2>
-
-              <p className="text-sm">
-                <ul className="list-disc pl-4 pt-2">
-                  <li><span className="font-bold">Attend</span>: Attending a lecture has a chance of giving you Understanding (U) for a course. Attending takes time, which reduces your energy. <span className="italic text-red-500">You cannot attend if you don't have enough energy.</span></li>
-                  <li><span className="font-bold">Skip</span>: Skipping gives you Procrastinations (P) and restores energy. <span className="italic text-red-500">You restore energy half as fast if you have less than 50% of your maximum.</span></li>
-                </ul>
-              </p>
-            </PopoverContent>
-          </Popover>
-        </h2>
-
+      <CustomInfoCard
+        icon={BookOpen}
+        title="Next Event"
+        className="min-h-[600px]"
+        help={
+          <>
+            <h2 className="font-bold m-1 flex items-center gap-2">
+              <BookOpen className="w-5 h-5" /> Lectures
+            </h2>
+            <p className="text-sm">
+              <ul className="list-disc pl-4 pt-2">
+                <li>
+                  <span className="font-bold">Attend</span>: Attending a lecture has
+                  a chance of giving you Understanding (U) for a course. Attending
+                  takes time, which reduces your energy.{" "}
+                  <span className="italic text-red-500">
+                    You cannot attend if you don't have enough energy.
+                  </span>
+                </li>
+                <li>
+                  <span className="font-bold">Skip</span>: Skipping gives you
+                  Procrastinations (P) and restores energy.{" "}
+                  <span className="italic text-red-500">
+                    You restore energy half as fast if you have less than 50% of your
+                    maximum.
+                  </span>
+                </li>
+              </ul>
+            </p>
+          </>
+        }
+      >
         {/* --- CASE 1: Lectures still remaining --- */}
         {game.nextLecture && !game.examsAttended ? (
           <div className="flex flex-col items-center gap-2">
@@ -227,26 +150,27 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
                       />
                     </div>
                   </CardContent>
-
                 </Card>
               );
             })()}
 
-
             {/* Buttons */}
             <div className="flex gap-2 m-2">
-              <Button
-                onClick={() => setGame(g => startRound(g, "attend"))}
-                className={`${game.energy < game.nextLecture.energyCost ? "bg-neutral-500 hover:bg-neutral-500" : "bg-green-500 hover:bg-green-600"} text-white px-4 py-2 rounded`}
+              <CustomButton
+                onClick={() => setGame((g) => startRound(g, "attend"))}
+                color={`${game.energy < game.nextLecture.energyCost
+                  ? "gray"
+                  : "Green"
+                  }`}
               >
                 Attend
-              </Button>
-              <Button
-                onClick={() => setGame(g => startRound(g, "skip"))}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+              </CustomButton>
+              <CustomButton
+                onClick={() => setGame((g) => startRound(g, "skip"))}
+                color="FireBrick"
               >
                 Skip
-              </Button>
+              </CustomButton>
             </div>
 
             <h1 className="font-bold flex items-center p-0 m-0">
@@ -255,10 +179,11 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
 
             <div className="flex flex-col gap-1 w-full max-w-sm p-3">
               <div className="flex items-center gap-2 text-sm font-medium">
-                <Zap className="w-4 h-4" /> Energy: {game.energy} E / {game.maxEnergy} E
+                <Zap className="w-4 h-4" /> Energy: {game.energy} E /{" "}
+                {game.maxEnergy} E
               </div>
               <Progress
-                value={game.energy / game.maxEnergy * 100}
+                value={(game.energy / game.maxEnergy) * 100}
                 className="h-3 rounded-full"
               />
             </div>
@@ -269,18 +194,18 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
         {!game.nextLecture && !game.examsAttended ? (
           <div className="flex flex-col items-center justify-center gap-4 py-8">
             <h2 className="text-lg font-bold">All lectures completed.</h2>
-            <Button
-              onClick={() => setGame(g => attendExams(g, setTopRuns))}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
+            <CustomButton
+              onClick={() => setGame((g) => attendExams(g, setTopRuns))}
+              color="purple"
             >
               Start Exams
-            </Button>
+            </CustomButton>
           </div>
         ) : null}
 
         {/* --- CASE 3: Exams attended → Show results --- */}
         {game.examsAttended ? (
-          <div className="flex flex-col items-center gap-4 mt-2 overflow-auto">
+          <div className="flex flex-col items-center gap-4 mt-2">
             <h2 className="text-lg font-bold">Exam Results</h2>
 
             <div className="space-y-2 w-full">
@@ -290,7 +215,9 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
                 return (
                   <Card
                     key={i}
-                    className={`border-2 ${passed ? "border-green-600 bg-green-950" : "border-red-600 bg-red-950"
+                    className={`border-2 ${passed
+                      ? "border-green-600 bg-green-950"
+                      : "border-red-600 bg-red-950"
                       }`}
                   >
                     <CardHeader>
@@ -305,36 +232,34 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
             </div>
 
             {/* --- FAILURE CHECK --- */}
-            {game.examResults.filter(r => !r).length >= 2 ? (
-              // Game Over → Reset Run only
+            {game.examResults.filter((r) => !r).length >= 2 ? (
               <div>
                 <h2 className="font-bold">Final Score: {game.score}</h2>
-                <Button
-                  variant="destructive"
-                  className="flex items-center gap-2 mt-4"
+                <CustomButton
+                  icon={RefreshCcw}
+                  color="#ac0000ff"
                   onClick={() => setGame(initGame())}
                 >
-                  <RefreshCcw className="w-4 h-4" /> Reset Run
-                </Button>
+                  Reset Run
+                </CustomButton>
+
               </div>
             ) : (
-              // Otherwise → Start Next Block
-              <Button
-                onClick={() => setGame(g => startNewBlock(g))}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded mt-2"
+              <CustomButton
+                onClick={() => setGame((g) => startNewBlock(g))}
+                color="RoyalBlue"
               >
                 Start Next Block
-              </Button>
+              </CustomButton>
             )}
           </div>
         ) : null}
-      </div>
+      </CustomInfoCard>
 
       {/* Log */}
-      <div className="bg-card p-2 rounded flex flex-col max-w-[400px] w-full h-content">
-        <h2 className="font-bold m-1 flex items-center gap-2"> <Scroll className="w-5 h-5" /> Log</h2>
+      <CustomInfoCard icon={Scroll} title="Log">
         <div
-          className="flex flex-col-reverse overflow-y-auto flex-1"
+          className="flex flex-col-reverse flex-1"
           ref={logContainerRef}
         >
           {game.log.slice().map((entry, i) =>
@@ -351,9 +276,8 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
               </div>
             );
           })}
-
         </div>
-      </div>
+      </CustomInfoCard>
 
       {/* Inventory */}
       <Inventory

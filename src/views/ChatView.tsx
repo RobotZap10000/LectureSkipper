@@ -1,10 +1,12 @@
 import Inventory from "@/components/Inventory";
 import { saveGame, type GameState, type Quest } from "../game";
 import type { Dispatch, SetStateAction } from "react";
-import { HelpCircle, MessageCircle, MessagesSquare } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { MessageCircle, MessagesSquare } from "lucide-react";
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import chroma from "chroma-js";
+import { CustomInfoCard } from "@/components/CustomInfoCard";
+import { CustomButton } from "@/components/CustomButton";
+import { CoursesCard } from "@/components/CoursesCard";
 
 interface Props
 {
@@ -14,9 +16,9 @@ interface Props
 
 export default function ChatView({ game, setGame }: Props)
 {
-  const haveRequirements = (quest: Quest): boolean =>
+  const haveCosts = (quest: Quest): boolean =>
   {
-    return quest.requirements.every((req) =>
+    return quest.costs.every((req) =>
     {
       if (req.type === "understandings" && req.courseIndex !== undefined)
         return game.courses[req.courseIndex].understandings >= req.amount;
@@ -32,7 +34,7 @@ export default function ChatView({ game, setGame }: Props)
 
   const handleProvideNotes = (quest: Quest) =>
   {
-    const hasRequirements = haveRequirements(quest);
+    const hasRequirements = haveCosts(quest);
 
     if (!hasRequirements) return;
 
@@ -43,7 +45,7 @@ export default function ChatView({ game, setGame }: Props)
       let newProcrastinations = state.procrastinations;
       let newCash = state.cash;
       let newMaxActivatedItems = state.maxActivatedItems;
-      quest.requirements.forEach((req) =>
+      quest.costs.forEach((req) =>
       {
         if (req.type === "understandings" && req.courseIndex !== undefined)
         {
@@ -87,35 +89,35 @@ export default function ChatView({ game, setGame }: Props)
 
 
   return (
-    <div className="flex flex-wrap justify-center gap-4 p-4">
+    <div className="flex flex-wrap justify-center p-4">
+
+      <CoursesCard game={game} />
 
       {/* Quests */}
-      <div className="bg-card p-2 rounded flex flex-col max-w-[1000px] w-full h-content max-h-[650px] overflow-auto">
-        <h2 className="font-bold m-1 flex items-center gap-2">
-          <MessagesSquare className="w-5 h-5" /> Course Group Chat
+      <CustomInfoCard
+        icon={MessagesSquare}
+        title="Course Group Chat"
+        help={
+          <>
+            <h2 className="font-bold m-1 flex items-center gap-2">
+              <MessageCircle className="w-5 h-5" /> The GC
+            </h2>
 
-          <Popover>
-            <PopoverTrigger asChild>
-              <HelpCircle className="w-4 h-4 cursor-pointer" />
-            </PopoverTrigger>
-            <PopoverContent className="w-96" side="top">
-              <h2 className="font-bold m-1 flex items-center gap-2">
-                <MessageCircle className="w-5 h-5" /> The GC
-              </h2>
-
-              <p className="text-sm">
-                Every block, there will be a certain number of trade offers available. Spend Understandings to write notes for your fellow students in exchange for cash and other currencies.
-                <br></br><br></br>
-                Trade offers appear at the start of a block and remain until exams have been attended.
-              </p>
-            </PopoverContent>
-          </Popover>
-        </h2>
-
+            <p className="text-sm">
+              Every block, there will be a certain number of trade offers available. Spend Understandings
+              to write notes for your fellow students in exchange for cash and other currencies.
+              <br />
+              <br />
+              Trade offers appear at the start of a block and remain until exams have been attended.
+            </p>
+          </>
+        }
+        className="max-w-[1000px]"
+      >
         {game.quests.length === 0 ? (
           <div className="p-3 italic text-gray-400">No offers available.</div>
         ) : (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 max-h-[675px] overflow-auto">
             {game.quests.map((quest) =>
             {
               const baseColor = quest.color || "#4b5563"; // fallback
@@ -126,34 +128,32 @@ export default function ChatView({ game, setGame }: Props)
               return (
                 <Card
                   key={quest.id}
-                  className="flex flex-col border-2 gap-1 p-3 basis-[32%] min-w-[150px] h-content"
+                  className="flex flex-col border-2 gap-1 p-3 basis-[24%] min-w-[215px] h-[215px]"
                   style={{
                     backgroundColor: bg,
                     borderColor: border,
                     color: text,
                   }}
                 >
-
                   <CardTitle className="text-sm font-semibold" style={{ color: text }}>
-                    Requirements
+                    You give
                   </CardTitle>
 
                   <CardContent className="text-sm">
                     <ul className="list-disc">
-                      {quest.requirements.map((req, i) => (
+                      {quest.costs.map((cost, i) => (
                         <li key={i}>
-                          {req.type === "understandings" && `${req.amount} U in ${game.courses[req.courseIndex].title}`}
-                          {req.type === "procrastinations" && `${req.amount} P`}
-                          {req.type === "cash" && `$${req.amount}`}
-                          {req.type === "maxActivatedItems" && `${req.amount} Max Active Items`}
+                          {cost.type === "understandings" && `${cost.amount} U in ${game.courses[cost.courseIndex].title}`}
+                          {cost.type === "procrastinations" && `${cost.amount} P`}
+                          {cost.type === "cash" && `$${cost.amount}`}
+                          {cost.type === "maxActivatedItems" && `${cost.amount} Max Active Items`}
                         </li>
-
                       ))}
                     </ul>
                   </CardContent>
 
                   <CardTitle className="text-sm font-semibold" style={{ color: text }}>
-                    Rewards
+                    You get
                   </CardTitle>
 
                   <CardContent className="text-sm flex-1">
@@ -169,26 +169,24 @@ export default function ChatView({ game, setGame }: Props)
                     </ul>
                   </CardContent>
 
-                  <CardFooter className="">
-                    <button
-                      className="w-full px-2 py-1 rounded text-sm"
-                      style={{
-                        backgroundColor: haveRequirements(quest) ? "rgba(0, 197, 10, 1)" : "rgba(0, 0, 0, 0.25)",
-                        color: text,
-                      }}
+                  <CardFooter className="flex m-0 p-0 justify-center">
+                    <CustomButton
+                      color={`${haveCosts(quest)
+                        ? "Green"
+                        : "Gray"
+                        }`}
                       onClick={() => handleProvideNotes(quest)}
+                      className="p-0 m-0 w-full"
                     >
                       Provide Notes
-                    </button>
+                    </CustomButton>
                   </CardFooter>
                 </Card>
               );
             })}
           </div>
-
         )}
-
-      </div>
+      </CustomInfoCard>
 
       {/* Inventory */}
       <Inventory

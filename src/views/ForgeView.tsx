@@ -1,11 +1,12 @@
 import Inventory from "@/components/Inventory";
-import { Anvil, CirclePlus, HelpCircle, MoveDown } from "lucide-react";
+import { CirclePlus, MoveDown } from "lucide-react";
 import { saveGame, type GameState } from "@/game";
 import type { Dispatch, SetStateAction } from "react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { ItemData } from "@/item";
 import { itemMetaRegistry } from "@/itemRegistry";
 import { renderDescription } from "@/stringUtils";
+import { CustomInfoCard } from "@/components/CustomInfoCard";
+import { CustomButton } from "@/components/CustomButton";
 
 interface Props
 {
@@ -53,28 +54,20 @@ export default function ForgeView({ game, setGame }: Props)
   };
 
   return (
-    <div className="flex flex-wrap justify-center gap-4 p-4">
+    <div className="flex flex-wrap justify-center p-4">
 
       {/* Forge Section */}
-      <div className="bg-card p-2 rounded flex flex-col max-w-[400px] w-full h-content max-h-[500px]">
-        <h2 className="font-bold m-1 flex items-center gap-2">
-          <CirclePlus className="w-5 h-5" /> Upgrade Items
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <HelpCircle className="w-4 h-4 cursor-pointer" />
-            </PopoverTrigger>
-            <PopoverContent className="w-96" side="top">
-              <h2 className="font-bold m-1 flex items-center gap-2">
-                <Anvil className="w-5 h-5" /> The Forge
-              </h2>
-
-              <p className="text-sm">
-                Dump money into your items to upgrade them and make them more potent. There is no level cap, but each upgrade is more expensive than the last.
-              </p>
-            </PopoverContent>
-          </Popover>
-        </h2>
+      <CustomInfoCard
+        icon={CirclePlus}
+        title="Upgrade Items"
+        help={
+          <>
+            <p>
+              Spend cash to upgrade your items. Each level costs more than the last.
+            </p>
+          </>
+        }
+      >
         <div className="flex flex-col items-center justify-center p-3">
           {item && upgradedItemData ? (
             <div className="flex flex-col items-center justify-center mb-4 gap-3">
@@ -107,28 +100,26 @@ export default function ForgeView({ game, setGame }: Props)
 
               <div className="flex items-center gap-3">
                 <MoveDown
-                  className={`w-5 h-5 ${game.cash < (item ? calculateUpgradeCost(item) : 0)
-                    ? "text-red-500"
+                  className={`w-10 h-10 ${game.cash < (item ? calculateUpgradeCost(item) : 0)
+                    ? "text-neutral-500"
                     : "text-green-500"
                     }`}
                 />
 
-
-                <button
-                  className={`${item ? "" : "opacity-50"} ${game.cash < (item ? calculateUpgradeCost(item) : 0)
-                    ? "bg-red-500"
-                    : "bg-green-500"
-                    } text-white px-3 py-1 rounded`}
+                <CustomButton
+                  color={`${game.cash < (item ? calculateUpgradeCost(item) : 0)
+                    ? "gray"
+                    : "MediumSeaGreen"
+                    }`}
                   onClick={handleUpgrade}
-                  disabled={!item}
                 >
                   Upgrade for ${item ? calculateUpgradeCost(item) : "..."}
-                </button>
+                </CustomButton>
 
                 <MoveDown
-                  className={`w-5 h-5 ${game.cash < (item ? calculateUpgradeCost(item) : 0)
-                      ? "text-red-500"
-                      : "text-green-500"
+                  className={`w-10 h-10 ${game.cash < (item ? calculateUpgradeCost(item) : 0)
+                    ? "text-neutral-500"
+                    : "text-green-500"
                     }`}
                 />
 
@@ -169,7 +160,7 @@ export default function ForgeView({ game, setGame }: Props)
           )}
 
         </div>
-      </div>
+      </CustomInfoCard>
 
       {/* Inventory */}
       <Inventory

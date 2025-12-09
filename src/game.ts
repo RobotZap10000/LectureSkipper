@@ -44,7 +44,7 @@ export type Currency =
 export type Quest = {
   // Set randomly when the quest is made
   id: string;
-  requirements: Currency[];
+  costs: Currency[];
   rewards: Currency[];
   color: string;
 };
@@ -118,7 +118,7 @@ export function initGame(): GameState
 };
 
 const LOCAL_STORAGE_KEY = "myGameState";
-const CURRENT_SAVE_VERSION = 2;
+const CURRENT_SAVE_VERSION = 3;
 
 export function saveGame(game: GameState)
 {
@@ -146,13 +146,18 @@ export function loadGame(): GameState
 
     const parsed: GameState = JSON.parse(data);
 
-    if (parsed.saveVersion == 1)
+    // Save version migration here
+
+    if (parsed.saveVersion < 3)
     {
-      parsed.saveVersion = 2;
-      parsed.calendarViewSelectedItemIDs = [];
+      throw new Error("Unsupported save version.");
     }
 
-    parsed.log = [];
+    parsed.log = [{
+      icon: Check,
+      color: "LawnGreen",
+      message: "Save game loaded.",
+    }];
 
     return parsed;
   } catch (err)
@@ -605,7 +610,7 @@ function generateQuest(state: GameState): Quest
 
   return {
     id: generateUUID(),
-    requirements: requirements,
+    costs: requirements,
     rewards: rewards,
     color: chroma.average(colors).hex(),
   };

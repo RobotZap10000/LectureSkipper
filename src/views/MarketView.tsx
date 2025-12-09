@@ -1,13 +1,15 @@
 import Inventory from "@/components/Inventory";
 import type { GameState } from "@/game";
-import { generateUUID, saveGame } from "@/game";
+import { saveGame } from "@/game";
 import type { Dispatch, SetStateAction } from "react";
 import { HelpCircle, PackageOpen, Store, Gift } from "lucide-react";
 import ItemSlot from "@/components/ItemSlot";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Item as ShadItem, ItemGroup } from "@/components/ui/item";
 import { itemsByRarity } from "@/itemRegistry";
-import { itemUtils, type ItemData } from "@/item";
+import { itemUtils } from "@/item";
+import { CustomButton } from "@/components/CustomButton";
+import { CustomInfoCard } from "@/components/CustomInfoCard";
 
 interface Props
 {
@@ -108,7 +110,8 @@ export default function MarketView({ game, setGame }: Props)
   // Trash the unboxed item
   const handleTrash = () =>
   {
-    setGame((prev) => {
+    setGame((prev) =>
+    {
       const newState = {
         ...prev,
         unboxedItem: null,
@@ -119,27 +122,25 @@ export default function MarketView({ game, setGame }: Props)
   };
 
   return (
-    <div className="flex flex-wrap justify-center gap-4 p-4">
+    <div className="flex flex-wrap justify-center p-4">
+
       {/* Shop */}
-      <div className="bg-card p-2 rounded flex flex-col max-w-[400px] w-full h-content max-h-[500px]">
-        <h2 className="font-bold m-1 flex items-center gap-2">
-          <Store className="w-5 h-5" /> Store
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <HelpCircle className="w-4 h-4 cursor-pointer" />
-            </PopoverTrigger>
-            <PopoverContent className="w-96" side="top">
-              <h2 className="font-bold m-1 flex items-center gap-2">
-                <Store className="w-5 h-5" /> Store
-              </h2>
-              <p className="text-sm">
-                Spend units of Procrastination to buy items. The more expensive a box is, the higher the chance of getting rare and high-level items.
-              </p>
-            </PopoverContent>
-          </Popover>
-        </h2>
-
+      <CustomInfoCard
+        icon={Store}
+        title="Store"
+        className="max-w-[400px] w-full h-content max-h-[500px]"
+        help={
+          <>
+            <h2 className="font-bold m-1 flex items-center gap-2">
+              <Store className="w-5 h-5" /> Store
+            </h2>
+            <p className="text-sm">
+              Spend units of Procrastination to buy items. The more expensive a box is,
+              the higher the chance of getting rare and high-level items.
+            </p>
+          </>
+        }
+      >
         <ItemGroup className="space-y-2">
           {shopListings.map((box, i) => (
             <ShadItem
@@ -156,43 +157,39 @@ export default function MarketView({ game, setGame }: Props)
                 </div>
               </div>
 
-              <button
-                className={`px-2 py-1 rounded text-white ${game.procrastinations < box.cost ? "bg-red-500" : "bg-green-500"}`}
+              <CustomButton
+                color={game.procrastinations < box.cost ? "gray" : "Green"}
                 onClick={() => handleBuy(box)}
               >
                 Buy
-              </button>
+              </CustomButton>
             </ShadItem>
           ))}
         </ItemGroup>
-
-
-      </div>
+      </CustomInfoCard>
 
       {/* Unboxed Item */}
-      <div className="bg-card p-2 rounded flex flex-col max-w-[400px] w-full h-content max-h-[500px]">
-        <h2 className="font-bold m-1 flex items-center gap-2">
-          <PackageOpen className="w-5 h-5" /> Unboxed Item
+      <CustomInfoCard
+        icon={PackageOpen}
+        title="Unboxed Item"
+        className="h-500px"
+        help={
+          <>
+            <h2 className="font-bold m-1 flex items-center gap-2">
+              <PackageOpen className="w-5 h-5" /> Unboxing
+            </h2>
 
-          <Popover>
-            <PopoverTrigger asChild>
-              <HelpCircle className="w-4 h-4 cursor-pointer" />
-            </PopoverTrigger>
-            <PopoverContent className="w-96" side="top">
-              <h2 className="font-bold m-1 flex items-center gap-2">
-                <PackageOpen className="w-5 h-5" /> Unboxing
-              </h2>
-
-              <p className="text-sm">
-                After buying an item, click on an empty inventory slot to place the item there, or buy another item (automatically trash the previous one).
-              </p>
-            </PopoverContent>
-          </Popover>
-        </h2>
+            <p className="text-sm">
+              After buying an item, click on an empty inventory slot to place the item there, or buy another item (automatically trash the previous one).
+            </p>
+          </>
+        }
+      >
         <div className="flex flex-col items-center justify-center p-3">
-          <h2 className={`font-bold m-1 flex items-center gap-2 ${game.unboxedItem ? '' : 'invisible'}`}>
+          <h2 className={`font-bold m-1 flex items-center gap-2 ${game.unboxedItem ? "" : "invisible"}`}>
             {game.unboxedItem?.name || "..."}
           </h2>
+
           <ItemSlot
             game={game}
             item={game.unboxedItem}
@@ -202,23 +199,25 @@ export default function MarketView({ game, setGame }: Props)
           />
 
           <div className="flex gap-2 mt-2">
-            <button
-              className={`bg-red-500 text-white px-4 py-2 rounded ${game.unboxedItem ? '' : 'invisible'}`}
+            <CustomButton
+              color="FireBrick"
+              className={`${game.unboxedItem ? "" : "invisible"}`}
               onClick={handleTrash}
             >
               Trash
-            </button>
+            </CustomButton>
 
-            <button
-              className={`bg-green-500 text-white px-4 py-2 rounded ${game.unboxedItem ? '' : 'invisible'}`}
+            <CustomButton
+              color="Green"
+              className={`${game.unboxedItem ? "" : "invisible"}`}
               onClick={handlePlaceItem}
             >
               Take
-            </button>
+            </CustomButton>
           </div>
-
         </div>
-      </div>
+      </CustomInfoCard>
+
 
 
       {/* Inventory */}
