@@ -1,4 +1,4 @@
-import { Box, Boxes, Check, LayoutGrid, ListOrdered, Package } from "lucide-react";
+import { ArrowBigRight, Box, Boxes, Check, LayoutGrid, ListOrdered, Package } from "lucide-react";
 import ItemSlot from "@/components/ItemSlot";
 import { saveGame, type GameState } from "@/game";
 import type { Dispatch, SetStateAction } from "react";
@@ -70,6 +70,8 @@ export default function Inventory({
       {
         items[itemSlotID] = unboxedItem;
         unboxedItem = null;
+      } else {
+        selected = [];
       }
 
       const newState = {
@@ -104,6 +106,48 @@ export default function Inventory({
       return newState;
     });
   };
+
+  const handleSelectRow = (row: number) =>
+  {
+    setGame(prev =>
+    {
+      const items = [...prev.items];
+      let selected: string[] = [];
+
+      for (let i = 0; i < numCols; i++)
+      {
+        const item = items[row * numCols + i];
+        if (item)
+        {
+          selected.push(item.id);
+
+          if (selected.length >= game.maxActivatedItems)
+            break;
+        }
+      }
+
+      // If the selected row is already selected, deselect it
+      if(prev.selectedItemIDs.length == selected.length) {
+        let same = true;
+        for(let i = 0; i < prev.selectedItemIDs.length; i++) {
+          if(prev.selectedItemIDs[i] != selected[i]) {
+            same = false;
+            break;
+          }
+        }
+        if(same) {
+          selected = [];
+        }
+      }
+
+      const newState = { ...prev, selectedItemIDs: selected };
+
+      return newState;
+    });
+  };
+
+  const numRows = 6;
+  const numCols = 6;
 
   return (
     <CustomInfoCard
@@ -168,25 +212,43 @@ export default function Inventory({
             </h2>
           )}
 
-          <div className="grid grid-cols-6 grid-rows-6 gap-1">
-            {game.items.map((item, i) => (
-              <ItemSlot
-                key={i}
-                game={game}
-                item={item ?? null} // explicitly null if empty
-                selected={item !== null && game.selectedItemIDs.includes(item.id)}
-                onClick={() =>
-                {
-                  if (item)
-                  {
-                    handleItemClick(item.id); // item exists
-                  } else
-                  {
-                    handleEmptySlotClick(i); // empty slot
-                  }
-                }}
-                size={40}
-              />
+          <div className="flex flex-col gap-1">
+            {Array.from({ length: numRows }).map((_, rowIndex) => (
+              <div key={rowIndex} className="flex items-center gap-1">
+
+                {/* Row select button */}
+                {game.view === "Calendar" &&
+                  <CustomButton
+                    color="#494949ff"
+                    className="w-9 h-9 mr-1"
+                    onClick={() => handleSelectRow(rowIndex)}
+                    icon={ArrowBigRight}
+                  ></CustomButton>
+                }
+
+                {/* Items in this row */}
+                {game.items
+                  .slice(rowIndex * numCols, (rowIndex + 1) * numCols)
+                  .map((item, colIndex) => (
+                    <ItemSlot
+                      key={colIndex}
+                      game={game}
+                      item={item ?? null} // explicitly null if empty
+                      selected={item !== null && game.selectedItemIDs.includes(item.id)}
+                      onClick={() =>
+                      {
+                        if (item)
+                        {
+                          handleItemClick(item.id); // item exists
+                        } else
+                        {
+                          handleEmptySlotClick(rowIndex * numCols + colIndex); // empty slot
+                        }
+                      }}
+                      size={40}
+                    />
+                  ))}
+              </div>
             ))}
           </div>
 
