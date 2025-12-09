@@ -5,6 +5,7 @@ import type { Dispatch, SetStateAction } from "react";
 import { CustomInfoCard } from "./CustomInfoCard";
 import { itemUtils } from "@/item";
 import { CustomButton } from "./CustomButton";
+import { itemMetaRegistry } from "@/itemRegistry";
 
 interface Props
 {
@@ -29,9 +30,11 @@ export default function Inventory({
         selected.splice(selected.indexOf(itemID), 1);
       } else
       {
+        let item = itemUtils.itemIDtoItem(itemID, prev);
+
         if (game.view === "Calendar")
         {
-          if (selected.length < prev.maxActivatedItems)
+          if (item && itemMetaRegistry[item.name].getEnabled(item, prev) && selected.length < prev.maxActivatedItems)
             selected.push(itemID);
         } else
         {
@@ -70,7 +73,8 @@ export default function Inventory({
       {
         items[itemSlotID] = unboxedItem;
         unboxedItem = null;
-      } else {
+      } else
+      {
         selected = [];
       }
 
@@ -117,7 +121,7 @@ export default function Inventory({
       for (let i = 0; i < numCols; i++)
       {
         const item = items[row * numCols + i];
-        if (item)
+        if (item && itemMetaRegistry[item.name].getEnabled(item, prev))
         {
           selected.push(item.id);
 
@@ -127,15 +131,19 @@ export default function Inventory({
       }
 
       // If the selected row is already selected, deselect it
-      if(prev.selectedItemIDs.length == selected.length) {
+      if (prev.selectedItemIDs.length == selected.length)
+      {
         let same = true;
-        for(let i = 0; i < prev.selectedItemIDs.length; i++) {
-          if(prev.selectedItemIDs[i] != selected[i]) {
+        for (let i = 0; i < prev.selectedItemIDs.length; i++)
+        {
+          if (prev.selectedItemIDs[i] != selected[i])
+          {
             same = false;
             break;
           }
         }
-        if(same) {
+        if (same)
+        {
           selected = [];
         }
       }

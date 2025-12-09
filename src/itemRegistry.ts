@@ -11,7 +11,7 @@ for (const path in modules) {
   const mod = modules[path] as any;
 
   const data: ItemData = mod.itemData;
-  const meta: ItemMeta = mod.itemMeta; // must export meta for icon/getDescription
+  const meta: ItemMeta = mod.itemMeta;
   const behavior: ItemBehavior = mod.itemBehavior || {};
 
   // Save to registries

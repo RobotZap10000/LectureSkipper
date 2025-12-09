@@ -3,13 +3,14 @@ import Mustache from "mustache";
 import chroma from "chroma-js";
 import { behaviorRegistry, itemMetaRegistry } from "@/itemRegistry";
 import { itemUtils, type ItemData } from "./item";
+import type { EffectData } from "./effect";
 
 export type Course = {
   title: string;
   color: string;
   understandings: number;
   goal: number;
-  effects: Record<string, number>;
+  effects: EffectData[];
 
   maxUnderstandingsPerLecture: number;
   maxProcrastinationsPerLecture: number;
@@ -597,7 +598,7 @@ export function generateCourse(state: GameState, hue: number): Course
     goal: 10 * state.block + Math.round(courseDifficulty * (3 ** state.block)),
     understandings: 0,
     color: chroma.hsv(hue, 1, 0.25).hex(),
-    effects: {},
+    effects: [],
     maxUnderstandingsPerLecture: 10 * state.block + Math.round(courseDifficulty * (2 ** state.block)),
     maxProcrastinationsPerLecture: 10 * state.block + Math.round(courseDifficulty * state.block * 20),
     maxEnergyCostPerLecture: 10 * state.block

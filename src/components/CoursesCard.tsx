@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import type { GameState } from "@/game";
+import { EffectBadge } from "./EffectBadge";
 
 interface CoursesCardProps
 {
@@ -83,15 +84,14 @@ export function CoursesCard({ game }: CoursesCardProps)
                   </CardDescription>
 
                   {/* --- Effects Section (Badges) --- */}
-                  {Object.keys(c.effects).length > 0 && (
+                  {c.effects.length > 0 && (
                     <div className="flex flex-wrap gap-2 m-0 p-0">
-                      {Object.entries(c.effects).map(([key, value]) => (
-                        <Badge key={key} className="bg-neutral-800 text-white">
-                          {key}: {`${value}`}
-                        </Badge>
+                      {c.effects.map((effect, index) => (
+                        <EffectBadge key={effect.id ?? index} effect={effect} game={game} />
                       ))}
                     </div>
                   )}
+
                 </CardHeader>
 
                 <CardContent>

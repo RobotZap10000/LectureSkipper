@@ -1,6 +1,7 @@
 import type { GameState, Lecture, LectureResult, LogEntry } from "@/game";
 import type { LucideIcon } from "lucide-react";
 import { generateUUID } from "@/game";
+import type { EffectData } from "./effect";
 
 export type ItemData = {
   // Set randomly when the item is made
@@ -98,20 +99,35 @@ export const itemUtils = {
 
     return true;
   },
-  addEffectStacksToCourse: (state: GameState, courseIndex: number, effect: string, amount: number): number =>
+  /**
+   * Finds the first effect in the course's effects that matches the given name, and adds the given amount to it.  
+   * If no effect is found, it is added.  
+   * Deletes the effect if the amount is 0 or less.
+   * @returns Returns the new EffectData.
+   */
+  addEffectStacksToCourse: (state: GameState, courseIndex: number, effectName: string, amount: number): EffectData =>
   {
-    if (state.courses[courseIndex].effects.hasOwnProperty(effect) == false)
-      state.courses[courseIndex].effects[effect] = 0;
-    state.courses[courseIndex].effects[effect] += amount;
-    if (state.courses[courseIndex].effects[effect] == 0)
-      delete state.courses[courseIndex].effects[effect];
-    return state.courses[courseIndex].effects[effect];
+    // Create an effect if there is none
+    if (state.courses[courseIndex].effects.find((e) => e.name === effectName) == null)
+      state.courses[courseIndex].effects.push({ id: generateUUID(), name: effectName, value: 0 });
+    // Get the effect
+    let effectIndex = state.courses[courseIndex].effects.findIndex((e) => e.name === effectName);
+    let effect = state.courses[courseIndex].effects[effectIndex];
+    // Add the amount
+    effect.value += amount;
+    // Delete the effect if the amount is 0 or less
+    if (effect.value <= 0)
+      delete state.courses[courseIndex].effects[effectIndex];
+    return effect;
   },
-  getEffectStacks: (state: GameState, courseIndex: number, effect: string): number =>
+  /**
+   * Finds the first effect in the course's effects that matches the given name, and returns its amount.
+   */
+  getEffectStacks: (state: GameState, courseIndex: number, effectName: string): number =>
   {
-    if (state.courses[courseIndex].effects.hasOwnProperty(effect) == false)
+    if (state.courses[courseIndex].effects.find((e) => e.name === effectName) == null)
       return 0;
-    return state.courses[courseIndex].effects[effect];
+    return state.courses[courseIndex].effects.find((e) => e.name === effectName)!.value;
   },
 
   /**
