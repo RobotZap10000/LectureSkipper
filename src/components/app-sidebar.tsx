@@ -11,7 +11,7 @@ import
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import type { GameState, View } from "@/game";
+import { changeView, type GameState, type View } from "@/game";
 import type { Dispatch, SetStateAction } from "react";
 import { Kbd } from "./ui/kbd";
 
@@ -57,7 +57,7 @@ export function AppSidebar({ game, setGame }: Props)
               {items.map((item, i) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <button onClick={() => {setGame((prev) => ({ ...prev, view: item.title }))}} className={`flex items-center gap-2 p-1 ${game.view === item.title ? "ring-1 ring-gray-500" : ""}`}>
+                    <button onClick={() => setGame(prev => changeView(prev, item.title))} className={`flex items-center gap-2 p-1 ${game.view === item.title ? "ring-1 ring-gray-500" : ""}`}>
                       <item.icon />
                       <span className={game.view === item.title ? "font-bold" : ""}>{item.title}</span>
                       <Kbd className="ml-auto sm:visible invisible">{i + 1}</Kbd>

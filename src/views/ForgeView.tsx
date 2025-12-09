@@ -2,7 +2,7 @@ import Inventory from "@/components/Inventory";
 import { Box, CirclePlus, MoveDown } from "lucide-react";
 import { type GameState } from "@/game";
 import type { Dispatch, SetStateAction } from "react";
-import type { ItemData } from "@/item";
+import { itemUtils, type ItemData } from "@/item";
 import { itemMetaRegistry } from "@/itemRegistry";
 import { renderDescription } from "@/stringUtils";
 import { CustomInfoCard } from "@/components/CustomInfoCard";
@@ -22,7 +22,7 @@ export default function ForgeView({ game, setGame }: Props)
     return (n / 2) * (50 + 50 * n);
   };
 
-  const item: ItemData | null = game.selectedItemSlots.length > 0 ? game.items[game.selectedItemSlots[game.selectedItemSlots.length - 1]] : null;
+  const item: ItemData | null = game.selectedItemIDs.length > 0 ? itemUtils.itemIDtoItem(game.selectedItemIDs[0], game) : null;
   const upgradedItemData: ItemData | null = item ? { ...item, level: item.level + 1 } : null;
   let Icon = null;
   if (item) Icon = itemMetaRegistry[item.name].icon;
@@ -39,7 +39,7 @@ export default function ForgeView({ game, setGame }: Props)
       const upgradedItem = { ...item, level: item.level + 1 };
 
       const newItems = [...state.items];
-      newItems[state.selectedItemSlots[state.selectedItemSlots.length - 1]] = upgradedItem;
+      newItems[itemUtils.itemIDtoSlot(item.id, state)] = upgradedItem;
 
       const newState = {
         ...state,
@@ -221,7 +221,6 @@ export default function ForgeView({ game, setGame }: Props)
       <Inventory
         game={game}
         setGame={setGame}
-        mode="normal"
       />
     </div>
   );

@@ -214,7 +214,6 @@ export default function ChatView({ game, setGame }: Props)
       <Inventory
         game={game}
         setGame={setGame}
-        mode="normal"
       />
     </div >
   );

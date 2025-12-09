@@ -283,7 +283,6 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
       <Inventory
         game={game}
         setGame={setGame}
-        mode="calendar"
       />
     </div >
   );

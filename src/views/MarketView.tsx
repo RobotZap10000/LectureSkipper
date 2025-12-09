@@ -272,7 +272,6 @@ export default function MarketView({ game, setGame }: Props)
       <Inventory
         game={game}
         setGame={setGame}
-        mode="normal"
       />
     </div>
   );

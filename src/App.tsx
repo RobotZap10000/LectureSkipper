@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import type { GameState, Run, View } from "@/game";
-import { initGame, loadGame, saveGame } from "@/game";
+import { changeView, initGame, loadGame, saveGame } from "@/game";
 import CalendarView from "@/views/CalendarView";
 import MarketView from "@/views/MarketView";
 import ChatView from "@/views/ChatView";
@@ -11,36 +11,66 @@ import SettingsView from "@/views/SettingsView";
 import { CircleDollarSign, Sparkles, TriangleAlert, Zap } from "lucide-react";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
 
-function validateGameState(game: any): boolean {
+function validateGameState(game: any)
+{
   const template = initGame(); // A correct GameState shape
 
-  // Basic object check
-  if (!game || typeof game !== "object") return false;
+  if (!game || typeof game !== "object")
+  {
+    return { valid: false, missing: Object.keys(template) };
+  }
 
-  // Check missing top-level keys
-  for (const key of Object.keys(template)) {
-    if (!(key in game)) {
-      console.warn("Missing key:", key);
-      return false;
+  const missing: string[] = [];
+
+  for (const key of Object.keys(template))
+  {
+    if (!(key in game))
+    {
+      missing.push(key);
     }
   }
 
-  // Nested structures aren't checked
-  return true;
+  return { valid: missing.length === 0, missing };
 }
+
 
 export default function App()
 {
-  const [game, setGame] = useState<GameState>(loadGame());
   const [saveCorrupted, setSaveCorrupted] = useState(false);
+  const [missingFields, setMissingFields] = useState<string[]>([]);
+  const [game, setGame] = useState<GameState>(() =>
+  {
+    const loaded = loadGame();
+    if (loaded === "ParsingFailed")
+    {
+      setSaveCorrupted(true);
+      setMissingFields(validateGameState(loaded).missing);
+      return initGame();
+    } else if (loaded === "GameDoesNotExist")
+    {
+      return initGame();
+    } else
+    {
+      let valid = validateGameState(loaded).valid;
+      if (!valid)
+      {
+        setSaveCorrupted(true);
+        setMissingFields(validateGameState(loaded).missing);
+        return initGame();
+      }
+      return loaded;
+    }
+  });
 
   // Validate save on mount
   useEffect(() =>
   {
-    if (!validateGameState(game))
+    let validation = validateGameState(game);
+    if (validation.valid == false)
     {
       console.error("Invalid save file detected.");
       setSaveCorrupted(true);
+      setMissingFields(validation.missing);
     }
   }, []);
 
@@ -60,7 +90,7 @@ export default function App()
       const view = keyToView[e.key];
       if (view)
       {
-        setGame((prev) => ({ ...prev, view }));
+        setGame(prev => changeView(prev, view));
       }
     };
 
@@ -77,6 +107,7 @@ export default function App()
   // Save game whenever setGame is called
   useEffect(() =>
   {
+    if (saveCorrupted) return;
     saveGame(game);
   }, [game]);
 
@@ -100,10 +131,13 @@ export default function App()
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-red-500 font-bold"> <TriangleAlert className="w-5 h-5" /> Save File Corrupted</AlertDialogTitle>
             <AlertDialogDescription>
-              Your save data is missing required fields. The save data must be fixed manually or the game must be reset to continue.
+              Your save data is missing required fields. <span className="font-bold">The save data must be fixed manually or the game must be reset to continue.</span>
               <br />
               <br />
               This can happen when loading a save file from an unsupported version of the game.
+              <br />
+              <br />
+              Missing fields: <code>{missingFields.join(", ")}</code>
             </AlertDialogDescription>
           </AlertDialogHeader>
 

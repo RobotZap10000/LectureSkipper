@@ -50,6 +50,10 @@ export type ItemBehavior = Partial<{
 }>;
 
 export const itemUtils = {
+  itemIDtoSlot: (id: string, state: GameState): number => state.items.findIndex((item) => item && item.id === id),
+  itemIDtoItem: (id: string, state: GameState): ItemData | null => state.items[itemUtils.itemIDtoSlot(id, state)],
+  itemToSlot: (item: ItemData, state: GameState): number => itemUtils.itemIDtoSlot(item.id, state),
+
   setItemUsedThisBlock: (item: ItemData, state: GameState) =>
   {
     item.memory["lastUsed"] = state.block;

@@ -58,6 +58,43 @@ export interface LogEntry
 
 export type View = "Calendar" | "Market" | "Chat" | "Forge" | "Settings";
 
+export function changeView(game: GameState, view: View): GameState
+{
+  const newState: GameState = { ...game };
+
+  if (view === "Calendar")
+  {
+    if (newState.view !== "Calendar")
+    {
+      // Going to Calendar from some other view
+      newState.selectedItemIDs = [...newState.calendarActivatedItemIDs];
+    }
+  } else
+  {
+    if (newState.view === "Calendar")
+    {
+      // Leaving calendar
+      newState.calendarActivatedItemIDs = [...newState.selectedItemIDs];
+    }
+    // Going to other view
+    newState.selectedItemIDs = [];
+  }
+
+  // Check for selected items that don't exist
+  for (let i = newState.selectedItemIDs.length - 1; i >= 0; i--)
+  {
+    const itemID = newState.selectedItemIDs[i];
+    if (itemUtils.itemIDtoItem(itemID, newState) == null)
+    {
+      newState.selectedItemIDs.splice(i, 1);
+    }
+  }
+
+  newState.view = view;
+
+  return newState;
+}
+
 export type GameState = {
   saveVersion: number;
 
@@ -78,8 +115,8 @@ export type GameState = {
   log: LogEntry[];
   quests: Quest[];
   unboxedItem: ItemData | null;
-  selectedItemSlots: number[];
-  calendarViewSelectedItemIDs: string[];
+  selectedItemIDs: string[];
+  calendarActivatedItemIDs: string[];
 
   // Player Stats
   energy: number;
@@ -111,8 +148,8 @@ export function initGame(): GameState
     items: Array(36).fill(null),
     maxActivatedItems: 3,
     unboxedItem: null,
-    selectedItemSlots: [],
-    calendarViewSelectedItemIDs: [],
+    selectedItemIDs: [],
+    calendarActivatedItemIDs: [],
     quests: [],
     log: [],
     examsAttended: true,
@@ -143,14 +180,15 @@ export function saveGame(game: GameState)
 
 /**
  * Load the GameState from localStorage.
- * If nothing exists or parsing fails, return a fresh game state.
+ * If nothing exists, returns "GameDoesNotExist",
+ * If parsing fails, returns "ParsingFailed",
  */
-export function loadGame(): GameState
+export function loadGame(): GameState | "GameDoesNotExist" | "ParsingFailed"
 {
   try
   {
     const data = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (!data) return initGame();
+    if (!data) return "GameDoesNotExist";
 
     const parsed: GameState = JSON.parse(data);
 
@@ -171,7 +209,7 @@ export function loadGame(): GameState
   } catch (err)
   {
     console.error("Failed to load game from localStorage:", err);
-    return initGame();
+    return "ParsingFailed";
   }
 }
 
@@ -255,7 +293,7 @@ export function startRound(state: GameState, action: "attend" | "skip"): GameSta
         newState.log.push(itemLogEntry);
     }
 
-    if (newState.selectedItemSlots.includes(i) == false) continue;
+    if (newState.selectedItemIDs.includes(item.id) == false) continue;
 
     if (behaviorRegistry[item.name].beforeUse !== undefined)
     {
@@ -367,7 +405,7 @@ export function startRound(state: GameState, action: "attend" | "skip"): GameSta
         newState.log.push(itemLogEntry);
     }
 
-    if (newState.selectedItemSlots.includes(i) == false) continue;
+    if (newState.selectedItemIDs.includes(item.id) == false) continue;
 
     if (behaviorRegistry[item.name].afterUse !== undefined)
     {
@@ -401,13 +439,13 @@ export function startRound(state: GameState, action: "attend" | "skip"): GameSta
   newState.log.reverse();
 
   // Deselect items that were disabled during the round
-  newState.selectedItemSlots = newState.selectedItemSlots.filter(slotID =>
+  newState.selectedItemIDs = newState.selectedItemIDs.filter(itemID =>
   {
-    let item = newState.items[slotID];
+    let item = itemUtils.itemIDtoItem(itemID, newState);
     let keepItem = item !== null && itemMetaRegistry[item.name].getEnabled(item, newState);
     if (!keepItem && item)
     {
-      newState.calendarViewSelectedItemIDs.splice(newState.calendarViewSelectedItemIDs.indexOf(item.id), 1);
+      newState.selectedItemIDs.splice(newState.selectedItemIDs.indexOf(item.id), 1);
     }
     return keepItem;
   });
@@ -710,7 +748,8 @@ export function startNewBlock(state: GameState): GameState
     message: `Welcome to Block ${newState.block}.`,
   }];
 
-  if(newState.block == 1) {
+  if (newState.block == 1)
+  {
     newState.log.push({
       icon: PenOff,
       color: "white",

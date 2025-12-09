@@ -3,53 +3,43 @@ import ItemSlot from "@/components/ItemSlot";
 import { saveGame, type GameState } from "@/game";
 import type { Dispatch, SetStateAction } from "react";
 import { CustomInfoCard } from "./CustomInfoCard";
+import { itemUtils } from "@/item";
+import { CustomButton } from "./CustomButton";
 
 interface Props
 {
   game: GameState;
   setGame: Dispatch<SetStateAction<GameState>>;
-  mode: "calendar" | "normal";
 }
 
 export default function Inventory({
   game,
   setGame,
-  mode,
 }: Props)
 {
 
-  const handleItemClick = (itemSlotID: number) =>
+  const handleItemClick = (itemID: string) =>
   {
     setGame(prev =>
     {
-      const selected = [...prev.selectedItemSlots];
-      const item = prev.items[itemSlotID];
-      if (selected.includes(itemSlotID))
+      let selected = [...prev.selectedItemIDs];
+      if (selected.includes(itemID))
       {
         // Remove item selection
-        selected.splice(selected.indexOf(itemSlotID), 1);
-
-        // Calendar View selected items
-        if (mode === "calendar" && item && prev.calendarViewSelectedItemIDs.includes(item.id))
-        {
-          prev.calendarViewSelectedItemIDs.splice(prev.calendarViewSelectedItemIDs.indexOf(item.id), 1);
-        }
+        selected.splice(selected.indexOf(itemID), 1);
       } else
       {
-        if (mode !== "calendar" || selected.length < prev.maxActivatedItems)
-          selected.push(itemSlotID);
-
-        // Calendar View selected items
-        if (mode === "calendar")
+        if (game.view === "Calendar")
         {
-          if (item && !prev.calendarViewSelectedItemIDs.includes(item.id))
-          {
-            prev.calendarViewSelectedItemIDs.push(item.id);
-          }
+          if (selected.length < prev.maxActivatedItems)
+            selected.push(itemID);
+        } else
+        {
+          selected = [itemID];
         }
       }
 
-      const newState = { ...prev, selectedItemSlots: selected };
+      const newState = { ...prev, selectedItemIDs: selected };
 
       saveGame(newState);
 
@@ -62,18 +52,19 @@ export default function Inventory({
     setGame(prev =>
     {
       const items = [...prev.items];
-      const selected = [...prev.selectedItemSlots];
+      let selected = [...prev.selectedItemIDs];
 
       let unboxedItem = prev.unboxedItem;
 
       if (selected.length === 1)
       {
-        const sourceIndex = selected[0];
-        const item = items[sourceIndex];
+        const item = items[itemUtils.itemIDtoSlot(selected[0], prev)];
         if (item)
         {
+          const sourceIndex = itemUtils.itemToSlot(item, prev);
           items[itemSlotID] = item;
           items[sourceIndex] = null;
+          selected = [];
         }
       } else if (unboxedItem)
       {
@@ -84,7 +75,7 @@ export default function Inventory({
       const newState = {
         ...prev,
         items,
-        selectedItemSlots: [],
+        selectedItemIDs: selected,
         unboxedItem,
       };
 
@@ -99,14 +90,14 @@ export default function Inventory({
     setGame(prev =>
     {
       const items = [...prev.items];
-      const selected = [...prev.selectedItemSlots];
+      const selected = [...prev.selectedItemIDs];
 
       selected.forEach(slotID =>
       {
-        items[slotID] = null;
+        items[itemUtils.itemIDtoSlot(slotID, prev)] = null;
       });
 
-      const newState = { ...prev, items, selectedItemSlots: [] };
+      const newState = { ...prev, items, selectedItemIDs: [] };
 
       saveGame(newState);
 
@@ -171,9 +162,9 @@ export default function Inventory({
       <div className="flex-1 flex items-center justify-center overflow-auto p-5">
         <div className="flex flex-col items-center">
 
-          {mode === "calendar" && (
+          {game.view === "Calendar" && (
             <h2 className="font-bold flex items-center gap-2 pb-2">
-              <Check className={`w-5 h-5 ${game.selectedItemSlots.length === game.maxActivatedItems ? "text-green-500" : ""}`} /> Activated {game.selectedItemSlots.length} / {game.maxActivatedItems}
+              <Check className={`w-5 h-5 ${game.selectedItemIDs.length === game.maxActivatedItems ? "text-green-500" : ""}`} /> Activated {game.selectedItemIDs.length} / {game.maxActivatedItems}
             </h2>
           )}
 
@@ -183,12 +174,12 @@ export default function Inventory({
                 key={i}
                 game={game}
                 item={item ?? null} // explicitly null if empty
-                selected={game.selectedItemSlots.includes(i)}
+                selected={item !== null && game.selectedItemIDs.includes(item.id)}
                 onClick={() =>
                 {
                   if (item)
                   {
-                    handleItemClick(i); // item exists
+                    handleItemClick(item.id); // item exists
                   } else
                   {
                     handleEmptySlotClick(i); // empty slot
@@ -199,15 +190,16 @@ export default function Inventory({
             ))}
           </div>
 
+          <br></br>
 
-          {mode === "normal" && (
-            <button
+          {game.view !== "Calendar" && (
+            <CustomButton
               onClick={handleTrash}
-              disabled={game.selectedItemSlots.length === 0}
-              className="mt-2 bg-red-500 text-white px-2 py-1 rounded disabled:opacity-50"
+              color="FireBrick"
+              className={`${game.selectedItemIDs.length === 0 ? "opacity-50" : ""}`}
             >
               Trash
-            </button>
+            </CustomButton>
           )}
         </div>
       </div>
