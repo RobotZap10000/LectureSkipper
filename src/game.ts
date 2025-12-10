@@ -11,6 +11,15 @@ export type Course = {
   understandings: number;
   goal: number;
   effects: EffectData[];
+  /**
+   * The minimum amount of lectures that must be generated for this course during the block.  
+   * Decremented each time the lecture appears.
+   */
+  minimumLecturesLeft: number;
+  /**
+   * The amount of times a lecture has been generated for this course.
+   */
+  lecturesAppeared: number;
 
   maxUnderstandingsPerLecture: number;
   maxProcrastinationsPerLecture: number;
@@ -599,13 +608,15 @@ export function generateCourse(state: GameState, hue: number): Course
     understandings: 0,
     color: chroma.hsv(hue, 1, 0.25).hex(),
     effects: [],
+    minimumLecturesLeft: 3,
+    lecturesAppeared: 0,
     maxUnderstandingsPerLecture: 10 * state.block + Math.round(courseDifficulty * (2 ** state.block)),
     maxProcrastinationsPerLecture: 10 * state.block + Math.round(courseDifficulty * state.block * 20),
     maxEnergyCostPerLecture: 10 * state.block
   };
 }
 
-function generateQuest(state: GameState): Quest
+export function generateQuest(state: GameState): Quest
 {
   let requirements: Currency[] = [];
   let rewards: Currency[] = [];
@@ -666,6 +677,30 @@ export function generateLecture(state: GameState): Lecture
 {
   let courseIndex = Math.floor(Math.random() * 3);
 
+  // If we might run out of lectures for some course before it
+  // has had its minimum amount, choose that course
+  let totalMinLecturesLeft = 0;
+  for (let i = 0; i < state.courses.length; i++)
+  {
+    totalMinLecturesLeft += state.courses[i].minimumLecturesLeft;
+    console.log(state.courses[i].minimumLecturesLeft, state.courses[i].title);
+  }
+  console.log("TOTAL: ", totalMinLecturesLeft);
+  if (totalMinLecturesLeft >= state.lecturesLeft)
+  {
+    // Choose the course that has the least amount of lecturesAppeared
+    let minLecturesAppeared = state.courses[0].lecturesAppeared;
+    courseIndex = 0;
+    for (let i = 1; i < state.courses.length; i++)
+    {
+      if (state.courses[i].lecturesAppeared < minLecturesAppeared)
+      {
+        minLecturesAppeared = state.courses[i].lecturesAppeared;
+        courseIndex = i;
+      }
+    }
+  }
+
   // If any course has the effect "Guaranteed", set courseIndex to that course
   for (let i = 0; i < state.courses.length; i++)
   {
@@ -676,6 +711,10 @@ export function generateLecture(state: GameState): Lecture
       break;
     }
   }
+
+  state.courses[courseIndex].lecturesAppeared++;
+  if (state.courses[courseIndex].minimumLecturesLeft > 0)
+    state.courses[courseIndex].minimumLecturesLeft--;
 
   let startHour = Math.floor(9 + Math.random() * 12 + state.block);
   let endHour = startHour + Math.min(2 ** state.block, 1000);

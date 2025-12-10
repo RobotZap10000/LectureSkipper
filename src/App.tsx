@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
-import type { GameState, Run, View } from "@/game";
-import { changeView, initGame, loadGame, saveGame } from "@/game";
+import type { GameState, Lecture, Quest, Run, View } from "@/game";
+import { changeView, generateLecture, generateQuest, initGame, loadGame, saveGame } from "@/game";
 import CalendarView from "@/views/CalendarView";
 import MarketView from "@/views/MarketView";
 import ChatView from "@/views/ChatView";
@@ -11,18 +11,23 @@ import SettingsView from "@/views/SettingsView";
 import { CircleDollarSign, Sparkles, TriangleAlert, Zap } from "lucide-react";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
 
-function validateGameState(game: any)
+export function validateGameState(game: any)
 {
-  const template = initGame(); // A correct GameState shape
-
-  if (!game || typeof game !== "object")
-  {
-    return { valid: false, missing: Object.keys(template) };
-  }
-
   const missing: string[] = [];
 
-  for (const key of Object.keys(template))
+  // Build templates from fresh game
+  const gameTemplate: GameState = initGame();
+  const lectureTemplate: Lecture = generateLecture(initGame());
+  const questTemplate: Quest = generateQuest(initGame());
+
+  // Extract flat keys
+  const GAME_KEYS = Object.keys(gameTemplate);
+  const LECTURE_KEYS = Object.keys(lectureTemplate);
+  const QUEST_KEYS = Object.keys(questTemplate);
+  const COURSE_KEYS = Object.keys(gameTemplate.courses[0]);
+
+  // --- Validate GameState root keys ---
+  for (const key of GAME_KEYS)
   {
     if (!(key in game))
     {
@@ -30,8 +35,60 @@ function validateGameState(game: any)
     }
   }
 
-  return { valid: missing.length === 0, missing };
+  // --- Validate nextLecture (if exists) ---
+  if (game.nextLecture)
+  {
+    for (const key of LECTURE_KEYS)
+    {
+      if (!(key in game.nextLecture))
+      {
+        missing.push(`nextLecture.${key}`);
+      }
+    }
+  }
+
+  // --- Validate quests array ---
+  if (Array.isArray(game.quests))
+  {
+    game.quests.forEach((q: any, i: number) =>
+    {
+      for (const key of QUEST_KEYS)
+      {
+        if (!(key in q))
+        {
+          missing.push(`quests[${i}].${key}`);
+        }
+      }
+    });
+  } else
+  {
+    missing.push("quests (not an array)");
+  }
+
+  // --- Validate courses array ---
+  if (Array.isArray(game.courses))
+  {
+    game.courses.forEach((c: any, i: number) =>
+    {
+      for (const key of COURSE_KEYS)
+      {
+        if (!(key in c))
+        {
+          missing.push(`courses[${i}].${key}`);
+        }
+      }
+    });
+  } else
+  {
+    missing.push("courses (not an array)");
+  }
+
+  return {
+    valid: missing.length === 0,
+    missing
+  };
 }
+
 
 
 export default function App()
