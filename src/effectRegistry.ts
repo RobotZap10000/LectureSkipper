@@ -1,4 +1,3 @@
-// effectRegistry.ts
 import type { EffectData, EffectMeta } from "@/effect";
 
 const modules = import.meta.glob("@/effects/*.ts", { eager: true });
