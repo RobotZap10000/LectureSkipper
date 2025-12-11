@@ -25,10 +25,11 @@ export default function SettingsView({ game, setGame, topRuns }: Props)
       title: "Third Test Version",
       description: "Difficulty overhaul, new items, lots of tweaks",
       majorChanges: [
-        "...",
+        "Added story and an ending",
+        "Dozens of UI changes, rewrites and QoL",
       ],
       smallChanges: [
-        "Dozens of UI changes",
+        "...",
       ],
       bugFixes: [
         "...",

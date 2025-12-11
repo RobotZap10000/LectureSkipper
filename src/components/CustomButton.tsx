@@ -10,6 +10,7 @@ interface CustomButtonProps
   outlineColor?: string;
   hoverColor?: string;
   className?: string;
+  style?: React.CSSProperties;
   onClick?: () => void;
 }
 
@@ -20,10 +21,10 @@ export function CustomButton({
   outlineColor,
   hoverColor,
   className = "",
+  style = {},
   onClick,
 }: CustomButtonProps)
 {
-
   const computedHoverColor = hoverColor || chroma(color).darken(0.5).hex();
   const text = chroma.contrast(color, "white") > 4.5 ? "white" : "black";
   const computedOutlineColor = outlineColor || chroma(color).darken(1.5).hex();
@@ -43,6 +44,7 @@ export function CustomButton({
         backgroundColor: color,
         color: text,
         boxShadow: `0 2px 0 1px ${computedOutlineColor}`,
+        ...style, // user overrides applied last
       }}
       onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = computedHoverColor)}
       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = color)}
@@ -62,4 +64,3 @@ export function CustomButton({
     </button>
   );
 }
-

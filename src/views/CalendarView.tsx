@@ -73,8 +73,8 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
         {/* --- CASE 0: Story must be shown --- */}
         {story[game.story] ? (
           <>
-            <div className="flex flex-col items-center justify-center gap-4 py-8">
-              {story[game.story]}
+            <div className="flex flex-col items-center justify-center gap-4">
+              {story[game.story](game, setGame)}
               <CustomButton
                 onClick={() => setGame((g) => ({ ...g, story: -1 }))}
                 color="DarkOrchid"
