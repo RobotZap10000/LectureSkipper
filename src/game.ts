@@ -774,6 +774,7 @@ export function startNewBlock(state: GameState): GameState
   if (newState.block > 6) courseCount++;
   if (newState.block > 12) courseCount++;
   if (newState.block > 24) courseCount++;
+  newState.maxActivatedItems = courseCount;
 
   const hues: number[] = [];
   const minDistance = 25;
