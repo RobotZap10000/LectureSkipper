@@ -194,6 +194,7 @@ export default function MarketView({ game, setGame }: Props)
             selected={false}
             onClick={() => { }}
             size={120}
+            threeDHeight={9}
           />
 
           <div className="flex gap-4">

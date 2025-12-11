@@ -2,8 +2,7 @@ import React from "react";
 import chroma from "chroma-js";
 import { type LucideIcon } from "lucide-react";
 
-interface CustomButtonProps
-{
+interface CustomButtonProps {
   icon?: LucideIcon;
   children?: React.ReactNode;
   color?: string;
@@ -12,6 +11,7 @@ interface CustomButtonProps
   className?: string;
   style?: React.CSSProperties;
   onClick?: () => void;
+  threeDHeight?: number;
 }
 
 export function CustomButton({
@@ -23,13 +23,19 @@ export function CustomButton({
   className = "",
   style = {},
   onClick,
-}: CustomButtonProps)
-{
+  threeDHeight = 3,
+}: CustomButtonProps) {
   const computedHoverColor = hoverColor || chroma(color).darken(0.5).hex();
   const text = chroma.contrast(color, "white") > 4.5 ? "white" : "black";
   const computedOutlineColor = outlineColor || chroma(color).darken(1.5).hex();
 
   const isIconOnly = Icon && !children;
+
+  // Shadow values based on 3D height
+  const restingShadow = `0 ${threeDHeight}px 0 1px ${computedOutlineColor}`;
+  const pressedShadow = `0 0 0 1px ${computedOutlineColor}`;
+  const restingTranslate = `${-threeDHeight}px`;
+  const pressedTranslate = `0px`;
 
   return (
     <button
@@ -43,20 +49,23 @@ export function CustomButton({
       style={{
         backgroundColor: color,
         color: text,
-        boxShadow: `0 2px 0 1px ${computedOutlineColor}`,
-        ...style, // user overrides applied last
+        boxShadow: restingShadow,
+        translate: `0 ${restingTranslate}`,
+        ...style,
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = computedHoverColor)}
-      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = color)}
-      onMouseDown={(e) =>
-      {
-        e.currentTarget.style.boxShadow = `0 0 0 1px ${computedOutlineColor}`;
-        e.currentTarget.style.translate = "0 2px";
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = computedHoverColor;
       }}
-      onMouseUp={(e) =>
-      {
-        e.currentTarget.style.boxShadow = `0 2px 0 1px ${computedOutlineColor}`;
-        e.currentTarget.style.translate = "0 0";
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = color;
+      }}
+      onMouseDown={(e) => {
+        e.currentTarget.style.boxShadow = pressedShadow;
+        e.currentTarget.style.translate = `0 ${pressedTranslate}`;
+      }}
+      onMouseUp={(e) => {
+        e.currentTarget.style.boxShadow = restingShadow;
+        e.currentTarget.style.translate = `0 ${restingTranslate}`;
       }}
     >
       {Icon && <Icon className={isIconOnly ? "w-5 h-5" : "w-4 h-4"} />}

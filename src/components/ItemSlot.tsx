@@ -12,6 +12,7 @@ interface ItemSlotProps
   selected: boolean;
   onClick: () => void;
   size: number;
+  threeDHeight?: number;
 }
 
 export default function ItemSlot({
@@ -20,6 +21,7 @@ export default function ItemSlot({
   selected,
   onClick,
   size = 40,
+  threeDHeight = 3,
 }: ItemSlotProps)
 {
   const [isTouch, setIsTouch] = useState(false);
@@ -56,6 +58,12 @@ export default function ItemSlot({
 
   const outline = chroma(bg).darken(1.5).hex();
 
+  // Precomputed dynamic values
+  const restingShadow = `0 ${threeDHeight}px 0 1px ${outline}`;
+  const pressedShadow = `0 0 0 1px ${outline}`;
+  const translateResting = `${-threeDHeight}px`;
+  const translatePressed = `0px`;
+
   const slot = (
     <div
       className="relative rounded cursor-pointer flex items-center justify-center select-none"
@@ -64,32 +72,35 @@ export default function ItemSlot({
         width: size,
         height: size,
         background: bg,
-        boxShadow: `0 2px 0 1px ${outline}`, // 3D effect only
-        transform: "translateY(0px)",
+        boxShadow: restingShadow,
+        transform: `translateY(${translateResting})`,
         position: "relative",
         transition: "box-shadow 0.05s, transform 0.05s",
       }}
       onMouseDown={(e) =>
       {
-        e.currentTarget.style.boxShadow = `0 0 0 1px ${outline}`;
-        e.currentTarget.style.transform = "translateY(2px)";
+        e.currentTarget.style.boxShadow = pressedShadow;
+        e.currentTarget.style.transform = `translateY(${translatePressed})`;
       }}
       onMouseUp={(e) =>
       {
-        e.currentTarget.style.boxShadow = `0 2px 0 1px ${outline}`;
-        e.currentTarget.style.transform = "translateY(0px)";
+        e.currentTarget.style.boxShadow = restingShadow;
+        e.currentTarget.style.transform = `translateY(${translateResting})`;
       }}
       onMouseLeave={(e) =>
       {
-        e.currentTarget.style.boxShadow = `0 2px 0 1px ${outline}`;
-        e.currentTarget.style.transform = "translateY(0px)";
+        e.currentTarget.style.boxShadow = restingShadow;
+        e.currentTarget.style.transform = `translateY(${translateResting})`;
       }}
     >
-      {/* Selected outline as a separate div */}
+      {/* Selected outline */}
       {selected && (
         <div
           className="absolute inset-0 rounded pointer-events-none"
-          style={{ border: "2px solid rgba(0,255,0,0.8)", boxSizing: "border-box" }}
+          style={{
+            border: "2px solid rgba(0,255,0,0.8)",
+            boxSizing: "border-box",
+          }}
         />
       )}
 
