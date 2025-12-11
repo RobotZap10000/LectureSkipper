@@ -192,7 +192,7 @@ export const story: Record<string, (game: GameState, setGame: React.Dispatch<Rea
       <br /> <br />
       I think I get this place now. It lures in those who intend on cheating or otherwise trying to take advantage of the academic system. Victims are trapped here as punishment. Failing too many exams sends them back to block 1. The only way to get out is to pass the final exams, which I am going to attempt now.
       <br /> <br />
-      I think the system can only restart once everyone has dropped out. This is why I haven't seen anyone else in a long time. This also explains why the place has been falling apart. There is almost nothing left anymore; only my room, the lecture room and the exam room remain. Everything else is pitch black, and walking from one place to another is either instantaneous or a solitary experience where all I can hear is the echo of my footsteps. This place is getting ready to reset the cycle.
+      I think the system can only restart once everyone has dropped out. This is why I haven't seen anyone else in a long time. This also explains why the place has been falling apart. There is almost nothing left anymore; only my room, the lecture room and the exam room remain. Everything else is pitch black, and walking from one place to another is either instantaneous or a solitary experience where all I can hear is the echo of my footsteps in a sea of darkness. This place is getting ready to reset the cycle.
       <br /> <br />
       I don't know what will happen after I complete the exams, assuming I even pass.
       <br /> <br />

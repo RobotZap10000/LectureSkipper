@@ -103,9 +103,9 @@ export const itemUtils = {
    * Finds the first effect in the course's effects that matches the given name, and adds the given amount to it.  
    * If no effect is found, it is added.  
    * Deletes the effect if the amount is 0 or less.
-   * @returns Returns the new EffectData.
+   * @returns Returns the new EffectData, or null if the stacks were set to 0 (effect gets deleted).
    */
-  addEffectStacksToCourse: (state: GameState, courseIndex: number, effectName: string, amount: number): EffectData =>
+  addEffectStacksToCourse: (state: GameState, courseIndex: number, effectName: string, amount: number): EffectData | null =>
   {
     // Create an effect if there is none
     if (state.courses[courseIndex].effects.find((e) => e.name === effectName) == null)
@@ -117,7 +117,10 @@ export const itemUtils = {
     effect.value += amount;
     // Delete the effect if the amount is 0 or less
     if (effect.value <= 0)
+    {
       delete state.courses[courseIndex].effects[effectIndex];
+      return null;
+    }
     return effect;
   },
   /**

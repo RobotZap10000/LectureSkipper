@@ -6,6 +6,16 @@ import { itemUtils, type ItemData } from "@/item";
 import type { EffectData } from "@/effect";
 import { story } from "@/story";
 
+export function generateUUID(): string
+{
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) =>
+  {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 export type Course = {
   title: string;
   color: string;
@@ -462,53 +472,6 @@ export function startRound(state: GameState, action: "attend" | "skip"): GameSta
   return newState;
 }
 
-export function generateUUID(): string
-{
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) =>
-  {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-}
-
-export function attendExams(state: GameState, setTopRuns: React.Dispatch<React.SetStateAction<Run[]>>): GameState
-{
-  // Exams may only be attended once
-  if (state.examsAttended)
-    return state;
-
-  const newState: GameState = { ...state };
-
-  // Remove Quests
-  newState.quests = [];
-
-  // Calculate results
-  const results = newState.courses.map(c =>
-  {
-    const passChance = Math.min(c.understandings / c.goal, 1);
-    return Math.random() <= passChance;
-  });
-
-  const logMessage = `You passed ${results.filter(r => r).length} exams.`;
-
-  newState.examsAttended = true;
-  newState.examResults = results;
-  newState.log = [{
-    icon: Check,
-    color: "LawnGreen",
-    message: logMessage,
-  }];
-
-  if (results.filter(r => r).length < 2)
-  {
-    // Game failed, record run
-    recordRun(newState, setTopRuns);
-  }
-
-  return newState;
-}
-
 const courseTemplates = [
   "Introduction to {{topic}}",
   "Advanced {{topic}}",
@@ -603,15 +566,31 @@ export function generateCourse(state: GameState, hue: number): Course
 
   return {
     title,
-    goal: 10 * state.block + Math.round(courseDifficulty * (3 ** state.block)),
+    // For online graphing calculators:
+    // Max: y\ =\ 100\left(0.35x+1\right)\ +\ 3.5^{\frac{x}{5}}
+    // Min: y\ =\ 100\left(0.15x+1\right)\ +3^{\frac{x}{5}}
+    goal:
+      Math.round(
+        (100 * ((0.15 + 0.2 * courseDifficulty) * state.block + 1)
+          + (3 + 0.5 * courseDifficulty) ** (state.block / 5)
+          + Math.random() * 5)
+      ),
     understandings: 0,
     color: chroma.hsv(hue, 1, 0.25).hex(),
     effects: [],
     minimumLecturesLeft: 3,
     lecturesAppeared: 0,
-    maxUnderstandingsPerLecture: 10 * state.block + Math.round(courseDifficulty * (2 ** state.block)),
-    maxProcrastinationsPerLecture: 10 * state.block + Math.round(courseDifficulty * state.block * 20),
-    maxEnergyCostPerLecture: 10 * state.block
+    // For online graphing calculators:
+    // Max: y\ =\ \frac{\left(100\left(0.30x+1\right)\ +\ 1.5^{\frac{x}{5}}\right)}{3}
+    // Min: y\ =\ \frac{\left(100\left(0.125x+1\right)\ +1^{\frac{x}{5}}\right)}{3}
+    maxUnderstandingsPerLecture:
+      Math.round(
+        (100 * ((0.125 + 0.175 * courseDifficulty) * state.block + 1)
+          + (1 + 0.5 * courseDifficulty) ** (state.block / 5)
+          + Math.random() * 5)
+      ) / 3,
+    maxProcrastinationsPerLecture: 20 + Math.round((courseDifficulty + 1) * state.block * 10),
+    maxEnergyCostPerLecture: 5 + 10 * (state.block - 1)
   };
 }
 
@@ -623,10 +602,7 @@ export function generateQuest(state: GameState): Quest
 
   // U requirement comes from questDifficulty * targetCourse.goal
   // effectively "how many courses worth of U is required to complete this quest?"
-  let x = Math.random();
-  let questDifficulty = 4 ** x - 0.9;
-  // min - 0.30679
-  // max - 4
+  let questDifficulty = Math.random() * 2 + 0.5;
 
   // Generating requirements
   let randomCourseIndex = Math.floor(Math.random() * state.courses.length);
@@ -639,27 +615,19 @@ export function generateQuest(state: GameState): Quest
   });
   colors.push(targetCourse.color);
 
-  if (Math.random() < 0.25)
+  if (questDifficulty > 2)
   {
     requirements.push({
       type: "procrastinations",
-      amount: Math.round(targetCourse.maxProcrastinationsPerLecture * questDifficulty)
+      amount: Math.round(targetCourse.maxProcrastinationsPerLecture * questDifficulty / 2),
     });
   }
 
   // Generating rewards
   rewards.push({
     type: "cash",
-    amount: Math.round(50 + 20 * state.block + (10 * state.block) ** questDifficulty)
+    amount: Math.round(50 + 40 * state.block * questDifficulty + Math.random() * 25),
   });
-
-  if (questDifficulty > 1 && Math.random() < 0.25)
-  {
-    rewards.push({
-      type: "maxActivatedItems",
-      amount: 1,
-    });
-  }
 
   return {
     id: generateUUID(),
@@ -735,6 +703,65 @@ export function generateLecture(state: GameState): Lecture
   return lecture;
 }
 
+export function attendExams(state: GameState, setTopRuns: React.Dispatch<React.SetStateAction<Run[]>>): GameState
+{
+  // Exams may only be attended once
+  if (state.examsAttended)
+    return state;
+
+  const newState: GameState = { ...state };
+
+  // Remove Quests
+  newState.quests = [];
+
+  // Calculate results
+  const results = newState.courses.map(c =>
+  {
+    const passChance = Math.min(c.understandings / c.goal, 1);
+    return Math.random() <= passChance;
+  });
+
+  const logMessage = `You passed ${results.filter(r => r).length} exams.`;
+
+  newState.examsAttended = true;
+  newState.examResults = results;
+  newState.log = [{
+    icon: Check,
+    color: "LawnGreen",
+    message: logMessage,
+  }];
+
+  if (results.filter(r => r).length < 2)
+  {
+    // Game failed, record run
+    recordRun(newState, setTopRuns);
+  }
+
+  return newState;
+}
+
+let level1Effects: string[] = [
+  "Ambiguous",
+  "Unclear",
+  "Aftershock",
+  "TravelCost",
+  "TakesP",
+];
+
+let level2Effects: string[] = [
+  "Difficult",
+  "Unhelpful",
+  "Exhausting",
+  "Collateral",
+  "Frying",
+];
+
+let level3Effects: string[] = [
+  "BadPacing",
+  "Extensive",
+  "Mutating",
+];
+
 export function startNewBlock(state: GameState): GameState
 {
   if (!state.examsAttended) return state;
@@ -743,9 +770,14 @@ export function startNewBlock(state: GameState): GameState
 
   newState.block += 1;
 
+  let courseCount = 3;
+  if (newState.block > 6) courseCount++;
+  if (newState.block > 12) courseCount++;
+  if (newState.block > 24) courseCount++;
+
   const hues: number[] = [];
   const minDistance = 25;
-  while (hues.length < 3)
+  while (hues.length < courseCount)
   {
     const h = Math.floor(Math.random() * 360);
     if (hues.every(existing => Math.abs(existing - h) >= minDistance &&
@@ -756,14 +788,95 @@ export function startNewBlock(state: GameState): GameState
   }
 
   // Create 3 new courses
-  const newCourses: Course[] = [
-    generateCourse(newState, hues[0]),
-    generateCourse(newState, hues[1]),
-    generateCourse(newState, hues[2]),
-  ];
+  const newCourses: Course[] = [];
+  for (let i = 0; i < courseCount; i++)
+  {
+    newCourses.push(generateCourse(newState, hues[i]));
+  }
   newState.courses = newCourses;
 
-  // Create new quests (example)
+  let level1EffectCount = Math.floor((newState.block) / 2);
+  let level2EffectCount = Math.floor((newState.block) / 5);
+  let level3EffectCount = Math.floor((newState.block) / 20);
+
+  // Add effects to courses
+
+  for (let i = 0; i < level1EffectCount; i++)
+  {
+    let randomEffect: string = level1Effects[Math.floor(Math.random() * level1Effects.length)];
+    let randomCourseIndex = Math.floor(Math.random() * newState.courses.length);
+    if (itemUtils.getEffectStacks(newState, randomCourseIndex, randomEffect) == 0)
+    {
+      switch (randomEffect)
+      {
+        case "Ambiguous":
+          itemUtils.addEffectStacksToCourse(newState, randomCourseIndex, randomEffect, Math.round(Math.random() * 100));
+          break;
+        case "Unclear":
+          itemUtils.addEffectStacksToCourse(newState, randomCourseIndex, randomEffect, Math.round(Math.random() * 100));
+          break;
+        case "Aftershock":
+          itemUtils.addEffectStacksToCourse(newState, randomCourseIndex, randomEffect, Math.round(25 + Math.random() * 50));
+          break;
+        case "TravelCost":
+          itemUtils.addEffectStacksToCourse(newState, randomCourseIndex, randomEffect, Math.round(50 + Math.random() * 50) * newState.block);
+          break;
+        case "TakesP":
+          itemUtils.addEffectStacksToCourse(newState, randomCourseIndex, randomEffect, Math.round(50 + Math.random() * 50) * newState.block);
+          break;
+      }
+    }
+  }
+
+  for (let i = 0; i < level2EffectCount; i++)
+  {
+    let randomEffect: string = level2Effects[Math.floor(Math.random() * level2Effects.length)];
+    let randomCourseIndex = Math.floor(Math.random() * newState.courses.length);
+    if (itemUtils.getEffectStacks(newState, randomCourseIndex, randomEffect) == 0)
+    {
+      switch (randomEffect)
+      {
+        case "Difficult":
+          itemUtils.addEffectStacksToCourse(newState, randomCourseIndex, randomEffect, Math.round(Math.random() * 100));
+          break;
+        case "Unhelpful":
+          itemUtils.addEffectStacksToCourse(newState, randomCourseIndex, randomEffect, Math.round(Math.random() * 100));
+          break;
+        case "Exhausting":
+          itemUtils.addEffectStacksToCourse(newState, randomCourseIndex, randomEffect, Math.round(20 + Math.random() * 60));
+          break;
+        case "Collateral":
+          itemUtils.addEffectStacksToCourse(newState, randomCourseIndex, randomEffect, Math.round(3 + Math.random() * 6));
+          break;
+        case "Frying":
+          itemUtils.addEffectStacksToCourse(newState, randomCourseIndex, randomEffect, Math.round(5 + Math.random() * 10));
+          break;
+      }
+    }
+  }
+
+  for (let i = 0; i < level3EffectCount; i++)
+  {
+    let randomEffect: string = level3Effects[Math.floor(Math.random() * level3Effects.length)];
+    let randomCourseIndex = Math.floor(Math.random() * newState.courses.length);
+    if (itemUtils.getEffectStacks(newState, randomCourseIndex, randomEffect) == 0)
+    {
+      switch (randomEffect)
+      {
+        case "BadPacing":
+          itemUtils.addEffectStacksToCourse(newState, randomCourseIndex, randomEffect, Math.round(10 + Math.random() * 40));
+          break;
+        case "Extensive":
+          itemUtils.addEffectStacksToCourse(newState, randomCourseIndex, randomEffect, Math.round(Math.random() * 100));
+          break;
+        case "Mutating":
+          itemUtils.addEffectStacksToCourse(newState, randomCourseIndex, randomEffect, Math.round(10 + Math.random() * 10));
+          break;
+      }
+    }
+  }
+
+  // Create new quests
   const newQuests: Quest[] = [];
   const questCount = Math.min(4 + newState.block * 2 + Math.floor(Math.random() * 4), 40);
   for (let i = 0; i < questCount; i++)
@@ -775,7 +888,7 @@ export function startNewBlock(state: GameState): GameState
   const nextLecture: Lecture = generateLecture(newState);
   newState.nextLecture = nextLecture;
 
-  newState.lecturesLeft = 28 + state.block * 2;
+  newState.lecturesLeft = 30;
   newState.examsAttended = false;
   newState.examResults = [];
 
