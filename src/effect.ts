@@ -9,8 +9,8 @@ export type EffectData = {
 };
 
 export type EffectMeta = {
-  title: string;
   icon?: LucideIcon;
   backgroundColor: string;
+  getBadgeText: (effect: EffectData, state: GameState) => string;
   getDescription: (effect: EffectData, state: GameState) => string;
 };

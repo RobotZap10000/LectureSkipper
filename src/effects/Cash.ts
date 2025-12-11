@@ -11,7 +11,7 @@ export const effectData: EffectData = {
 
 export const effectMeta: EffectMeta = {
   icon: EffectIcon,
-  title: "Cash",
   backgroundColor: "#ffff00ff",
+  getBadgeText: (effect, state) => `Cash: $${effect.value}`,
   getDescription: (effect, state) => `When this lecture appears, gain **$${effect.value}**.`,
 };

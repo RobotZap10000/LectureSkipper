@@ -48,7 +48,7 @@ export function EffectBadge({ effect, game }: EffectBadgeProps)
               style={{ transform: "scale(1.25)", transformOrigin: "center" }}
             />
           )}
-          {meta.title}: {effect.value}
+          {renderDescription(meta.getBadgeText(effect, game))}
         </Badge>
       </PopoverTrigger>
 
@@ -62,8 +62,8 @@ export function EffectBadge({ effect, game }: EffectBadgeProps)
         }}
       >
         <div className="flex items-center gap-2 mb-2">
-          {Icon && <Icon className="w-4 h-4" />}
-          <span className="font-semibold">{meta.title}</span>
+          {Icon && <Icon className="w-4 h-4 transform scale-125" />}
+          <span className="font-semibold">{renderDescription(meta.getBadgeText(effect, game))}</span>
         </div>
 
         <div>{renderDescription(meta.getDescription(effect, game))}</div>
