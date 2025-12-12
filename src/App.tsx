@@ -11,8 +11,13 @@ import SettingsView from "@/views/SettingsView";
 import { CircleDollarSign, Sparkles, TriangleAlert, Zap } from "lucide-react";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
 
-export function validateGameState(game: any)
+export function validateGameState(game: any): { valid: boolean, missing: string[] }
 {
+  if(typeof game !== "object")
+  {
+    return { valid: false, missing: ["everything"] };
+  }
+
   const missing: string[] = [];
 
   // Build templates from fresh game
