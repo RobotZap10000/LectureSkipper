@@ -13,5 +13,5 @@ export const effectMeta: EffectMeta = {
   icon: EffectIcon,
   backgroundColor: "#000000ff",
   getBadgeText: (effect, state) => `Mutating: ${effect.value}%`,
-  getDescription: (effect, state) => `Whenever a lecture appears, lose **${effect.value}%** of your current U for this course.`,
+  getDescription: (effect, state) => `Whenever a lecture about this course appears, lose **${effect.value}%** of your current U for this course.`,
 };

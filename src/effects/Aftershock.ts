@@ -11,7 +11,7 @@ export const effectData: EffectData = {
 
 export const effectMeta: EffectMeta = {
   icon: EffectIcon,
-  backgroundColor: "#585c00ff",
+  backgroundColor: "#c1b400ff",
   getBadgeText: (effect, state) => `Aftershock: ${effect.value}%`,
   getDescription: (effect, state) => `After attending a lecture about this course, the next lecture (from any course) will take **${effect.value}%** more energy.`,
 };

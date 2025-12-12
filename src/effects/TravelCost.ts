@@ -1,4 +1,4 @@
-import { ZapOff as EffectIcon } from "lucide-react";
+import { Car as EffectIcon } from "lucide-react";
 import type { EffectData, EffectMeta } from "@/effect";
 
 export const effectData: EffectData = {
