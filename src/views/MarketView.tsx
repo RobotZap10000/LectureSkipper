@@ -31,8 +31,8 @@ export default function MarketView({ game, setGame }: Props)
   // Example shop listing
   const shopListings: Box[] = [
     { name: "Mild Box", cost: 30, border: "border-green-700", bg: "bg-green-950", rarityWeights: [100, 0, 0] },
-    { name: "Anxiety Box", cost: 100, border: "border-yellow-700", bg: "bg-yellow-950", rarityWeights: [60, 40, 1] },
-    { name: "Stress Box", cost: 650, border: "border-red-700", bg: "bg-red-950", rarityWeights: [0, 90, 10] },
+    { name: "Anxiety Box", cost: 100, border: "border-yellow-700", bg: "bg-yellow-950", rarityWeights: [90, 9, 1] },
+    { name: "Stress Box", cost: 700, border: "border-red-700", bg: "bg-red-950", rarityWeights: [0, 90, 10] },
     { name: "Breakdown Box", cost: 5000, border: "border-purple-700", bg: "bg-purple-950", rarityWeights: [0, 0, 100] },
   ];
 
