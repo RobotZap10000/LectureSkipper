@@ -32,6 +32,7 @@ export type Course = {
    * The amount of times a lecture has been generated for this course.
    */
   lecturesAppeared: number;
+  lectureAppearWeight: number;
 
   maxUnderstandingsPerLecture: number;
   maxProcrastinationsPerLecture: number;
@@ -188,12 +189,12 @@ export function initGame(): GameState
   // Debug code for testing
 
   //game.items[0] = {
-  //  name: "Schedule Editor",
-  //  rarity: 3,
+  //  name: "Sticky Note",
+  //  rarity: 1,
   //  dropWeight: 100,
   //
   //  // Don't change
-  //  level: 1,
+  //  level: 50,
   //  startingLevel: 1,
   //  memory: {},
   //  id: "Testing",
@@ -416,6 +417,12 @@ export function startRound(state: GameState, action: "attend" | "skip"): GameSta
     let oldUnderstanding = lecture.potentialUnderstandings;
     lecture.potentialUnderstandings = Math.round(lecture.potentialUnderstandings * (1 - itemUtils.getEffectStacks(newState, lecture.courseIndex, "Unhelpful") * 0.01));
     newState.log.push({ icon: effectMetaRegistry["Unhelpful"].icon, color: "crimson", message: `${oldUnderstanding} U → ${lecture.potentialUnderstandings} U` });
+  }
+  if (listOfAppliedEffects.includes("Prepared") && action == "attend")
+  {
+    let oldUnderstanding = lecture.potentialUnderstandings;
+    lecture.potentialUnderstandings = Math.round(lecture.potentialUnderstandings * (1 + itemUtils.getEffectStacks(newState, lecture.courseIndex, "Prepared") * 0.01));
+    newState.log.push({ icon: effectMetaRegistry["Prepared"].icon, color: effectMetaRegistry["Prepared"].backgroundColor, message: `${oldUnderstanding} U → ${lecture.potentialUnderstandings} U` });
   }
   if (listOfAppliedEffects.includes("Soda") && action == "skip")
   {
@@ -703,6 +710,7 @@ export function generateCourse(state: GameState, hue: number): Course
     effects: [],
     minimumLecturesLeft: 3,
     lecturesAppeared: 0,
+    lectureAppearWeight: 100,
     maxUnderstandingsPerLecture: maxUnderstandingsPerLecture,
     maxProcrastinationsPerLecture: 20 + Math.round((courseDifficulty + 1) * state.block * 10),
     maxEnergyCostPerLecture: 5 + 10 * (state.block - 1)
@@ -759,8 +767,26 @@ export function generateLecture(state: GameState): Lecture
 {
   let courseIndex = Math.floor(Math.random() * 3);
 
-  // If we might run out of lectures for some course before it
-  // has had its minimum amount, choose that course
+  // --- Step 1: Default random weighted pick ---
+
+  // Collect weights
+  const weights = state.courses.map(c => c.lectureAppearWeight);
+
+  // Weighted random selection
+  let total = weights.reduce((a, b) => a + b, 0);
+  let r = Math.random() * total;
+
+  for (let i = 0; i < weights.length; i++)
+  {
+    if (r < weights[i])
+    {
+      courseIndex = i;
+      break;
+    }
+    r -= weights[i];
+  }
+
+  // --- Step 2: Minimum-lecture guarantee ---
   let totalMinLecturesLeft = 0;
   for (let i = 0; i < state.courses.length; i++)
   {
@@ -780,6 +806,8 @@ export function generateLecture(state: GameState): Lecture
       }
     }
   }
+
+  // --- Step 3: "Guaranteed" effect ---
 
   // If any course has the effect "Guaranteed", set courseIndex to that course
   for (let i = 0; i < state.courses.length; i++)

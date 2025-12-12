@@ -9,7 +9,7 @@ Level 1 effects are given the most, while Level 3 effects only start appearing v
 
 - [x] Ambiguous - Lectures have a x% chance of not showing their potential understandings.
 - [x] Unclear - Lectures have a x% chance of not showing their understand chance.
-- [x] ExhaustingAftershock - After attending attending a lecture about this course, the next lecture (from any course) will take x% more energy.
+- [x] Aftershock - After attending attending a lecture about this course, the next lecture (from any course) will take x% more energy.
 - [x] Shocked - Attending this lecture takes x% more energy. One time only.
 - [x] Travel Cost - Attending this lecture costs $x.
 - [x] Takes P - Attending this lecture costs x P.

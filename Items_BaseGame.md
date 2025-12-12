@@ -8,18 +8,17 @@ Stat increases and simple boosts. Meant to help in the early game and support so
 - [x] Apple - On Attend: increase your max energy by x E.
 - [x] Cake - On Attend: increase your current energy by x E.
 - [x] Pizza - On Attend: lose x% less energy from that lecture.
-- [ ] Video Game - On Skip: Gain +x% extra Procrastination.
+- [x] Video Game - On Skip: Gain +x% extra Procrastination.
 - [x] Headphones - On Attend: Still gain x% of the Procrastination Value, despite not skipping.
 - [x] Wallet - On Attend: Gain +$x.
-- [ ] ..... - On Attend: If the Understand Chance is below x%, double the Potential Understanding.
 - [x] Soda - After Skip: For the rest of the block, skipping this lecture now gives you +x E.
 - [x] Joystick - On Skip: Increases its own level by 1, and has a x % chance of giving you double the Procrastinations from this lecture.
 
 ###### Consumables
 
-- [ ] Paper - Consumble: if attending, increases the Understand Chance by x %.
-- [ ] Sticky Note - Consumble: if skipping, still gain x % of the Potential Understanding.
-- [ ] Origami - Consumble: increase your current amount of Procrastinations by x %.
+- [x] Paper - Consumable: If attending, increases the Understand Chance by x %.
+- [x] Sticky Note - Consumable: If skipping, still gain x% of the Potential Understanding.
+- [x] Origami - Consumable: Increase your current amount of Procrastinations by x %.
 
 ###### Miscellanous
 
@@ -36,11 +35,10 @@ The main components of a good build.
 - [x] Cart - After Attend: Whenever this lecture appears, gain +$x. Can only be used once per block.
 - [x] Video - On Attend: If the Understand Chance is above x%, it becomes 100%.
 - [x] Notes - On Attend: Increases the Potential Understanding by x%, but increases Energy Cost by x%.
-- [ ] AI Assistant - On Attend: Increase the Understand Chance by x%, but decrease the Potential Understanding by x%.
 - [x] Snail - On Attend: Increases the Potential Understanding by x %, but it is instead given to you over the course of the next 5 rounds, as long as this item is in your Inventory. Failing to understand any lecture from any course within this period will interrupt the process. 
 - [x] Friend - On Attend: Eats the item in the slot directly to the right of it in the Inventory, if that item is not selected. If it gets to eat an item, gives you x P and $x, multiplied by the eaten item's level. 
 - [x] GPS - On Attend: The chance of understanding this lecture is increased by +x%.
-- [ ] Course Material - After Attend: permanently xx the amount of understandings that lectures of this course give, but now they are half as likely to appear. Can be used once per block.
+- [x] Course Material - After Attend: Permanently increases the amount of understandings that lectures of this course give by x%, but now they are half as likely to appear. Can be used once per block.
 - [x] Printer - On Attend: Gain +$1 for every level of the x highest level items you have.
 
 
@@ -63,6 +61,8 @@ Very rare items that can turn around an entire run.
 
 ## Ideas/Undecided
 
+- [ ] ..... - On Attend: If the Understand Chance is below x%, double the Potential Understanding.
+- [ ] AI Assistant - On Attend: Increase the Understand Chance by x%, but decrease the Potential Understanding by x%.
 - [ ] Generic Beer - On Attend: Applies one stack of Alcoholism to the course that you use it on, permanently halving the chance to understand it.
 - [ ] Grass - On Touch: Adds x Procrastination.
 - [ ] Pot - On Attend: Gives you x items from a Mild Box.

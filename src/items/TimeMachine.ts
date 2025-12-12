@@ -3,7 +3,7 @@ import { type ItemData, type ItemMeta, type ItemBehavior, itemUtils } from "@/it
 
 export const itemData: ItemData = {
   name: "Time Machine",
-  rarity: 2,
+  rarity: 3,
   dropWeight: 100,
 
   // Don't change
