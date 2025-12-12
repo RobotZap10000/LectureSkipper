@@ -189,8 +189,8 @@ export function initGame(): GameState
   // Debug code for testing
 
   //game.items[0] = {
-  //  name: "Sticky Note",
-  //  rarity: 1,
+  //  name: "Snail",
+  //  rarity: 2,
   //  dropWeight: 100,
   //
   //  // Don't change

@@ -85,6 +85,11 @@ export const itemBehavior: ItemBehavior = {
         course.roundCount--;
       }
     }
-
+  },
+  afterRound: (params) => {
+    if(params.result.action == "attend" && params.result.result == "failure" && params.item.memory.courses != null && params.item.memory.courses.length > 0) {
+      params.item.memory.courses = [];
+      params.logEntry.message += "Lost all progress";
+    }
   },
 };
