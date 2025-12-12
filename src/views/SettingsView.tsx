@@ -21,19 +21,19 @@ export default function SettingsView({ game, setGame, topRuns }: Props)
   const gameUpdates = [
     {
       version: "0.3.0",
-      date: "December ?????, 2025",
+      date: "December 12, 2025",
       title: "Third Test Version",
       description: "Difficulty overhaul, story, new items, UI rewrite, lots of tweaks...",
       majorChanges: [
-        "Rebalanced half of the items.",
+        "Rebalanced half of the existing items.",
         "Changed almost all difficulty scaling formulas.",
-        "Added a lot of items.",
+        "Added 17 items. Now there are a total of 25.",
         "Added a story and an ending (you can still continue the run after the ending).",
         "Dozens of UI changes, polish, rewrites and QoL.",
         "Each course will now have a minimum amount of lectures that are guaranteed to appear during the course.",
-        "Each course may now be created with innate negative effects.",
-        "You can no longer gain max active items from quests. Instead, they increase over time automatically.",
-        "Added more effects. Effects are now clickable and have dynamic descriptions.",
+        "Each course may now be generated with innate negative effects.",
+        "Effects are now clickable and have dynamic descriptions.",
+        "You can no longer increase your max active items via quests. Instead, they increase over time automatically.",
       ],
       smallChanges: [
         "You can now select a row of items with just one button in the Calendar view.",

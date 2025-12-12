@@ -251,7 +251,7 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
             {/* --- FAILURE CHECK --- */}
             {game.examResults.filter((r) => !r).length >= 2 ? (
               <div>
-                <h2 className="font-bold">Final Score: {game.score}</h2>
+                <h2 className="font-bold mb-4">Final Score: {game.score}</h2>
                 <CustomButton
                   icon={RefreshCcw}
                   color="#ac0000ff"
