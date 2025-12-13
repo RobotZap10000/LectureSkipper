@@ -30,8 +30,8 @@ export default function MarketView({ game, setGame }: Props)
 
   // Example shop listing
   const shopListings: Box[] = [
-    { name: "Mild Box", cost: 30, border: "border-green-700", bg: "bg-green-950", rarityWeights: [100, 0, 0] },
-    { name: "Anxiety Box", cost: 100, border: "border-yellow-700", bg: "bg-yellow-950", rarityWeights: [90, 9, 1] },
+    { name: "Mild Box", cost: 30, border: "border-green-700", bg: "bg-green-950", rarityWeights: [1000, 30, 1] },
+    { name: "Anxiety Box", cost: 200, border: "border-yellow-700", bg: "bg-yellow-950", rarityWeights: [80, 25, 1] },
     { name: "Stress Box", cost: 700, border: "border-red-700", bg: "bg-red-950", rarityWeights: [0, 90, 10] },
     { name: "Breakdown Box", cost: 5000, border: "border-purple-700", bg: "bg-purple-950", rarityWeights: [0, 0, 100] },
   ];
@@ -153,7 +153,23 @@ export default function MarketView({ game, setGame }: Props)
                 <div className="flex flex-col">
                   <h4 className="font-bold">{box.name} (Cost: {box.cost} P)</h4>
                   <div className="text-sm text-muted-foreground">
-                    Common: {box.rarityWeights[0]}%, Rare: {box.rarityWeights[1]}%, Legendary: {box.rarityWeights[2]}%
+                    {(() =>
+                    {
+                      const total =
+                        box.rarityWeights[0] +
+                        box.rarityWeights[1] +
+                        box.rarityWeights[2];
+
+                      const pct = (w: number) => ((w / total) * 100).toFixed(1);
+
+                      return (
+                        <>
+                          Common: {pct(box.rarityWeights[0])}%,
+                          Rare: {pct(box.rarityWeights[1])}%,
+                          Legendary: {pct(box.rarityWeights[2])}%
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
@@ -214,7 +230,7 @@ export default function MarketView({ game, setGame }: Props)
               Take
             </CustomButton>
           </div>
-          
+
           {game.unboxedItem &&
             <div
               className={`

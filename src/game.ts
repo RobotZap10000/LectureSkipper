@@ -828,11 +828,15 @@ export function generateLecture(state: GameState): Lecture
   let startHour = Math.floor(9 + Math.random() * 12 + state.block);
   let endHour = startHour + Math.min(2 ** state.block, 1000);
 
-  let understandChance = Math.random();
+  let chanceLowerBound = Math.max(0.7 - state.block * 0.1, 0);
+  let chanceUpperBound = 1.0;
   if (itemUtils.getEffectStacks(state, courseIndex, "Difficult") > 0)
   {
-    understandChance = Math.min(understandChance, itemUtils.getEffectStacks(state, courseIndex, "Difficult") / 100);
+    chanceUpperBound = itemUtils.getEffectStacks(state, courseIndex, "Difficult") / 100;
   }
+  if (chanceLowerBound > chanceUpperBound)
+    chanceLowerBound = chanceUpperBound;
+  let understandChance = Math.random() * (chanceUpperBound - chanceLowerBound) + chanceLowerBound;
 
   const lecture: Lecture = {
     courseIndex: courseIndex,

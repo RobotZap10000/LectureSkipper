@@ -20,6 +20,22 @@ export default function SettingsView({ game, setGame, topRuns }: Props)
 {
   const gameUpdates = [
     {
+      version: "0.3.1",
+      date: "December 13, 2025",
+      title: "Small Rebalance",
+      description: "Early-game was completely impossible",
+      majorChanges: [
+        "Lectures in the earlier blocks now have a lower bound for the understand chance.",
+        "Rebalanced Market box values.",
+      ],
+      smallChanges: [
+
+      ],
+      bugFixes: [
+
+      ],
+    },
+    {
       version: "0.3.0",
       date: "December 12, 2025",
       title: "Third Test Version",
