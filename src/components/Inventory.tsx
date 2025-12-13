@@ -266,7 +266,7 @@ export default function Inventory({
             <CustomButton
               onClick={handleTrash}
               color="FireBrick"
-              className={`${game.selectedItemIDs.length === 0 ? "opacity-50" : ""}`}
+              className={`${game.selectedItemIDs.length === 0 ? "opacity-50" : ""} py-2`}
             >
               Trash
             </CustomButton>
