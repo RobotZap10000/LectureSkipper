@@ -19,6 +19,31 @@ interface Props
 export default function SettingsView({ game, setGame, topRuns }: Props)
 {
   const gameUpdates = [
+        {
+      version: "0.4.0",
+      date: "???, 2025",
+      title: "Another Rebalance",
+      description: "More content has been added as well.",
+      majorChanges: [
+        "",
+      ],
+      smallChanges: [],
+      bugFixes: [
+        "Time Machine now works when used on the last lecture."
+      ],
+    },
+    {
+      version: "0.3.1",
+      date: "December 13, 2025",
+      title: "Lecture and Market Rebalance",
+      description: "Early game was completely impossible.",
+      majorChanges: [
+        "Lectures in the earlier blocks now have a lower bound for the understand chance.",
+        "Rebalanced Market box values.",
+      ],
+      smallChanges: [],
+      bugFixes: [],
+    },
     {
       version: "0.3.2",
       date: "December 13, 2025",

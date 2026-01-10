@@ -16,12 +16,12 @@ export const itemData: ItemData = {
 export const itemMeta: ItemMeta = {
   icon: ItemIcon,
   getDescription: (item) =>
-    `**After Attend**: Lectures for this course now give half as much understanding, but **${item.level}** lectures are added to the block. Can only be used once per block.`,
+    `**Before Attend**: Lectures for this course now give half as much understanding, but **${item.level}** lectures are added to the block. Can only be used once per block.`,
   getEnabled: (item, state) => !itemUtils.getItemUsedThisBlock(item, state),
 };
 
 export const itemBehavior: ItemBehavior = {
-  afterAttendLecture: (params) =>
+  beforeAttendLecture: (params) =>
   {
     itemUtils.setItemUsedThisBlock(params.item, params.state);
 
