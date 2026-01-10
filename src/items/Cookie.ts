@@ -16,7 +16,7 @@ export const itemData: ItemData = {
 export const itemMeta: ItemMeta = {
   icon: ItemIcon,
   getDescription: (item) =>
-    `**On Use**: Has a **${Math.min(item.level * 10, 100)}%** chance of giving you a Level **${item.level}** Cookie. Going over 100% can give you more cookies per use.`,
+    `**On Use**: Has a **${item.level * 10}%** chance of giving you a Level **${item.level}** Cookie. Going over 100% can give you more cookies per use.`,
   getEnabled: (item, state) => true,
 };
 
