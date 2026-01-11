@@ -69,4 +69,4 @@ Very rare items that can turn around an entire run.
 - [ ] Inverter - On Attend: If your Chance of Understanding is below 50%, set it to x %.
 - [ ] Epic Beer - On Attend: Gives you one Master Professor item. Has a x% chance of applying Alcoholism to the course that you use it on, permanently halving the chance to understand it.
 - [ ] Master Professor - On Attend: Gives you x^n Understandings where n is the amount of active Master Professors.
-
+- [ ] Cat - On Use: if this item is at the top right of the inventory, it will activate and start to move on its own. Every lecture, it will move into a random adjacent (horizontally or vertically) free slot. If it reaches the bottom left corner, it disappears and you gain +$x. If you manually move it before it reaches its destination, it becomes deactivated.
