@@ -52,8 +52,9 @@ export function CustomButton({
         backgroundColor: color,
         color: text,
         boxShadow: restingShadow,
-        translate: `0 ${restingTranslate}`,
+        transform: `translateY(${restingTranslate})`,
         ...style,
+        transition: "box-shadow 0.1s, transform 0.1s, background 0.25s",
       }}
       onMouseEnter={(e) =>
       {
@@ -66,25 +67,25 @@ export function CustomButton({
       onMouseDown={(e) =>
       {
         e.currentTarget.style.boxShadow = pressedShadow;
-        e.currentTarget.style.translate = `0 ${pressedTranslate}`;
+        e.currentTarget.style.transform = `translateY(${pressedTranslate})`;
       }}
       onMouseUp={(e) =>
       {
         e.currentTarget.style.boxShadow = restingShadow;
-        e.currentTarget.style.translate = `0 ${restingTranslate}`;
+        e.currentTarget.style.transform = `translateY(${restingTranslate})`;
       }}
 
       onTouchStart={(e) =>
       {
         e.currentTarget.style.backgroundColor = computedHoverColor;
         e.currentTarget.style.boxShadow = pressedShadow;
-        e.currentTarget.style.translate = `0 ${pressedTranslate}`;
+        e.currentTarget.style.transform = `translateY(${pressedTranslate})`;
       }}
       onTouchEnd={(e) =>
       {
         e.currentTarget.style.backgroundColor = color;
         e.currentTarget.style.boxShadow = restingShadow;
-        e.currentTarget.style.translate = `0 ${restingTranslate}`;
+        e.currentTarget.style.transform = `translateY(${restingTranslate})`;
       }}
     >
       {Icon && <Icon className={isIconOnly ? "w-5 h-5" : "w-4 h-4"} />}

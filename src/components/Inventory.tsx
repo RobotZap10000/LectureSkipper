@@ -6,6 +6,8 @@ import { CustomInfoCard } from "./CustomInfoCard";
 import { itemUtils } from "@/item";
 import { CustomButton } from "./CustomButton";
 import { itemMetaRegistry } from "@/itemRegistry";
+import ItemComponent from "./ItemComponent";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 
 interface Props
 {
@@ -211,62 +213,144 @@ export default function Inventory({
         </>
       }
     >
-      <div className="flex-1 flex items-center justify-center overflow-auto p-5">
+      <div className="flex-1 flex items-center justify-center overflow-hidden p-5">
         <div className="flex flex-col items-center">
 
           {game.view === "Calendar" && (
             <h2 className="font-bold flex items-center gap-2 pb-2">
-              <Check className={`w-5 h-5 ${game.selectedItemIDs.length === game.maxActivatedItems ? "text-green-500" : ""}`} /> Activated {game.selectedItemIDs.length} / {game.maxActivatedItems}
+              {game.selectedItemIDs.length === game.maxActivatedItems ? (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="lawnGreen"
+                  strokeWidth="2" // Slightly thicker looks better for animations
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-5 h-5"
+                >
+                  <motion.path
+                    // Path data for the Lucide Check icon
+                    d="M20 6L9 17l-5-5"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{
+                      duration: 0.5,
+                      ease: "easeOut",
+                      opacity: { duration: 0.25 }
+                    }}
+                  />
+                </svg>
+              ) : (
+                <div className="w-5 h-5" />
+              )}
+
+              Activated {game.selectedItemIDs.length} / {game.maxActivatedItems}
             </h2>
           )}
 
-          <div className="flex flex-col gap-1">
-            {Array.from({ length: numRows }).map((_, rowIndex) => (
-              <div key={rowIndex} className="flex items-center gap-1">
-
-                {/* Row select button */}
-                {game.view === "Calendar" &&
-                  <CustomButton
-                    color="#494949ff"
-                    className="w-11 h-11 mr-1 rounded-full"
-                    onClick={() => handleSelectRow(rowIndex)}
-                    icon={ArrowBigRight}
-                  ></CustomButton>
-                }
-
-                {/* Items in this row */}
-                {game.items
-                  .slice(rowIndex * numCols, (rowIndex + 1) * numCols)
-                  .map((item, colIndex) => (
-                    <ItemSlot
-                      key={colIndex}
-                      game={game}
-                      item={item ?? null} // explicitly null if empty
-                      selected={item !== null && game.selectedItemIDs.includes(item.id)}
-                      onClick={() =>
-                      {
-                        if (item)
-                        {
-                          handleItemClick(item.id); // item exists
-                        } else
-                        {
-                          handleEmptySlotClick(rowIndex * numCols + colIndex); // empty slot
-                        }
-                      }}
-                      size={50}
+          <LayoutGroup>
+            <div className="flex gap-2">
+              {/* Left column: 1x6 row select buttons */}
+              {game.view === "Calendar" && (
+                <div className={`grid grid-rows-${numRows} gap-0`}>
+                  {Array.from({ length: numRows }).map((_, rowIndex) => (
+                    <CustomButton
+                      key={`row-btn-${rowIndex}`}
+                      color="#494949ff"
+                      outlineColor="rgb(41, 41, 41)"
+                      className="w-10 h-10 mt-2 rounded-2xl"
+                      onClick={() => handleSelectRow(rowIndex)}
+                      icon={ArrowBigRight}
                     />
                   ))}
-              </div>
-            ))}
-          </div>
+                </div>
+              )}
 
-          <br></br>
+              {/* Right side: 6x6 item grid */}
+              {/* Container to establish the coordinate space */}
+              <div className="relative" style={{ width: numCols * 50 + (numCols - 1) * 4, height: numRows * 50 + (numRows - 1) * 4 }}>
+
+                {/* Layer 1: Background Slots */}
+                <div
+                  className="grid gap-1"
+                  style={{
+                    gridTemplateColumns: `repeat(${numCols}, 50px)`,
+                    gridTemplateRows: `repeat(${numRows}, 50px)`,
+                  }}
+                >
+                  {Array.from({ length: numCols * numRows }).map((_, index) => (
+                    <ItemSlot
+                      key={`slot-${index}`}
+                      game={game}
+                      size={50}
+                      onClick={() => handleEmptySlotClick(index)}
+                    />
+                  ))}
+                </div>
+
+                {/* Layer 2: Foreground Items */}
+                <div
+                  className="absolute inset-0 grid gap-1 pointer-events-none" // pointer-events-none lets clicks pass to slots
+                  style={{
+                    gridTemplateColumns: `repeat(${numCols}, 50px)`,
+                    gridTemplateRows: `repeat(${numRows}, 50px)`,
+                  }}
+                >
+                  <AnimatePresence>
+                    {game.items.map((item, index) =>
+                    {
+                      if (!item) return null;
+
+                      // Calculate grid position (CSS grid is 1-indexed)
+                      const col = (index % numCols) + 1;
+                      const row = Math.floor(index / numCols) + 1;
+
+                      return (
+                        <motion.div
+                          key={`item-${item.id}-view-${game.view}`}
+                          layoutId={`item-${item.id}-view-${game.view}`}
+                          className="pointer-events-auto" // Re-enable clicks for the item itself
+                          style={{
+                            gridColumnStart: col,
+                            gridRowStart: row,
+                          }}
+                          initial={{ opacity: 0, scale: 0.5, x: -20 + Math.random() * 40, y: -50 + Math.random() * 10, rotate: 0 }}
+                          animate={{ opacity: 1, scale: 1, x: 0, y: 0, rotate: 0 }}
+                          exit={{ opacity: 0, scale: 0, x: 0, y: 0, rotate: 90 }}
+                          transition={{
+                            // 1. General settings for the initial "pop-in"
+                            duration: 0.5,
+                            ease: "easeInOut",
+                            delay: index * 0.0075,
+
+                            // 2. Specific override for layout movements
+                            layout: {
+                              delay: 0,          // No delay when moving between slots
+                              duration: 0.3,
+                              ease: "circOut"
+                            }
+                          }}
+                          onClick={(e) =>
+                          {
+                            e.stopPropagation(); // Prevent triggering the slot click underneath
+                            handleItemClick(item.id);
+                          }}
+                        >
+                          <ItemComponent item={item} game={game} size={50} />
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
+                </div>
+              </div>
+            </div>
+          </LayoutGroup>
 
           {game.view !== "Calendar" && (
             <CustomButton
               onClick={handleTrash}
               color="FireBrick"
-              className={`${game.selectedItemIDs.length === 0 ? "opacity-50" : ""} py-2`}
+              className={`${game.selectedItemIDs.length === 0 ? "opacity-50" : ""} py-2 mt-4`}
             >
               Trash
             </CustomButton>

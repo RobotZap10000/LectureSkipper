@@ -11,6 +11,8 @@ import { itemUtils } from "@/item";
 import { CustomButton } from "@/components/CustomButton";
 import { CustomInfoCard } from "@/components/CustomInfoCard";
 import { renderDescription } from "@/stringUtils";
+import ItemComponent from "@/components/ItemComponent";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Props
 {
@@ -204,14 +206,39 @@ export default function MarketView({ game, setGame }: Props)
         }
       >
         <div className="flex flex-col items-center justify-center p-3 gap-4">
-          <ItemSlot
-            game={game}
-            item={game.unboxedItem}
-            selected={false}
-            onClick={() => { }}
-            size={120}
-            threeDHeight={9}
-          />
+
+          <div className="relative flex items-center justify-center" style={{ width: 120, height: 120 }}>
+
+            {/* The background slot */}
+            <ItemSlot
+              onClick={() => { }}
+              game={game}
+              size={120}
+            />
+
+            {/* The item layer */}
+            <AnimatePresence>
+              {game.unboxedItem && (
+                <motion.div
+                  key={`item-${game.unboxedItem.id}-view-${game.view}`}
+                  layoutId={`item-${game.unboxedItem.id}-view-${game.view}`}
+                  initial={{ opacity: 0, scale: 0.5, rotate: 0 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                  exit={{ opacity: 0, scale: 0, rotate: 90 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="absolute inset-0 flex items-center justify-center"
+                >
+                  <ItemComponent
+                    game={game}
+                    item={game.unboxedItem}
+                    size={120}
+                    threeDHeight={9}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
 
           <div className="flex gap-4">
             <CustomButton
