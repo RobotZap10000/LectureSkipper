@@ -954,7 +954,7 @@ export function generateShop(state: GameState)
       i--;
       continue;
     }
-    state.shop[randomItemIdx].discount += Math.random() * 0.2 + 0.2;
+    state.shop[randomItemIdx].discount += Math.round(Math.random() * 20 + 20) / 100;
   }
 
   // Add levels
