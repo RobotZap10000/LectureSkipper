@@ -12,6 +12,7 @@ import { CustomButton } from "@/components/CustomButton";
 import { CoursesCard } from "@/components/CoursesCard";
 import { story } from "@/story";
 import { renderDescription } from "@/stringUtils";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Props
 {
@@ -85,6 +86,7 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
           </>
         ) : null}
 
+
         {/* --- CASE 1: Lectures still remaining --- */}
         {story[game.story] == null && game.nextLecture && !game.examsAttended ? (
           <div className="flex flex-col items-center gap-2">
@@ -99,74 +101,90 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
               const text = chroma.contrast(bg, "white") > 4.5 ? "white" : "black";
 
               return (
-                <Card
-                  className="w-80 h-80 p-4 pl-0 pr-0 mt-4 flex flex-col justify-between border-2"
-                  style={{
-                    backgroundColor: bg,
-                    borderColor: border,
-                    color: text,
-                  }}
-                >
-                  <CardHeader>
-                    <CardTitle className="text-lg font-bold" style={{ color: text }}>
-                      {course.title} Lecture
-                    </CardTitle>
-                    <CardDescription
-                      className="text-sm"
+                <AnimatePresence mode="popLayout">
+                  <motion.div
+                    layout
+                    layoutId={"lecture-" + game.nextLecture.potentialUnderstandings + game.nextLecture.understandChance + game.nextLecture.energyCost + game.nextLecture.procrastinationValue}
+                    key={"lecture-" + game.nextLecture.potentialUnderstandings + game.nextLecture.understandChance + game.nextLecture.energyCost + game.nextLecture.procrastinationValue}
+                    initial={{ opacity: 0, x: 100, scale: 0.5 }}
+                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                    exit={{ opacity: 0, x: -100, scale: 0.5 }}
+                    transition={{
+                      type: "spring",
+                      damping: 35,
+                      stiffness: 300,
+                    }}
+                  >
+                    <Card
+                      className="w-80 h-80 p-4 pl-0 pr-0 mt-4 flex flex-col justify-between border-2"
                       style={{
-                        color: text === "white" ? "#e5e5e5" : "#333",
+                        backgroundColor: bg,
+                        borderColor: border,
+                        color: text,
                       }}
                     >
-                      Time: {game.nextLecture.startTime} – {game.nextLecture.endTime}
-                    </CardDescription>
-                  </CardHeader>
+                      <CardHeader>
+                        <CardTitle className="text-lg font-bold" style={{ color: text }}>
+                          {course.title} Lecture
+                        </CardTitle>
+                        <CardDescription
+                          className="text-sm"
+                          style={{
+                            color: text === "white" ? "#e5e5e5" : "#333",
+                          }}
+                        >
+                          Time: {game.nextLecture.startTime} – {game.nextLecture.endTime}
+                        </CardDescription>
+                      </CardHeader>
 
-                  <CardContent className="flex flex-col gap-1">
-                    {/* Potential Understandings */}
-                    <div style={{ visibility: game.nextLecture.PUVisible ? "visible" : "hidden" }}>
-                      <div className="text-sm mb-1 flex justify-between">
-                        Potential Understanding (U) <span className="font-bold">{game.nextLecture.potentialUnderstandings} U</span>
-                      </div>
-                      <Progress
-                        value={game.nextLecture.potentialUnderstandings / game.courses[game.nextLecture.courseIndex].maxUnderstandingsPerLecture * 100}
-                        className="h-3 rounded-full [&>div]:bg-purple-300 [&>div]:!transition-none"
-                      />
-                    </div>
+                      <CardContent className="flex flex-col gap-1">
+                        {/* Potential Understandings */}
+                        <div style={{ visibility: game.nextLecture.PUVisible ? "visible" : "hidden" }}>
+                          <div className="text-sm mb-1 flex justify-between">
+                            Potential Understanding (U) <span className="font-bold">{game.nextLecture.potentialUnderstandings} U</span>
+                          </div>
+                          <Progress
+                            value={game.nextLecture.potentialUnderstandings / game.courses[game.nextLecture.courseIndex].maxUnderstandingsPerLecture * 100}
+                            className="h-3 rounded-full [&>div]:bg-purple-300 [&>div]:!transition-none"
+                          />
+                        </div>
 
-                    {/* Understand Chance */}
-                    <div style={{ visibility: game.nextLecture.UCVisible ? "visible" : "hidden" }}>
-                      <div className="text-sm mb-1 flex justify-between">
-                        Understand Chance <span className="font-bold">{(game.nextLecture.understandChance * 100).toFixed(1)}%</span>
-                      </div>
-                      <Progress
-                        value={game.nextLecture.understandChance * 100}
-                        className="h-3 rounded-full [&>div]:bg-green-300 [&>div]:!transition-none"
-                      />
-                    </div>
+                        {/* Understand Chance */}
+                        <div style={{ visibility: game.nextLecture.UCVisible ? "visible" : "hidden" }}>
+                          <div className="text-sm mb-1 flex justify-between">
+                            Understand Chance <span className="font-bold">{(game.nextLecture.understandChance * 100).toFixed(1)}%</span>
+                          </div>
+                          <Progress
+                            value={game.nextLecture.understandChance * 100}
+                            className="h-3 rounded-full [&>div]:bg-green-300 [&>div]:!transition-none"
+                          />
+                        </div>
 
-                    {/* Energy Cost */}
-                    <div>
-                      <div className="text-sm mb-1 flex justify-between">
-                        Energy Cost: <span className="font-bold">{game.nextLecture.energyCost} E</span>
-                      </div>
-                      <Progress
-                        value={game.nextLecture.energyCost / game.courses[game.nextLecture.courseIndex].maxEnergyCostPerLecture * 100}
-                        className="h-3 rounded-full [&>div]:bg-red-300 [&>div]:!transition-none"
-                      />
-                    </div>
+                        {/* Energy Cost */}
+                        <div>
+                          <div className="text-sm mb-1 flex justify-between">
+                            Energy Cost: <span className="font-bold">{game.nextLecture.energyCost} E</span>
+                          </div>
+                          <Progress
+                            value={game.nextLecture.energyCost / game.courses[game.nextLecture.courseIndex].maxEnergyCostPerLecture * 100}
+                            className="h-3 rounded-full [&>div]:bg-red-300 [&>div]:!transition-none"
+                          />
+                        </div>
 
-                    {/* Procrastination Value */}
-                    <div>
-                      <div className="text-sm mb-1 flex justify-between">
-                        Procrastination (P) Value: <span className="font-bold">{game.nextLecture.procrastinationValue} P</span>
-                      </div>
-                      <Progress
-                        value={game.nextLecture.procrastinationValue / game.courses[game.nextLecture.courseIndex].maxProcrastinationsPerLecture * 100}
-                        className="h-3 rounded-full [&>div]:bg-blue-300 [&>div]:!transition-none"
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
+                        {/* Procrastination Value */}
+                        <div>
+                          <div className="text-sm mb-1 flex justify-between">
+                            Procrastination (P) Value: <span className="font-bold">{game.nextLecture.procrastinationValue} P</span>
+                          </div>
+                          <Progress
+                            value={game.nextLecture.procrastinationValue / game.courses[game.nextLecture.courseIndex].maxProcrastinationsPerLecture * 100}
+                            className="h-3 rounded-full [&>div]:bg-blue-300 [&>div]:!transition-none"
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                </AnimatePresence>
               );
             })()}
 
@@ -229,27 +247,50 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
               {
                 const course = game.courses[i];
                 return (
-                  <Card
-                    key={i}
-                    className={`border-2 ${passed
-                      ? "border-green-600 bg-green-950"
-                      : "border-red-600 bg-red-950"
-                      }`}
+                  <motion.div
+                    layout
+                    layoutId={"exam-result-course-" + course.title + "-color-" + course.color}
+                    key={"exam-result-course-" + course.title + "-color-" + course.color}
+                    initial={{ opacity: 0, x: -100, scale: 0.5 }}
+                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                    transition={{
+                      type: "spring",
+                      damping: 35,
+                      stiffness: 300,
+                      delay: i * 0.5
+                    }}
                   >
-                    <CardHeader>
-                      <CardTitle className="text-md">{course.title}</CardTitle>
-                      <CardDescription className="text-sm">
-                        {passed ? "Passed ✔️" : "Failed ❌"}
-                      </CardDescription>
-                    </CardHeader>
-                  </Card>
+                    <Card
+                      key={i}
+                      className={`border-2 ${passed
+                        ? "border-green-600 bg-green-950"
+                        : "border-red-600 bg-red-950"
+                        }`}
+                    >
+                      <CardHeader>
+                        <CardTitle className="text-md">{course.title}</CardTitle>
+                        <CardDescription className="text-sm">
+                          {passed ? "Passed ✔️" : "Failed ❌"}
+                        </CardDescription>
+                      </CardHeader>
+                    </Card>
+                  </motion.div>
                 );
               })}
             </div>
 
             {/* --- FAILURE CHECK --- */}
             {game.examResults.filter((r) => !r).length >= 2 ? (
-              <div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{
+                  type: "spring",
+                  damping: 35,
+                  stiffness: 300,
+                  delay: game.courses.length * 0.5
+                }}
+              >
                 <h2 className="font-bold mb-4">Final Score: {game.score}</h2>
                 <CustomButton
                   icon={RefreshCcw}
@@ -258,15 +299,25 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
                 >
                   Reset Run
                 </CustomButton>
-
-              </div>
+              </motion.div>
             ) : (
-              <CustomButton
-                onClick={() => setGame((g) => startNewBlock(g))}
-                color="RoyalBlue"
+              <motion.div
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{
+                  type: "spring",
+                  damping: 35,
+                  stiffness: 300,
+                  delay: game.courses.length * 0.5
+                }}
               >
-                Start Next Block
-              </CustomButton>
+                <CustomButton
+                  onClick={() => setGame((g) => startNewBlock(g))}
+                  color="RoyalBlue"
+                >
+                  Start Next Block
+                </CustomButton>
+              </motion.div>
             )}
           </div>
         ) : null}

@@ -7,6 +7,7 @@ import chroma from "chroma-js";
 import { CustomInfoCard } from "@/components/CustomInfoCard";
 import { CustomButton } from "@/components/CustomButton";
 import { CoursesCard } from "@/components/CoursesCard";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Props
 {
@@ -135,76 +136,97 @@ export default function ChatView({ game, setGame }: Props)
         {game.quests.length === 0 ? (
           <div className="p-3 italic text-gray-400">No offers available.</div>
         ) : (
-          <div className="flex flex-wrap gap-2 max-h-[675px] overflow-auto">
-            {game.quests
-              .filter((quest) =>
-                game.showOnlyCompletableQuests ? haveCosts(quest) : true
-              )
-              .map((quest) =>
-              {
-                const baseColor = quest.color || "#4b5563"; // fallback
-                const bg = chroma(baseColor).brighten(1.2).hex();
-                const border = chroma(baseColor).brighten(2).hex();
-                const text = chroma.contrast(bg, "white") > 4.5 ? "white" : "black";
+          <div className="flex flex-wrap gap-2 max-h-[675px] overflow-y-auto overflow-x-hidden">
+            <AnimatePresence>
+              {game.quests
+                .filter((quest) =>
+                  game.showOnlyCompletableQuests ? haveCosts(quest) : true
+                )
+                .map((quest) =>
+                {
+                  const baseColor = quest.color || "#4b5563"; // fallback
+                  const bg = chroma(baseColor).brighten(1.2).hex();
+                  const border = chroma(baseColor).brighten(2).hex();
+                  const text = chroma.contrast(bg, "white") > 4.5 ? "white" : "black";
 
-                return (
-                  <Card
-                    key={quest.id}
-                    className="flex flex-col border-2 gap-1 p-3 basis-[24%] min-w-[215px] h-[215px]"
-                    style={{
-                      backgroundColor: bg,
-                      borderColor: border,
-                      color: text,
-                    }}
-                  >
-                    <CardTitle className="text-sm font-semibold" style={{ color: text }}>
-                      You give
-                    </CardTitle>
-
-                    <CardContent className="text-sm">
-                      <ul className="list-disc">
-                        {quest.costs.map((cost, i) => (
-                          <li key={i}>
-                            {cost.type === "understandings" && `${cost.amount} U in ${game.courses[cost.courseIndex].title.slice(0, 30)}${game.courses[cost.courseIndex].title.length > 30 ? "…" : ""}`}
-                            {cost.type === "procrastinations" && `${cost.amount} P`}
-                            {cost.type === "cash" && `$${cost.amount}`}
-                            {cost.type === "maxActivatedItems" && `${cost.amount} Max Active Items`}
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-
-                    <CardTitle className="text-sm font-semibold" style={{ color: text }}>
-                      You get
-                    </CardTitle>
-
-                    <CardContent className="text-sm flex-1">
-                      <ul className="list-disc">
-                        {quest.rewards.map((rew, i) => (
-                          <li key={i}>
-                            {rew.type === "understandings" &&
-                              `${rew.amount} U in ${game.courses[rew.courseIndex].title}`}
-                            {rew.type === "procrastinations" && `${rew.amount} P`}
-                            {rew.type === "cash" && `$${rew.amount}`}
-                            {rew.type === "maxActivatedItems" &&
-                              `${rew.amount} Max Active Items`}
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-
-                    <CardFooter className="flex m-0 p-0 justify-center">
-                      <CustomButton
-                        color={haveCosts(quest) ? "Green" : "Gray"}
-                        onClick={() => handleProvideNotes(quest)}
-                        className="p-0 m-0 w-full"
+                  return (
+                    <motion.div
+                      layout
+                      layoutId={"quest-" + quest.id}
+                      key={"quest-" + quest.id}
+                      initial={{ opacity: 0, y: -100, scale: 1 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{
+                        opacity: 0, y: 100, scale: 1, transition: {
+                          duration: 0.1,
+                          ease: "easeIn"
+                        }
+                      }}
+                      transition={{
+                        type: "spring",
+                        damping: 35,
+                        stiffness: 300,
+                      }}
+                    >
+                      <Card
+                        key={quest.id}
+                        className="flex flex-col border-2 gap-0 p-3 basis-[24%] min-w-[215px] h-[215px] aspect-square"
+                        style={{
+                          backgroundColor: bg,
+                          borderColor: border,
+                          color: text,
+                        }}
                       >
-                        Provide Notes
-                      </CustomButton>
-                    </CardFooter>
-                  </Card>
-                );
-              })}
+                        <CardTitle className="text-xs font-semibold" style={{ color: text }}>
+                          You give
+                        </CardTitle>
+
+                        <CardContent className="text-md">
+                          <ul className="list-disc">
+                            {quest.costs.map((cost, i) => (
+                              <li key={i}>
+                                {cost.type === "understandings" && `${cost.amount} U in ${game.courses[cost.courseIndex].title.slice(0, 30)}${game.courses[cost.courseIndex].title.length > 30 ? "…" : ""}`}
+                                {cost.type === "procrastinations" && `${cost.amount} P`}
+                                {cost.type === "cash" && `$${cost.amount}`}
+                                {cost.type === "maxActivatedItems" && `${cost.amount} Max Active Items`}
+                              </li>
+                            ))}
+                          </ul>
+                        </CardContent>
+
+                        <CardTitle className="text-xs font-semibold" style={{ color: text }}>
+                          You get
+                        </CardTitle>
+
+                        <CardContent className="text-sm flex-1">
+                          <ul className="list-disc">
+                            {quest.rewards.map((rew, i) => (
+                              <li key={i}>
+                                {rew.type === "understandings" &&
+                                  `${rew.amount} U in ${game.courses[rew.courseIndex].title}`}
+                                {rew.type === "procrastinations" && `${rew.amount} P`}
+                                {rew.type === "cash" && `$${rew.amount}`}
+                                {rew.type === "maxActivatedItems" &&
+                                  `${rew.amount} Max Active Items`}
+                              </li>
+                            ))}
+                          </ul>
+                        </CardContent>
+
+                        <CardFooter className="flex m-0 p-0 justify-center">
+                          <CustomButton
+                            color={haveCosts(quest) ? "Green" : "Gray"}
+                            onClick={() => handleProvideNotes(quest)}
+                            className="p-0 m-0 w-full"
+                          >
+                            Provide Notes
+                          </CustomButton>
+                        </CardFooter>
+                      </Card>
+                    </motion.div>
+                  );
+                })}
+            </AnimatePresence>
           </div>
         )}
       </CustomInfoCard>

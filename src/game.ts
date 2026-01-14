@@ -98,6 +98,8 @@ export function changeView(game: GameState, view: View): GameState
 {
   const newState: GameState = { ...game };
 
+  newState.courseTexts = [];
+
   if (view === "Calendar")
   {
     if (newState.view !== "Calendar")
@@ -142,6 +144,8 @@ export type GameState = {
   block: number;
   lecturesLeft: number;
   courses: Course[];
+  lastLecture: Lecture | null;
+  lastLectureResult: LectureResult | null;
   nextLecture: Lecture | null;
   score: number;
 
@@ -149,6 +153,7 @@ export type GameState = {
   examsAttended: boolean;
   examResults: boolean[];
   story: number;
+  courseTexts: string[];
   log: LogEntry[];
   quests: Quest[];
   unboxedItem: ItemData | null;
@@ -182,6 +187,8 @@ export function initGame(): GameState
     energy: 100,
     maxEnergy: 100,
     energyPerSkip: 5,
+    lastLecture: null,
+    lastLectureResult: null,
     nextLecture: null,
     items: Array(36).fill(null),
     maxActivatedItems: 3,
@@ -194,6 +201,7 @@ export function initGame(): GameState
     examsAttended: true,
     examResults: [],
     story: -1,
+    courseTexts: [],
     score: 0,
   };
 
@@ -256,6 +264,9 @@ export function loadGame(): GameState | "GameDoesNotExist" | "ParsingFailed"
     if (parsed.saveVersion == 3)
     {
       parsed.saveVersion = 4;
+      parsed.lastLecture = null;
+      parsed.lastLectureResult = null;
+      parsed.courseTexts = [];
       generateShop(parsed);
     }
 
@@ -336,6 +347,11 @@ export function startRound(state: GameState, action: "attend" | "skip"): GameSta
   const newState: GameState = { ...state };
   let lecture = { ...newState.nextLecture! };
   let course = { ...newState.courses[lecture.courseIndex] };
+  let lastRoundUnderstandings = [];
+  for (let i = 0; i < newState.courses.length; i++)
+  {
+    lastRoundUnderstandings.push(newState.courses[i].understandings);
+  }
 
   newState.log = [];
 
@@ -447,8 +463,8 @@ export function startRound(state: GameState, action: "attend" | "skip"): GameSta
     newState.log.push({ icon: effectMetaRegistry["Soda"].icon, color: effectMetaRegistry["Soda"].backgroundColor, message: `+${itemUtils.getEffectStacks(newState, lecture.courseIndex, "Soda")} E` });
   }
 
+  // Calculate round
   let lectureResult: LectureResult;
-
   if (action == "attend")
   {
     const understood = Math.random() < lecture.understandChance ? "success" : "failure";
@@ -495,6 +511,8 @@ export function startRound(state: GameState, action: "attend" | "skip"): GameSta
   newState.procrastinations += lectureResult.gainedProcrastinations;
   newState.lecturesLeft -= 1;
   newState.score += lectureResult.gainedUnderstandings;
+  newState.lastLecture = lecture;
+  newState.lastLectureResult = lectureResult;
 
   // Log
   const courseTitle = newState.courses[lecture.courseIndex].title;
@@ -598,6 +616,25 @@ export function startRound(state: GameState, action: "attend" | "skip"): GameSta
     return item && itemMetaRegistry[item.name].getEnabled(item, newState);
   });
 
+  // Show U differences for this round
+  newState.courseTexts = [];
+  for (let i = 0; i < newState.courses.length; i++)
+  {
+    let Udiff = (newState.courses[i].understandings - lastRoundUnderstandings[i]);
+    if (Udiff != 0)
+    {
+      if (Udiff > 0)
+      {
+        newState.courseTexts.push("+" + Udiff.toString());
+      } else
+      {
+        newState.courseTexts.push(Udiff.toString());
+      }
+    } else
+    {
+      newState.courseTexts.push("");
+    }
+  }
 
   return newState;
 }
@@ -1121,6 +1158,9 @@ export function startNewBlock(state: GameState): GameState
 
   // Create shop entries
   generateShop(newState);
+
+  newState.lastLecture = null;
+  newState.lastLectureResult = null;
 
   const nextLecture: Lecture = generateLecture(newState);
   newState.nextLecture = nextLecture;
