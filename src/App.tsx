@@ -142,14 +142,14 @@ export default function App()
     const handleKeyDown = (e: KeyboardEvent) =>
     {
       const keyToView: Record<string, View> = {
-        "1": "Calendar",
-        "2": "Market",
-        "3": "Forge",
-        "4": "Chat",
-        "5": "Settings",
+        "q": "Calendar",
+        "w": "Market",
+        "e": "Forge",
+        "r": "Chat",
+        "t": "Settings",
       };
 
-      const view = keyToView[e.key];
+      const view = keyToView[e.key.toLowerCase()];
       if (view)
       {
         setGame(prev => changeView(prev, view));

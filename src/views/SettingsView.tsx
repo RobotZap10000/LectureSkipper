@@ -29,6 +29,7 @@ export default function SettingsView({ game, setGame, topRuns }: Props)
         "You can now only get a maximum of 200 P from a  skipped lecture, with an average of 100 P per skip. This amount no longer scales with time.",
         "Reworked Market: now sells items, not just boxes.",
         "Anvil Nerf: now only works on items of equal type.",
+        "Improved Forge: you can now upgrade items multiple levels at a time.",
         "Added lots of animations to the UI.",
       ],
       smallChanges: [

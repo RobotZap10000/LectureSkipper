@@ -1,12 +1,13 @@
 import Inventory from "@/components/Inventory";
 import { Box, CirclePlus, MoveDown } from "lucide-react";
 import { type GameState } from "@/game";
-import type { Dispatch, SetStateAction } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import { itemUtils, type ItemData } from "@/item";
 import { itemMetaRegistry } from "@/itemRegistry";
 import { renderDescription } from "@/stringUtils";
 import { CustomInfoCard } from "@/components/CustomInfoCard";
 import { CustomButton } from "@/components/CustomButton";
+import { Input } from "@/components/ui/input";
 
 interface Props
 {
@@ -16,14 +17,33 @@ interface Props
 
 export default function ForgeView({ game, setGame }: Props)
 {
-  const calculateUpgradeCost = (item: ItemData) =>
+  const [upgradeAmount, setUpgradeAmount] = useState(1);
+
+  const calculateUpgradeCost = (item: ItemData, upgradeBy: number) =>
   {
-    let n = item.level - item.startingLevel + 1;
-    return (n / 2) * (50 + 50 * n);
+    const n0 = item.level - item.startingLevel;
+    const n1 = n0 + upgradeBy;
+
+    // sum of arithmetic series from n0+1 → n1
+    return (n1 * (n1 + 1) - n0 * (n0 + 1)) * 25;
   };
 
+  const calculateMaxUpgradeBy = (item: ItemData, amount: number) =>
+  {
+    const n0 = item.level - item.startingLevel;
+
+    // Solve quadratic for n1
+    const A = n0 * (n0 + 1) + amount / 25;
+
+    const n1 = Math.floor((Math.sqrt(1 + 4 * A) - 1) / 2);
+
+    return Math.max(0, n1 - n0);
+  };
+
+
+
   const item: ItemData | null = game.selectedItemIDs.length > 0 ? itemUtils.itemIDtoItem(game.selectedItemIDs[0], game) : null;
-  const upgradedItemData: ItemData | null = item ? { ...item, level: item.level + 1 } : null;
+  const upgradedItemData: ItemData | null = item ? { ...item, level: item.level + upgradeAmount } : null;
   let Icon = null;
   if (item) Icon = itemMetaRegistry[item.name].icon;
 
@@ -33,10 +53,10 @@ export default function ForgeView({ game, setGame }: Props)
     {
       if (!item) return state;
 
-      const cost = calculateUpgradeCost(item);
+      const cost = calculateUpgradeCost(item, upgradeAmount);
       if (state.cash < cost) return state;
 
-      const upgradedItem = { ...item, level: item.level + 1 };
+      const upgradedItem = { ...item, level: item.level + upgradeAmount };
 
       const newItems = [...state.items];
       newItems[itemUtils.itemIDtoSlot(item.id, state)] = upgradedItem;
@@ -98,25 +118,44 @@ export default function ForgeView({ game, setGame }: Props)
 
               <div className="flex items-center gap-3">
                 <MoveDown
-                  className={`w-10 h-10 ${game.cash < (item ? calculateUpgradeCost(item) : 0)
+                  className={`w-10 h-10 scale-[1.5] ${game.cash < (item ? calculateUpgradeCost(item, upgradeAmount) : 0)
                     ? "text-neutral-500"
                     : "text-green-500"
                     }`}
                 />
 
+                <div>
+                  <Input
+                    type="number"
+                    className="w-32"
+                    min={1}
+                    value={upgradeAmount}
+                    onChange={(e) => setUpgradeAmount(Math.max(1, Number(e.target.value)))}
+                  />
+                  <div className="flex gap-3 items-center pt-2">
+                    <CustomButton
+                      color="DarkSlateBlue"
+                      onClick={() => setUpgradeAmount(Math.max(1, calculateMaxUpgradeBy(item, game.cash)))}
+                      className="w-32 h-full"
+                    >
+                      Set MAX
+                    </CustomButton>
+                  </div>
+                </div>
+
                 <CustomButton
-                  color={`${game.cash < (item ? calculateUpgradeCost(item) : 0)
+                  color={`${game.cash < (item ? calculateUpgradeCost(item, upgradeAmount) : 0)
                     ? "gray"
                     : "MediumSeaGreen"
                     }`}
                   onClick={handleUpgrade}
-                  className="w-64"
+                  className="w-24 h-full break-all"
                 >
-                  Upgrade for ${item ? calculateUpgradeCost(item) : "..."}
+                  ${item ? calculateUpgradeCost(item, upgradeAmount) : "..."}
                 </CustomButton>
 
                 <MoveDown
-                  className={`w-10 h-10 ${game.cash < (item ? calculateUpgradeCost(item) : 0)
+                  className={`w-10 h-10 scale-[1.5] ${game.cash < (item ? calculateUpgradeCost(item, upgradeAmount) : 0)
                     ? "text-neutral-500"
                     : "text-green-500"
                     }`}
@@ -175,17 +214,17 @@ export default function ForgeView({ game, setGame }: Props)
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 h-21">
                 <MoveDown
-                  className={`w-10 h-10 text-neutral-500`}
+                  className={`w-10 h-10 scale-[1.5] text-neutral-500`}
                 />
 
-                <span className="text-muted-foreground italic w-64 text-center">
+                <span className="text-muted-foreground italic w-59 align-middle text-center">
                   Select an item to upgrade
                 </span>
 
                 <MoveDown
-                  className={`w-10 h-10 text-neutral-500`}
+                  className={`w-10 h-10 scale-[1.5] text-neutral-500`}
                 />
 
               </div>
@@ -215,13 +254,13 @@ export default function ForgeView({ game, setGame }: Props)
           )}
 
         </div>
-      </CustomInfoCard>
+      </CustomInfoCard >
 
       {/* Inventory */}
-      <Inventory
+      < Inventory
         game={game}
         setGame={setGame}
       />
-    </div>
+    </div >
   );
 }
