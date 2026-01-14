@@ -1,5 +1,4 @@
 import type { Dispatch, SetStateAction } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
 import { Settings, RefreshCcw, PenOff, ScrollText, Box, Trophy, AlertCircle } from "lucide-react";
 import type { GameState, Run } from "@/game";
