@@ -1,5 +1,6 @@
 import { CodeXml as ItemIcon } from "lucide-react";
 import { type ItemData, type ItemMeta, type ItemBehavior, itemUtils } from "@/item";
+import { effectUtils } from "@/effect";
 
 export const itemData: ItemData = {
   name: "Schedule Editor",
@@ -23,7 +24,7 @@ export const itemMeta: ItemMeta = {
 export const itemBehavior: ItemBehavior = {
   beforeAttendLecture: (params) =>
   {
-    itemUtils.addEffectStacksToCourse(params.state, params.lecture.courseIndex, "Guaranteed", params.item.level);
+    effectUtils.addEffectStacksToCourse(params.state, params.lecture.courseIndex, "Guaranteed", params.item.level);
 
     params.logEntry.message = `Guaranteed ${params.state.courses[params.lecture.courseIndex].title} for ${params.item.level} lectures`;
   },

@@ -1,5 +1,6 @@
 import { Rewind as ItemIcon } from "lucide-react";
 import { type ItemData, type ItemMeta, type ItemBehavior, itemUtils } from "@/item";
+import { effectUtils } from "@/effect";
 
 export const itemData: ItemData = {
   name: "Time Machine",
@@ -27,9 +28,9 @@ export const itemBehavior: ItemBehavior = {
 
     params.state.lecturesLeft += params.item.level;
     
-    let currentUnhelpful = itemUtils.getEffectStacks(params.state, params.lecture.courseIndex, "Unhelpful");
+    let currentUnhelpful = effectUtils.getEffectStacks(params.state, params.lecture.courseIndex, "Unhelpful");
     let toAdd = Math.round((100 - currentUnhelpful) / 2);
-    itemUtils.addEffectStacksToCourse(params.state, params.lecture.courseIndex, "Unhelpful", toAdd);
+    effectUtils.addEffectStacksToCourse(params.state, params.lecture.courseIndex, "Unhelpful", toAdd);
 
     params.logEntry.message = `+${params.item.level} lectures`;
   },

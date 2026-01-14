@@ -1,5 +1,6 @@
 import { ShoppingCart as ItemIcon } from "lucide-react";
 import { type ItemData, type ItemMeta, type ItemBehavior, itemUtils } from "@/item";
+import { effectUtils } from "@/effect";
 
 export const itemData: ItemData = {
   name: "Cart",
@@ -25,7 +26,7 @@ export const itemBehavior: ItemBehavior = {
   {
     itemUtils.setItemUsedThisBlock(params.item, params.state);
 
-    itemUtils.addEffectStacksToCourse(params.state, params.lecture.courseIndex, "Cash", params.item.level * 10);
+    effectUtils.addEffectStacksToCourse(params.state, params.lecture.courseIndex, "Cash", params.item.level * 10);
 
     params.logEntry.message = `+${params.item.level * 10}$ whenever ${params.state.courses[params.lecture.courseIndex].title} appears`;
   },

@@ -1,5 +1,6 @@
 import { Anvil as ItemIcon } from "lucide-react";
 import { type ItemData, type ItemMeta, type ItemBehavior, itemUtils } from "@/item";
+import { effectUtils } from "@/effect";
 
 export const itemData: ItemData = {
   name: "Anvil",

@@ -1,5 +1,6 @@
 import { CupSoda as ItemIcon } from "lucide-react";
 import { type ItemData, type ItemMeta, type ItemBehavior, itemUtils } from "@/item";
+import { effectUtils } from "@/effect";
 
 export const itemData: ItemData = {
   name: "Soda",
@@ -23,6 +24,6 @@ export const itemMeta: ItemMeta = {
 export const itemBehavior: ItemBehavior = {
   afterSkipLecture: (params) =>
   {
-    itemUtils.addEffectStacksToCourse(params.state, params.lecture.courseIndex, "Soda", params.item.level);
+    effectUtils.addEffectStacksToCourse(params.state, params.lecture.courseIndex, "Soda", params.item.level);
   },
 };

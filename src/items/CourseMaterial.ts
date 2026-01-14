@@ -1,5 +1,6 @@
 import { BookCheck as ItemIcon } from "lucide-react";
 import { type ItemData, type ItemMeta, type ItemBehavior, itemUtils } from "@/item";
+import { effectUtils } from "@/effect";
 
 export const itemData: ItemData = {
   name: "Course Material",
@@ -25,7 +26,7 @@ export const itemBehavior: ItemBehavior = {
   {
     itemUtils.setItemUsedThisBlock(params.item, params.state);
 
-    itemUtils.addEffectStacksToCourse(params.state, params.lecture.courseIndex, "Prepared", params.item.level * 20);
+    effectUtils.addEffectStacksToCourse(params.state, params.lecture.courseIndex, "Prepared", params.item.level * 20);
 
     params.state.courses[params.lecture.courseIndex].lectureAppearWeight = Math.ceil(params.state.courses[params.lecture.courseIndex].lectureAppearWeight / 2);
 
