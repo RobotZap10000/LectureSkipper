@@ -6,6 +6,7 @@ import { itemUtils, type ItemData } from "@/item";
 import { effectUtils, type EffectData } from "@/effect";
 import { story } from "@/story";
 import { effectMetaRegistry } from "./effectRegistry";
+import { weightedRandom } from "./lib/utils";
 
 export function generateUUID(): string
 {
@@ -926,8 +927,12 @@ export function generateShop(state: GameState)
 
   for (var i = 0; i < commonCount; i++)
   {
+    // Pick item using item dropWeight
+    const itemWeights = itemsByRarity[1].map((i) => i.dropWeight);
+    const chosenItem = weightedRandom(itemsByRarity[1], itemWeights);
+
     state.shop.push({
-      item: itemUtils.createItemInstance(itemsByRarity[1][Math.floor(Math.random() * itemsByRarity[1].length)]),
+      item: itemUtils.createItemInstance(chosenItem),
       price: 200,
       discount: 0,
     });
@@ -935,15 +940,23 @@ export function generateShop(state: GameState)
 
   for (var i = 0; i < 8 - commonCount; i++)
   {
+    // Pick item using item dropWeight
+    const itemWeights = itemsByRarity[2].map((i) => i.dropWeight);
+    const chosenItem = weightedRandom(itemsByRarity[2], itemWeights);
+
     state.shop.push({
-      item: itemUtils.createItemInstance(itemsByRarity[2][Math.floor(Math.random() * itemsByRarity[2].length)]),
+      item: itemUtils.createItemInstance(chosenItem),
       price: 1000,
       discount: 0,
     });
   }
 
+  // Pick item using item dropWeight
+  const legendaryItemWeights = itemsByRarity[3].map((i) => i.dropWeight);
+  const chosenLegendaryItem = weightedRandom(itemsByRarity[3], legendaryItemWeights);
+
   state.shop.push({
-    item: itemUtils.createItemInstance(itemsByRarity[3][Math.floor(Math.random() * itemsByRarity[3].length)]),
+    item: chosenLegendaryItem,
     price: 6000,
     discount: 0,
   });

@@ -12,6 +12,7 @@ import { CustomInfoCard } from "@/components/CustomInfoCard";
 import { renderDescription } from "@/stringUtils";
 import ItemComponent from "@/components/ItemComponent";
 import { motion, AnimatePresence } from "framer-motion";
+import { weightedRandom } from "@/lib/utils";
 
 interface Props
 {
@@ -32,20 +33,6 @@ export default function MarketView({ game, setGame }: Props)
   const shopListings: Box[] = [
     { name: "Stress Box", cost: 600, border: "border-red-700", bg: "bg-red-950", rarityWeights: [100, 40, 10] },
   ];
-
-  // Weighted random helper
-  function weightedRandom<T>(items: T[], weights: number[]): T
-  {
-    let sum = 0;
-    weights.forEach(w => sum += w);
-    let rnd = Math.random() * sum;
-    for (let i = 0; i < items.length; i++)
-    {
-      if (rnd < weights[i]) return items[i];
-      rnd -= weights[i];
-    }
-    return items[items.length - 1];
-  }
 
   // Buy a box
   const handleBuy = (box: Box) =>
@@ -144,11 +131,11 @@ export default function MarketView({ game, setGame }: Props)
       {/* Shop */}
       <CustomInfoCard
         icon={Store}
-        title="Store"
+        title="Shop"
         help={
           <>
             <h2 className="font-bold m-1 flex items-center gap-2">
-              <Store className="w-5 h-5" /> Store
+              <Store className="w-5 h-5" /> Shop
             </h2>
             <div className="text-sm">
               Spend Procrastinations to buy items. The shop refreshes once a new block starts.
