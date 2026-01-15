@@ -17,7 +17,7 @@ export const itemData: ItemData = {
 export const itemMeta: ItemMeta = {
   icon: ItemIcon,
   getDescription: (item) =>
-    `**Consumable**: If skipping, still gain **${Math.min(item.level * 5, 100)}%** of the Potential Understanding.`,
+    `**Consumable**: If skipping, still gain **${Math.min(40 + item.level * 10, 100)}%** of the Potential Understanding.`,
   getEnabled: (item, state) => true,
 };
 

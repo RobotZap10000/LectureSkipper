@@ -17,7 +17,7 @@ export const itemData: ItemData = {
 export const itemMeta: ItemMeta = {
   icon: ItemIcon,
   getDescription: (item) =>
-    `**On Attend**: Increases the Potential Understanding by **${item.level*10}%**, but increases Energy Cost by **${item.level*20}%**.`,
+    `**On Attend**: Increases the Potential Understanding by **${item.level * 10}%**, but increases Energy Cost by **${item.level * 20}%**.`,
   getEnabled: (item, state) => true,
 };
 
@@ -25,9 +25,9 @@ export const itemBehavior: ItemBehavior = {
   beforeAttendLecture: (params) =>
   {
     let lastEnergy = params.lecture.energyCost;
-    params.lecture.energyCost += Math.round(params.lecture.energyCost * params.item.level*20/100);
+    params.lecture.energyCost += Math.round(params.lecture.energyCost * params.item.level * 20 / 100);
     let lastUnderstandings = params.lecture.potentialUnderstandings;
-    params.lecture.potentialUnderstandings += Math.round(params.lecture.potentialUnderstandings * params.item.level*10/100);
+    params.lecture.potentialUnderstandings += Math.round(params.lecture.potentialUnderstandings * params.item.level * 10 / 100);
     params.logEntry.message = `Potential ${lastUnderstandings} U → ${params.lecture.potentialUnderstandings} U and ${lastEnergy} E → ${params.lecture.energyCost} E`;
   },
 };

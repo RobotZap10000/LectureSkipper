@@ -22,24 +22,32 @@ export default function SettingsView({ game, setGame, topRuns }: Props)
   const gameUpdates = [
     {
       version: "0.4.0",
-      date: "???, 2025",
-      title: "Another Rebalance",
+      date: "January ???, 2025",
+      title: "Rebalance, Reworks and Animations",
       description: "More content has been added as well.",
       majorChanges: [
-        "You can now only get a maximum of 200 P from a  skipped lecture, with an average of 100 P per skip. This amount no longer scales with time.",
+        "You can now only get a maximum of 200 P from a skipped lecture, with an average of 100 P per skip. This amount no longer scales with time.",
         "Reworked Market: now sells items, not just boxes.",
-        "Anvil Nerf: now only works on items of equal type.",
         "Improved Forge: you can now upgrade items multiple levels at a time.",
         "Added lots of animations to the UI.",
       ],
       smallChanges: [
         "Minor UI changes.",
+        "Anvil Nerf: now only works on items of equal type.",
+        "Clover Buff: now adds (level)% Understand Chance to the lecture.",
+        "GPS Change: can now go to a maximum of +100% Understand Chance, but the percentage scales more slowly.",
+        "Paper Buff: now starts at +75% Understand Chance and gains +5% per level.",
+        "Pizza Buff: now can go up to 100% and scales faster. Clarified description.",
+        "Sticky Note Buff: now starts at 50% and gains 10% per level.",
+        "Time Machine Nerf: now reduces the understandings that the lectures of the course give by 90%.",
+        "Video Game Buff: now increases +5% per level.",
+        "Wallet Buff: now starts at $25 and increases $5 per level.",
       ],
       bugFixes: [
         "Time Machine now works when used on the last lecture.",
         "Fixed a problem in the description of the Cookie.",
         "Clarified the description of the Snail.",
-        "Fixed error in the story.",
+        "Fixed an error in the story.",
       ],
     },
     {

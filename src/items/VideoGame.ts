@@ -17,7 +17,7 @@ export const itemData: ItemData = {
 export const itemMeta: ItemMeta = {
   icon: ItemIcon,
   getDescription: (item) =>
-    `**On Skip**: Gain **${Math.min(item.level * 3)}%** extra Procrastination.`,
+    `**On Skip**: Gain **${Math.min(item.level * 5)}%** extra Procrastination.`,
   getEnabled: (item, state) => true,
 };
 
@@ -25,7 +25,7 @@ export const itemBehavior: ItemBehavior = {
   beforeSkipLecture: (params) =>
   {
     params.logEntry.message = `Procrastinations ${params.lecture.procrastinationValue} P →`;
-    params.lecture.procrastinationValue += Math.round(params.lecture.procrastinationValue * (params.item.level * 3 / 100));
+    params.lecture.procrastinationValue += Math.round(params.lecture.procrastinationValue * ((params.item.level * 5) / 100));
     params.logEntry.message += ` ${params.lecture.procrastinationValue} P`;
   },
 };

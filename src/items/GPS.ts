@@ -17,7 +17,7 @@ export const itemData: ItemData = {
 export const itemMeta: ItemMeta = {
   icon: ItemIcon,
   getDescription: (item) =>
-    `**On Attend**: The chance of understanding this lecture is increased by **+${(itemUtils.geometricSeries(item.level - 1, 0.95, 0.05, 0.5) * 100).toFixed(2)}%**.`,
+    `**On Attend**: The chance of understanding this lecture is increased by **+${(itemUtils.geometricSeries(item.level - 1, 0.975, 0.05, 1) * 100).toFixed(2)}%**.`,
   getEnabled: (item, state) => true,
 };
 

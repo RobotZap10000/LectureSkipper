@@ -17,13 +17,13 @@ export const itemData: ItemData = {
 export const itemMeta: ItemMeta = {
   icon: ItemIcon,
   getDescription: (item) =>
-    `**On Attend**: Gain **$${item.level * 2 + 4}**.`,
+    `**On Attend**: Gain **$${item.level * 5 + 20}**.`,
   getEnabled: (item, state) => true,
 };
 
 export const itemBehavior: ItemBehavior = {
   beforeAttendLecture: (params) => {
-    params.state.cash += params.item.level * 2 + 4;
-    params.logEntry.message = `+$${params.item.level * 2 + 4}`;
+    params.state.cash += params.item.level * 5 + 20;
+    params.logEntry.message = `+$${params.item.level * 5 + 20}`;
   },
 };

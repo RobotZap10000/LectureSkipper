@@ -30,7 +30,7 @@ export default function MarketView({ game, setGame }: Props)
   };
 
   const shopListings: Box[] = [
-    { name: "Stress Box", cost: 300, border: "border-red-700", bg: "bg-red-950", rarityWeights: [100, 40, 10] },
+    { name: "Stress Box", cost: 600, border: "border-red-700", bg: "bg-red-950", rarityWeights: [100, 40, 10] },
   ];
 
   // Weighted random helper

@@ -17,7 +17,7 @@ export const itemData: ItemData = {
 export const itemMeta: ItemMeta = {
   icon: ItemIcon,
   getDescription: (item) =>
-    `**Before Attend**: Lectures for this course now give half as much understanding, but **${item.level}** lectures are added to the block. Can only be used once per block.`,
+    `**Before Attend**: Lectures for this course now give 90% less understanding, but **${item.level}** lectures are added to the block. Can only be used once per block.`,
   getEnabled: (item, state) => !itemUtils.getItemUsedThisBlock(item, state),
 };
 
@@ -29,7 +29,7 @@ export const itemBehavior: ItemBehavior = {
     params.state.lecturesLeft += params.item.level;
     
     let currentUnhelpful = effectUtils.getEffectStacks(params.state, params.lecture.courseIndex, "Unhelpful");
-    let toAdd = Math.round((100 - currentUnhelpful) / 2);
+    let toAdd = Math.round((100 - currentUnhelpful) * 0.9);
     effectUtils.addEffectStacksToCourse(params.state, params.lecture.courseIndex, "Unhelpful", toAdd);
 
     params.logEntry.message = `+${params.item.level} lectures`;

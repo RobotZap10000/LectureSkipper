@@ -928,7 +928,7 @@ export function generateShop(state: GameState)
   {
     state.shop.push({
       item: itemUtils.createItemInstance(itemsByRarity[1][Math.floor(Math.random() * itemsByRarity[1].length)]),
-      price: 100,
+      price: 200,
       discount: 0,
     });
   }
@@ -937,14 +937,14 @@ export function generateShop(state: GameState)
   {
     state.shop.push({
       item: itemUtils.createItemInstance(itemsByRarity[2][Math.floor(Math.random() * itemsByRarity[2].length)]),
-      price: 500,
+      price: 1000,
       discount: 0,
     });
   }
 
   state.shop.push({
     item: itemUtils.createItemInstance(itemsByRarity[3][Math.floor(Math.random() * itemsByRarity[3].length)]),
-    price: 3000,
+    price: 6000,
     discount: 0,
   });
 
