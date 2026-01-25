@@ -70,7 +70,7 @@ export default function Inventory({
           items[sourceIndex!] = null;
           selected = [];
         }
-      } else if (unboxedItem && game.view == "Market")
+      } else if (unboxedItem && prev.view == "Market")
       {
         items[itemSlotID] = unboxedItem;
         unboxedItem = null;
