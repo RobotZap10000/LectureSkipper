@@ -17,7 +17,7 @@ export const itemData: ItemData = {
 export const itemMeta: ItemMeta = {
   icon: ItemIcon,
   getDescription: (item) =>
-    `**Before Attend**: Lectures for this course now give 90% less understanding, but **${item.level}** lectures are added to the block. Can only be used once per block.`,
+    `**Before Attend**: Lectures for all courses now give 75% less understanding, but the current amount of lectures left until exams is increased by **${(itemUtils.geometricSeries(item.level - 1, 0.95, 0.1, 1) * 100).toFixed(2)}%**. Can only be used once per block.`,
   getEnabled: (item, state) => !itemUtils.getItemUsedThisBlock(item, state),
 };
 
@@ -26,12 +26,15 @@ export const itemBehavior: ItemBehavior = {
   {
     itemUtils.setItemUsedThisBlock(params.item, params.state);
 
-    params.state.lecturesLeft += params.item.level;
-    
-    let currentUnhelpful = effectUtils.getEffectStacks(params.state, params.lecture.courseIndex, "Unhelpful");
-    let toAdd = Math.round((100 - currentUnhelpful) * 0.9);
-    effectUtils.addEffectStacksToCourse(params.state, params.lecture.courseIndex, "Unhelpful", toAdd);
+    for (let i = 0; i < params.state.courses.length; i++)
+    {
+      let currentUnhelpful = effectUtils.getEffectStacks(params.state, i, "Unhelpful");
+      let toAdd = Math.round((100 - currentUnhelpful) * 0.75);
+      effectUtils.addEffectStacksToCourse(params.state, i, "Unhelpful", toAdd);
+    }
 
-    params.logEntry.message = `+${params.item.level} lectures`;
+    let lecturesToAdd = Math.ceil(itemUtils.geometricSeries(params.item.level - 1, 0.95, 0.1, 1) * params.state.lecturesLeft);
+    params.state.lecturesLeft += lecturesToAdd;
+    params.logEntry.message = `+${lecturesToAdd} lectures`;
   },
 };

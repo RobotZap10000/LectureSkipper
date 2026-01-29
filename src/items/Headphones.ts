@@ -17,14 +17,14 @@ export const itemData: ItemData = {
 export const itemMeta: ItemMeta = {
   icon: ItemIcon,
   getDescription: (item) =>
-    `**On Attend**: Still gain **${(itemUtils.geometricSeries(item.level - 1, 0.9, 0.25, 1) * 100).toFixed(2)}%** of the Procrastination Value, despite not skipping.`,
+    `**On Attend**: Still gain **${(itemUtils.geometricSeries(item.level - 1, 0.8, 0.5, 1) * 100).toFixed(2)}%** of the Procrastination Value, despite not skipping.`,
   getEnabled: (item, state) => true,
 };
 
 export const itemBehavior: ItemBehavior = {
   beforeAttendLecture: (params) =>
   {
-    let gainedP = Math.round(params.lecture.procrastinationValue * itemUtils.geometricSeries(params.item.level - 1, 0.9, 0.25, 1));
+    let gainedP = Math.round(params.lecture.procrastinationValue * itemUtils.geometricSeries(params.item.level - 1, 0.8, 0.5, 1));
     params.state.procrastinations += gainedP;
     params.logEntry.message = `+${gainedP} P`;
   },

@@ -17,7 +17,7 @@ export const itemData: ItemData = {
 export const itemMeta: ItemMeta = {
   icon: ItemIcon,
   getDescription: (item) =>
-    `**Always Active**: If a course reaches 200% completion, all other items in your inventory gain **+${item.level}** levels.`,
+    `**Always Active**: If a course reaches 500% completion, all other items in your inventory gain **+${item.level}** levels.`,
   getEnabled: (item, state) => true,
 };
 
@@ -29,13 +29,13 @@ export const itemBehavior: ItemBehavior = {
   },
   afterRound: (params) =>
   {
-    // Check if any course went over 200%
+    // Check if any course went over 500%
     for (let i = 0; i < params.state.courses.length; i++)
     {
       const course = params.state.courses[i];
       const preRoundUnderstandings = params.item.memory.courseUnderstandings[i];
       const postRoundUnderstandings = course.understandings;
-      const threshold = course.goal * 2;
+      const threshold = course.goal * 5;
 
       if (postRoundUnderstandings >= threshold && preRoundUnderstandings < threshold)
       {

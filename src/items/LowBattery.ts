@@ -17,7 +17,7 @@ export const itemData: ItemData = {
 export const itemMeta: ItemMeta = {
   icon: ItemIcon,
   getDescription: (item) =>
-    `**On Skip**: Reduce the Understanding requirements of all chats in the Group Chat by **${(itemUtils.geometricSeries(item.level - 1, 0.99, 0.05, 1) * 100).toFixed(2)}%**.`,
+    `**On Skip**: Reduce the Understanding requirements of all chats in the Group Chat by **${(itemUtils.geometricSeries(item.level - 1, 0.999, 0.025, 1) * 100).toFixed(2)}%**.`,
   getEnabled: (item, state) => true,
 };
 
@@ -25,7 +25,7 @@ export const itemBehavior: ItemBehavior = {
   beforeSkipLecture: (params) =>
   {
     let reducedCount = 0;
-    let reduceMultiplier = 1 - itemUtils.geometricSeries(params.item.level - 1, 0.99, 0.05, 1);
+    let reduceMultiplier = 1 - itemUtils.geometricSeries(params.item.level - 1, 0.999, 0.025, 1);
     for (let i = 0; i < params.state.quests.length; i++)
     {
       let quest = params.state.quests[i];

@@ -1,4 +1,4 @@
-import { useState, type Dispatch, type SetStateAction } from "react";
+import { useContext, useState, type Dispatch, type SetStateAction } from "react";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
 import { Settings, RefreshCcw, PenOff, ScrollText, Box, Trophy, AlertCircle } from "lucide-react";
 import type { GameState, Run } from "@/game";
@@ -19,19 +19,52 @@ import
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { AnimationContext, type AnimationMode } from "@/App";
 
 interface Props
 {
   game: GameState;
   setGame: Dispatch<SetStateAction<GameState>>;
   topRuns: Run[];
-  animations: string;
-  setAnimations: Dispatch<SetStateAction<string>>;
 }
 
-export default function SettingsView({ game, setGame, topRuns, animations, setAnimations }: Props)
+export default function SettingsView({ game, setGame, topRuns }: Props)
 {
+  let {animations, setAnimations} = useContext(AnimationContext)!;
+
   const gameUpdates = [
+    {
+      version: "0.6.0",
+      date: "January 29, 2026",
+      title: "Second to Last Update",
+      description: "More improvements before the 1.0.0 release.",
+      majorChanges: [
+        "Reworked Time Machine. Before Attend: Lectures for all courses now give 75% less understanding, but the current amount of lectures left until exams is increased by x%. Can only be used once per block.",
+        "More items in the Shop now start preleveled.",
+      ],
+      smallChanges: [
+        "Improved animation settings.",
+        "Added more course names.",
+        "Added an explanation for the Scoring mechanism to the Courses card.",
+        "Barcode Buff: Now activates 10 times per level instead of 5.",
+        "Cart Buff: Now adds $30 per level.",
+        "Headphones Buff: Now starts at 50% and scales faster.",
+        "Job Buff: Now starts at 1.33 and scales +0.33 per level.",
+        "Low Battery Nerf: Now starts at 2.5% and scales even slower.",
+        "Soda Buff: Now adds 3 stacks per level.",
+        "Sticky Note Buff: Now no longer has a maximum %.",
+        "Super Soup Nerf: Threshold is now 500%.",
+        "Toolbox Buff: Now activates 10 times per level.",
+        "Video Buff: Now can scale to 0%.",
+        "Video Game Buff: Now gives 25% extra per level.",
+        "Wallet Buff: Now gives $20 + $15 per level.",
+        "Stock Market Buff: Now starts at $1 per $30.",
+      ],
+      bugFixes: [
+        "Video description has been fixed.",
+        "Firefox should now properly render the game.",
+      ],
+    },
     {
       version: "0.5.1",
       date: "January 25, 2026",
@@ -227,14 +260,15 @@ export default function SettingsView({ game, setGame, topRuns, animations, setAn
           <div className="w-full max-w-[50%]">
             <Select
               value={animations}
-              onValueChange={(val) => { setAnimations(val); }}
+              onValueChange={(val) => { setAnimations(val as AnimationMode); }}
             >
               <SelectTrigger id="animations-select" className="w-full">
                 <SelectValue placeholder="Full" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Full">Full</SelectItem>
-                <SelectItem value="Reduced">Reduced</SelectItem>
+                <SelectItem value="full">Full</SelectItem>
+                <SelectItem value="reduced">Reduced</SelectItem>
+                <SelectItem value="minimal">Minimal</SelectItem>
               </SelectContent>
             </Select>
           </div>

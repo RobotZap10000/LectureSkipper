@@ -71,7 +71,7 @@ Very rare items that can turn around an entire run.
 - [x] Clover - After Skip: If the Understand Chance of the next lecture is less than the Understand Chance of this one, carry it over and add x%.
 - [x] Anvil - On Attend: If there are two unselected items of equal type directly to the left and right of this item in the Inventory, destroys the item on the right and transfers all the levels to the item on the left. Has a x% chance of breaking on use, disabling it until next block.
 - [x] Brain - After Attend: If you understood this lecture, gain x times the amount of Understanding you need for this course. Otherwise, lose the same amount of U for this course. Can only be used once per block
-- [x] Time Machine - After Attend: Lectures for this course now give 90% less understanding, but +x lectures are added to the block. Can only be used once per block.
+- [x] Time Machine - After Attend: Lectures for all courses now give 75% less understanding, but the current amount of lectures left until exams is increased by x%. Can only be used once per block.
 - [x] Mythical Croissant - On Attend: Permanently increases the amount of energy restored when skipping a lecture by x E.
 - [x] Gem - Always Active: After a lecture, gain +$x.
 - [x] Superintelligence - After Attend: All other courses also gain x% of the gained Understandings from this lecture.

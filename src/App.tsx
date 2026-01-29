@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, createContext, useContext, type Dispatch, type SetStateAction } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import type { GameState, Lecture, Quest, Run, View } from "@/game";
@@ -10,7 +10,6 @@ import ForgeView from "@/views/ForgeView";
 import SettingsView from "@/views/SettingsView";
 import { CircleDollarSign, Sparkles, TriangleAlert, Zap } from "lucide-react";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
-import { MotionGlobalConfig } from "framer-motion"
 
 export function validateGameState(game: any): { valid: boolean, missing: string[] }
 {
@@ -95,23 +94,24 @@ export function validateGameState(game: any): { valid: boolean, missing: string[
   };
 }
 
-
+export type AnimationMode = "full" | "reduced" | "minimal";
+export const AnimationContext = createContext<{
+  animations: AnimationMode;
+  setAnimations: Dispatch<SetStateAction<AnimationMode>>;
+} | null>(null);
 
 export default function App()
 {
-  const [animations, setAnimations] = useState(() =>
+  const [animations, setAnimations] = useState<AnimationMode>(() =>
   {
-    let val = (typeof window !== 'undefined' && localStorage.getItem('animations-pref')) || 'Full';
-    MotionGlobalConfig.skipAnimations = val === "Reduced";
-    return val;
-  }
-  );
-  // Save animations pref whenever it changes and set config
+    const saved = localStorage.getItem("animations-pref");
+    return (saved as AnimationMode) ?? "full";
+  });
   useEffect(() =>
   {
-    MotionGlobalConfig.skipAnimations = animations === "Reduced";
-    localStorage.setItem('animations-pref', animations);
+    localStorage.setItem("animations-pref", animations);
   }, [animations]);
+
   const [saveCorrupted, setSaveCorrupted] = useState(false);
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const [game, setGame] = useState<GameState>(() =>
@@ -247,15 +247,17 @@ export default function App()
             </div>
 
             {/* scrollable content area */}
-            <div className="flex-1 overflow-auto min-h-0 pb-50">
-              <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4 p-0">
-                {game.view === "Calendar" && <CalendarView game={game} setGame={setGame} setTopRuns={setTopRuns} />}
-                {game.view === "Market" && <MarketView game={game} setGame={setGame} />}
-                {game.view === "Chat" && <ChatView game={game} setGame={setGame} />}
-                {game.view === "Forge" && <ForgeView game={game} setGame={setGame} />}
-                {game.view === "Settings" && <SettingsView game={game} setGame={setGame} topRuns={topRuns} animations={animations} setAnimations={setAnimations} />}
+            <AnimationContext.Provider value={{ animations: animations, setAnimations: setAnimations }}>
+              <div className="flex-1 overflow-auto min-h-0 pb-50">
+                <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4 p-0">
+                  {game.view === "Calendar" && <CalendarView game={game} setGame={setGame} setTopRuns={setTopRuns} />}
+                  {game.view === "Market" && <MarketView game={game} setGame={setGame} />}
+                  {game.view === "Chat" && <ChatView game={game} setGame={setGame} />}
+                  {game.view === "Forge" && <ForgeView game={game} setGame={setGame} />}
+                  {game.view === "Settings" && <SettingsView game={game} setGame={setGame} topRuns={topRuns} />}
+                </div>
               </div>
-            </div>
+            </AnimationContext.Provider>
           </main>
 
         </div>

@@ -17,14 +17,14 @@ export const itemData: ItemData = {
 export const itemMeta: ItemMeta = {
   icon: ItemIcon,
   getDescription: (item) =>
-    `**On Skip**: Gain $1 for every Potential Understanding of the lecture that you skipped, multiplied by **${(0.9 + item.level / 10).toFixed(2)}**.`,
+    `**On Skip**: Gain $1 for every Potential Understanding of the lecture that you skipped, multiplied by **${(1 + item.level / 3).toFixed(2)}**.`,
   getEnabled: (item, state) => true,
 };
 
 export const itemBehavior: ItemBehavior = {
   beforeSkipLecture: (params) =>
   {
-    let cashToAdd = Math.round(params.lecture.potentialUnderstandings * (0.9 + params.item.level / 10));
+    let cashToAdd = Math.round(params.lecture.potentialUnderstandings * (1 + params.item.level / 3));
     params.state.cash += cashToAdd;
     params.logEntry.message = `+$${cashToAdd}`;
   },

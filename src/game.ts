@@ -214,7 +214,7 @@ export function initGame(): GameState
   };
 
   // Debug code for testing
-  //let debugItem = itemUtils.createItemInstanceAndAddToInventory(itemRegistry["Epic Beer"], game);
+  //let debugItem = itemUtils.createItemInstanceAndAddToInventory(itemRegistry["Low Battery"], game);
   //if (debugItem)
   //{
   //  debugItem.level = 1;
@@ -680,24 +680,32 @@ export function startRound(state: GameState, action: "attend" | "skip"): GameSta
 }
 
 const courseTemplates = [
-  "Introduction to {{topic}}",
-  "Advanced {{topic}}",
-  "Fundamental {{topic}}",
-  "Applied {{topic}}",
-  "Principles of {{topic}}",
-  "Modern {{topic}}",
-  "{{topic}}, but 2 times harder",
-  "Destroying {{topic}}",
-  "Daily {{topic}}",
-  "Forgetting {{topic}}",
-  "Paying for {{topic}} lectures",
-  "Blowing up {{topic}}",
-  "{{topic}} Speedrunning",
-  "Counting in {{topic}}",
-  "Experimenting with {{topic}}",
-  "History of {{topic}}",
-  "96.4% of {{topic}}",
-  "Philosophy of {{topic}}",
+  "Introduction to {{{topic}}}",
+  "Advanced {{{topic}}}",
+  "Fundamental {{{topic}}}",
+  "Applied {{{topic}}}",
+  "Principles of {{{topic}}}",
+  "Modern {{{topic}}}",
+  "{{{topic}}}, but 2 times harder",
+  "Destroying {{{topic}}}",
+  "Daily {{{topic}}}",
+  "Forgetting {{{topic}}}",
+  "Paying for {{{topic}}} lectures",
+  "Blowing up {{{topic}}}",
+  "{{{topic}}} Speedrunning",
+  "Counting in {{{topic}}}",
+  "Experimenting with {{{topic}}}",
+  "History of {{{topic}}}",
+  "96.4% of {{{topic}}}",
+  "Philosophy of {{{topic}}}",
+  "Politics of {{{topic}}}",
+  "Western {{{topic}}}",
+  "Eastern {{{topic}}}",
+  "Estonian {{{topic}}}",
+  "Chinese {{{topic}}}",
+  "American {{{topic}}}",
+  "Japanese {{{topic}}}",
+  "Luxembourgian {{{topic}}}",
 ];
 
 const courseTopics = [
@@ -754,6 +762,20 @@ const courseTopics = [
   "Philosophy",
   "Religion",
   "Arts",
+
+  "Cheese",
+  "Christmas",
+  "Halloween",
+  "Easter",
+  "Valentine's Day",
+  "Thanksgiving",
+  "New Year's Eve",
+  "New Year's Day",
+  "Gummy Bears :D",
+  ";)",
+  "Don't look up \"Unicode for g\"",
+  "birds",
+  "Knee Surgeries",
 ];
 
 export function generateCourse(state: GameState, hue: number): Course
@@ -992,7 +1014,7 @@ export function generateShop(state: GameState)
   }
 
   // Add levels
-  for (var i = 0; i < 3; i++)
+  for (var i = 0; i < 7; i++)
   {
     let randomItemIdx = Math.floor(Math.random() * state.shop.length);
     if (state.shop[randomItemIdx].item.level > 1)

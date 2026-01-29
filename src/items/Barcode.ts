@@ -17,7 +17,7 @@ export const itemData: ItemData = {
 export const itemMeta: ItemMeta = {
   icon: ItemIcon,
   getDescription: (item) =>
-    `**On Skip**: adds a 1% discount to a random item in the Shop. Activates **${item.level * 5}** times. Discounts can stack, but will not go past 100%`,
+    `**On Skip**: adds a 1% discount to a random item in the Shop. Activates **${item.level * 10}** times. Discounts can stack, but will not go past 100%`,
   getEnabled: (item, state) => true,
 };
 
@@ -27,7 +27,7 @@ export const itemBehavior: ItemBehavior = {
     if (params.state.shop.length == 0) return;
 
     let addedDiscounts = 0;
-    for (let i = 0; i < params.item.level * 5; i++)
+    for (let i = 0; i < params.item.level * 10; i++)
     {
       const randomIndex = Math.floor(Math.random() * params.state.shop.length);
       if (params.state.shop[randomIndex].discount < 1)

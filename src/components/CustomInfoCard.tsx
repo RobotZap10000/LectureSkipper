@@ -1,3 +1,4 @@
+import { AnimationContext } from "@/App";
 import
 {
   Card,
@@ -14,6 +15,7 @@ import
 import { motion } from "framer-motion";
 
 import { HelpCircle, type LucideIcon } from "lucide-react";
+import { useContext } from "react";
 
 interface CustomInfoCardProps
 {
@@ -32,6 +34,8 @@ export function CustomInfoCard({
   className = "",
 }: CustomInfoCardProps)
 {
+  let { animations, setAnimations } = useContext(AnimationContext)!;
+
   return (
     <motion.div
       className={`p-2 rounded flex flex-col max-w-[500px] w-full h-content overflow-hidden ${className}`}
@@ -41,13 +45,13 @@ export function CustomInfoCard({
       animate={{ opacity: 1, y: 0, scale: 1 }}
 
       // Spring transition for a "snappy" feel
-      transition={{
+      transition={animations === "full" ? {
         type: "spring",
         damping: 25,
         stiffness: 300,
         layout: { duration: 0.3 }, // Smooths the movement of other cards
         delay: Math.random() * 0.2,
-      }}
+      } : { duration: 0 }}
     >
       <Card className="gap-4 w-full rounded-xl border shadow-sm">
         <CardHeader className="gap-0">

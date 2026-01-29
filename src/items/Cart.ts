@@ -17,7 +17,7 @@ export const itemData: ItemData = {
 export const itemMeta: ItemMeta = {
   icon: ItemIcon,
   getDescription: (item) =>
-    `**After Attend**: Until the end of the block, whenever a lecture about this course appears, gain **+$${item.level * 10}**.`,
+    `**After Attend**: Until the end of the block, whenever a lecture about this course appears, gain **+$${item.level * 30}**.`,
   getEnabled: (item, state) => true,
 };
 
@@ -26,6 +26,6 @@ export const itemBehavior: ItemBehavior = {
   {
     effectUtils.addEffectStacksToCourse(params.state, params.lecture.courseIndex, "Cash", params.item.level * 10);
 
-    params.logEntry.message = `+${params.item.level * 10}$ whenever ${params.state.courses[params.lecture.courseIndex].title} appears`;
+    params.logEntry.message = `+${params.item.level * 30}$ whenever ${params.state.courses[params.lecture.courseIndex].title} appears`;
   },
 };

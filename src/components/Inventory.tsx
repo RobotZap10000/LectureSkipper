@@ -1,14 +1,15 @@
-import { ArrowBigRight, Box, Boxes, Check, LayoutGrid, ListOrdered, Package } from "lucide-react";
+import { Box, Boxes, LayoutGrid, ListOrdered, Package } from "lucide-react";
 import ItemSlot from "@/components/ItemSlot";
 import { type GameState } from "@/game";
-import { useEffect, type Dispatch, type SetStateAction } from "react";
+import { useContext, useEffect, type Dispatch, type SetStateAction } from "react";
 import { CustomInfoCard } from "./CustomInfoCard";
 import { itemUtils } from "@/item";
 import { CustomButton } from "./CustomButton";
 import { itemMetaRegistry } from "@/itemRegistry";
 import ItemComponent from "./ItemComponent";
-import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
-import { Kbd } from "./ui/kbd";
+import { motion } from "framer-motion";
+import { AnimationContext } from "@/App";
+import { CustomAnimatePresence } from "@/components/CustomAnimatePresence";
 
 interface Props
 {
@@ -21,6 +22,7 @@ export default function Inventory({
   setGame,
 }: Props)
 {
+  let { animations, setAnimations } = useContext(AnimationContext)!;
 
   const handleItemClick = (itemID: string) =>
   {
@@ -280,106 +282,105 @@ export default function Inventory({
             </h2>
           )}
 
-          <LayoutGroup>
-            <div className="flex gap-2">
-              {/* Left column: 1x6 row select buttons */}
-              {game.view === "Calendar" && (
-                <div className={`grid grid-rows-${numRows} gap-0`}>
-                  {Array.from({ length: numRows }).map((i, rowIndex) => (
-                    <CustomButton
-                      key={`row-btn-${rowIndex}`}
-                      color="#494949ff"
-                      outlineColor="rgb(41, 41, 41)"
-                      className="w-10 h-10 mt-2 rounded-2xl"
-                      onClick={() => handleSelectRow(rowIndex)}
-                    >
-                      <p className="text-xl font-bold">
-                        {rowIndex + 1}
-                      </p>
-                    </CustomButton>
-                  ))}
-                </div>
-              )}
+          <div className="flex gap-2">
+            {/* Left column: 1x6 row select buttons */}
+            {game.view === "Calendar" && (
+              <div className={`grid grid-rows-${numRows} gap-0`}>
+                {Array.from({ length: numRows }).map((i, rowIndex) => (
+                  <CustomButton
+                    key={`row-btn-${rowIndex}`}
+                    color="#494949ff"
+                    outlineColor="rgb(41, 41, 41)"
+                    className="w-10 h-10 mt-2 rounded-2xl"
+                    onClick={() => handleSelectRow(rowIndex)}
+                  >
+                    <p className="text-xl font-bold">
+                      {rowIndex + 1}
+                    </p>
+                  </CustomButton>
+                ))}
+              </div>
+            )}
 
-              {/* Right side: 6x6 item grid */}
-              {/* Container to establish the coordinate space */}
-              <div className="relative" style={{ width: numCols * 50 + (numCols - 1) * 4, height: numRows * 50 + (numRows - 1) * 4 }}>
+            {/* Right side: 6x6 item grid */}
+            {/* Container to establish the coordinate space */}
+            <div className="relative" style={{ width: numCols * 50 + (numCols - 1) * 4, height: numRows * 50 + (numRows - 1) * 4 }}>
 
-                {/* Layer 1: Background Slots */}
-                <div
-                  className="grid gap-1"
-                  style={{
-                    gridTemplateColumns: `repeat(${numCols}, 50px)`,
-                    gridTemplateRows: `repeat(${numRows}, 50px)`,
-                  }}
-                >
-                  {Array.from({ length: numCols * numRows }).map((_, index) => (
-                    <ItemSlot
-                      key={`slot-${index}`}
-                      game={game}
-                      size={50}
-                      onClick={() => handleEmptySlotClick(index)}
-                    />
-                  ))}
-                </div>
+              {/* Layer 1: Background Slots */}
+              <div
+                className="grid gap-1"
+                style={{
+                  gridTemplateColumns: `repeat(${numCols}, 50px)`,
+                  gridTemplateRows: `repeat(${numRows}, 50px)`,
+                }}
+              >
+                {Array.from({ length: numCols * numRows }).map((_, index) => (
+                  <ItemSlot
+                    key={`slot-${index}`}
+                    game={game}
+                    size={50}
+                    onClick={() => handleEmptySlotClick(index)}
+                  />
+                ))}
+              </div>
 
-                {/* Layer 2: Foreground Items */}
-                <div
-                  className="absolute inset-0 grid gap-1 pointer-events-none" // pointer-events-none lets clicks pass to slots
-                  style={{
-                    gridTemplateColumns: `repeat(${numCols}, 50px)`,
-                    gridTemplateRows: `repeat(${numRows}, 50px)`,
-                  }}
-                >
-                  <AnimatePresence>
-                    {game.items.map((item, index) =>
-                    {
-                      if (!item) return null;
+              {/* Layer 2: Foreground Items */}
+              <div
+                className="absolute inset-0 grid gap-1 pointer-events-none" // pointer-events-none lets clicks pass to slots
+                style={{
+                  gridTemplateColumns: `repeat(${numCols}, 50px)`,
+                  gridTemplateRows: `repeat(${numRows}, 50px)`,
+                }}
+              >
+                <CustomAnimatePresence mode="sync">
+                  {game.items.map((item, index) =>
+                  {
+                    if (!item) return null;
 
-                      // Calculate grid position (CSS grid is 1-indexed)
-                      const col = (index % numCols) + 1;
-                      const row = Math.floor(index / numCols) + 1;
+                    // Calculate grid position (CSS grid is 1-indexed)
+                    const col = (index % numCols) + 1;
+                    const row = Math.floor(index / numCols) + 1;
 
-                      return (
-                        <motion.div
-                          key={`item-${item.id}-view-${game.view}`}
-                          layoutId={`item-${item.id}-view-${game.view}`}
-                          className="pointer-events-auto" // Re-enable clicks for the item itself
-                          style={{
-                            gridColumnStart: col,
-                            gridRowStart: row,
-                          }}
-                          initial={{ opacity: 0, scale: 0.5, x: -20 + Math.random() * 40, y: -50 + Math.random() * 10, rotate: 0 }}
-                          animate={{ opacity: 1, scale: 1, x: 0, y: 0, rotate: 0 }}
-                          exit={{ opacity: 0, scale: 0, x: 0, y: 0, rotate: 90 }}
-                          transition={{
-                            // 1. General settings for the initial "pop-in"
-                            duration: 0.5,
-                            ease: "easeInOut",
-                            delay: index * 0.0075,
+                    return (
+                      <motion.div
+                        layout={animations !== "minimal"}
+                        key={`item-${item.id}-view-${game.view}`}
+                        layoutId={animations !== "minimal" ? `item-${item.id}-view-${game.view}` : undefined}
+                        className="pointer-events-auto" // Re-enable clicks for the item itself
+                        style={{
+                          gridColumnStart: col,
+                          gridRowStart: row,
+                        }}
+                        initial={animations !== "minimal" ? { opacity: 0, scale: 0.5, x: -20 + Math.random() * 40, y: -50 + Math.random() * 10, rotate: 0 } : undefined}
+                        animate={animations !== "minimal" ? { opacity: 1, scale: 1, x: 0, y: 0, rotate: 0 } : undefined}
+                        exit={animations !== "minimal" ? { opacity: 0, scale: 0, x: 0, y: 0, rotate: 90 } : undefined}
+                        transition={{
+                          // 1. General settings for the initial "pop-in"
+                          duration: 0.5,
+                          ease: "easeInOut",
+                          delay: index * 0.0075,
 
-                            // 2. Specific override for layout movements
-                            layout: {
-                              delay: 0,          // No delay when moving between slots
-                              duration: 0.3,
-                              ease: "circOut"
-                            }
-                          }}
-                          onClick={(e) =>
-                          {
-                            e.stopPropagation(); // Prevent triggering the slot click underneath
-                            handleItemClick(item.id);
-                          }}
-                        >
-                          <ItemComponent item={item} game={game} size={50} />
-                        </motion.div>
-                      );
-                    })}
-                  </AnimatePresence>
-                </div>
+                          // 2. Specific override for layout movements
+                          layout: {
+                            delay: 0,          // No delay when moving between slots
+                            duration: 0.3,
+                            ease: "circOut"
+                          }
+                        }}
+                        onClick={(e) =>
+                        {
+                          e.stopPropagation(); // Prevent triggering the slot click underneath
+                          handleItemClick(item.id);
+                        }}
+                      >
+                        <ItemComponent item={item} game={game} size={50} />
+                      </motion.div>
+                    );
+                  })}
+                </CustomAnimatePresence>
               </div>
             </div>
-          </LayoutGroup>
+          </div>
 
           {game.view !== "Calendar" && (
             <CustomButton

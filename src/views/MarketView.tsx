@@ -1,7 +1,6 @@
 import Inventory from "@/components/Inventory";
 import type { GameState, ShopEntry } from "@/game";
-import { saveGame } from "@/game";
-import type { Dispatch, SetStateAction } from "react";
+import { useContext, type Dispatch, type SetStateAction } from "react";
 import { PackageOpen, Store, Gift, Box } from "lucide-react";
 import ItemSlot from "@/components/ItemSlot";
 import { Item as ShadItem, ItemGroup } from "@/components/ui/item";
@@ -11,8 +10,10 @@ import { CustomButton } from "@/components/CustomButton";
 import { CustomInfoCard } from "@/components/CustomInfoCard";
 import { renderDescription } from "@/stringUtils";
 import ItemComponent from "@/components/ItemComponent";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { weightedRandom } from "@/lib/utils";
+import { CustomAnimatePresence } from "@/components/CustomAnimatePresence";
+import { AnimationContext } from "@/App";
 
 interface Props
 {
@@ -22,6 +23,8 @@ interface Props
 
 export default function MarketView({ game, setGame }: Props)
 {
+  let { animations, setAnimations } = useContext(AnimationContext)!;
+
   type Box = {
     name: string;
     cost: number;
@@ -172,7 +175,7 @@ export default function MarketView({ game, setGame }: Props)
       >
         {game.shop.length > 0 ? (
           <div className="grid grid-cols-3 gap-4">
-            <AnimatePresence>
+            <CustomAnimatePresence>
               {game.shop.map((entry, i) =>
               {
                 const finalPrice = Math.floor(entry.price * (1 - entry.discount));
@@ -181,21 +184,21 @@ export default function MarketView({ game, setGame }: Props)
                 return (
                   <motion.div
                     key={"entry-" + entry.item.id}
-                    layout
+                    layout={animations === "full"}
                     className="flex flex-col items-center justify-center gap-2 p-3 rounded-lg bg-neutral-800 border-1 border-neutral-700 relative"
-                    initial={{ opacity: 0, scale: 0.9, y: -50 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{
+                    initial={animations !== "minimal" ? { opacity: 0, scale: 0.9, y: -50 } : undefined}
+                    animate={animations !== "minimal" ? { opacity: 1, scale: 1, y: 0 } : undefined}
+                    exit={animations !== "minimal" ? {
                       opacity: 0, scale: 0.9, y: 0, transition: {
                         duration: 0.1,
                         ease: "easeOut"
                       }
-                    }}
+                    } : undefined}
                     transition={{
                       type: "spring",
                       damping: 35,
                       stiffness: 300,
-                      delay: i * 0.025
+                      delay: i * 0.015
                     }}
                   >
                     {/* Item visual */}
@@ -236,7 +239,7 @@ export default function MarketView({ game, setGame }: Props)
                   </motion.div>
                 );
               })}
-            </AnimatePresence>
+            </CustomAnimatePresence>
           </div>
         ) : (
           <div className="text-muted-foreground p-0">No items available.</div>
@@ -324,14 +327,14 @@ export default function MarketView({ game, setGame }: Props)
             />
 
             {/* The item layer */}
-            <AnimatePresence>
+            <CustomAnimatePresence>
               {game.unboxedItem && (
                 <motion.div
                   key={`item-${game.unboxedItem.id}-view-${game.view}`}
-                  layoutId={`item-${game.unboxedItem.id}-view-${game.view}`}
-                  initial={{ opacity: 0, scale: 0.5, rotate: 0 }}
-                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                  exit={{ opacity: 0, scale: 0, rotate: 90 }}
+                  layoutId={animations !== "minimal" ? `item-${game.unboxedItem.id}-view-${game.view}` : undefined}
+                  initial={animations === "full" ? { opacity: 0, scale: 0.5, rotate: 0 } : undefined}
+                  animate={animations === "full" ? { opacity: 1, scale: 1, rotate: 0 } : undefined}
+                  exit={animations === "full" ? { opacity: 0, scale: 0, rotate: 90 } : undefined}
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                   className="absolute inset-0 flex items-center justify-center"
                 >
@@ -343,7 +346,7 @@ export default function MarketView({ game, setGame }: Props)
                   />
                 </motion.div>
               )}
-            </AnimatePresence>
+            </CustomAnimatePresence>
           </div>
 
 

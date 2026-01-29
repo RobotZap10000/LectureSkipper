@@ -17,14 +17,14 @@ export const itemData: ItemData = {
 export const itemMeta: ItemMeta = {
   icon: ItemIcon,
   getDescription: (item) =>
-    `**On Use**: Gain **$${item.level * 5 + 20}**.`,
+    `**On Use**: Gain **$${item.level * 15 + 20}**.`,
   getEnabled: (item, state) => true,
 };
 
 export const itemBehavior: ItemBehavior = {
   beforeUse: (params) =>
   {
-    params.state.cash += params.item.level * 5 + 20;
-    params.logEntry.message = `+$${params.item.level * 5 + 20}`;
+    params.state.cash += params.item.level * 15 + 20;
+    params.logEntry.message = `+$${params.item.level * 15 + 20}`;
   },
 };

@@ -17,7 +17,7 @@ export const itemData: ItemData = {
 export const itemMeta: ItemMeta = {
   icon: ItemIcon,
   getDescription: (item) =>
-    `**On Attend**: If the Understand Chance is above **${(itemUtils.exponentialPercentage(item.level, 0.03, 0.9, 0.25) * 100).toFixed(2)}%**, it becomes 100%.`,
+    `**On Attend**: If the Understand Chance is above **${(itemUtils.exponentialPercentage(item.level, 0.03, 0.9, 0) * 100).toFixed(2)}%**, it becomes 100%.`,
   getEnabled: (item, state) => true,
 };
 

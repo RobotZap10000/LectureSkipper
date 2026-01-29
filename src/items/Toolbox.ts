@@ -17,7 +17,7 @@ export const itemData: ItemData = {
 export const itemMeta: ItemMeta = {
   icon: ItemIcon,
   getDescription: (item) =>
-    `**Consumable**: Increases the starting level of a random item in the shop by 1. Activates **${item.level * 3}** times.`,
+    `**Consumable**: Increases the starting level of a random item in the shop by 1. Activates **${item.level * 10}** times.`,
   getEnabled: (item, state) => true,
 };
 
@@ -27,7 +27,7 @@ export const itemBehavior: ItemBehavior = {
     if (params.state.shop.length == 0) return;
 
     let uniqueItemIDs: string[] = [];
-    for (let i = 0; i < params.item.level * 3; i++)
+    for (let i = 0; i < params.item.level * 10; i++)
     {
       const randomIndex = Math.floor(Math.random() * params.state.shop.length);
       params.state.shop[randomIndex].item.level++;

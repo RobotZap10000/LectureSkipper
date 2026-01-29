@@ -2,7 +2,7 @@ import Inventory from "@/components/Inventory";
 import type { GameState, Run } from "@/game";
 import { startRound, attendExams, startNewBlock, initGame } from "@/game";
 import type { Dispatch, SetStateAction } from "react";
-import { useEffect, useRef } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { Scroll, BookOpen, RefreshCcw, Zap } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -14,6 +14,8 @@ import { story } from "@/story";
 import { renderDescription } from "@/stringUtils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Separator } from "@/components/ui/separator";
+import { CustomAnimatePresence } from "@/components/CustomAnimatePresence";
+import { AnimationContext } from "@/App";
 
 interface Props
 {
@@ -24,6 +26,8 @@ interface Props
 
 export default function CalendarView({ game, setGame, setTopRuns }: Props)
 {
+  let { animations, setAnimations } = useContext(AnimationContext)!;
+
   const logContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() =>
@@ -87,7 +91,7 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
         {/* --- CASE 1: Lectures still remaining --- */}
         {story[game.story] == null && game.nextLecture && !game.examsAttended ? (
           <div className="flex flex-col items-center gap-2">
-            <AnimatePresence mode="popLayout">
+            <CustomAnimatePresence>
               {/* Determine course color */}
               {(() =>
               {
@@ -100,12 +104,12 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
 
                 return (
                   <motion.div
-                    layout
-                    layoutId={"lecture-" + game.nextLecture.potentialUnderstandings + game.nextLecture.understandChance + game.nextLecture.energyCost + game.nextLecture.procrastinationValue}
+                    layout={animations !== "minimal"}
+                    layoutId={animations !== "minimal" ? "lecture-" + game.nextLecture.potentialUnderstandings + game.nextLecture.understandChance + game.nextLecture.energyCost + game.nextLecture.procrastinationValue : undefined}
                     key={"lecture-" + game.nextLecture.potentialUnderstandings + game.nextLecture.understandChance + game.nextLecture.energyCost + game.nextLecture.procrastinationValue}
-                    initial={{ opacity: 0, x: 100, scale: 0.5 }}
-                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                    exit={{ opacity: 0, x: -100, scale: 0.5 }}
+                    initial={animations !== "minimal" ? { opacity: 0, x: 100, scale: 0.5 } : undefined}
+                    animate={animations !== "minimal" ? { opacity: 1, x: 0, scale: 1 } : undefined}
+                    exit={animations !== "minimal" ? { opacity: 0, x: -100, scale: 0.5 } : undefined}
                     transition={{
                       type: "spring",
                       damping: 35,
@@ -183,7 +187,7 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
                   </motion.div>
                 );
               })()}
-            </AnimatePresence>
+            </CustomAnimatePresence>
 
             {/* Buttons */}
             <div className="flex gap-2 m-2">
@@ -245,16 +249,16 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
                 const course = game.courses[i];
                 return (
                   <motion.div
-                    layout
+                    layout={animations !== "minimal"}
                     layoutId={"exam-result-course-" + course.title + "-color-" + course.color}
                     key={"exam-result-course-" + course.title + "-color-" + course.color}
-                    initial={{ opacity: 0, x: -100, scale: 0.5 }}
-                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                    initial={animations !== "minimal" ? { opacity: 0, x: -100, scale: 0.5 } : undefined}
+                    animate={animations !== "minimal" ? { opacity: 1, x: 0, scale: 1 } : undefined}
                     transition={{
                       type: "spring",
                       damping: 35,
                       stiffness: 300,
-                      delay: i * 0.5
+                      delay: i * 0.25
                     }}
                   >
                     <Card
@@ -279,13 +283,13 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
             {/* --- FAILURE CHECK --- */}
             {game.examResults.filter((r) => !r).length >= 2 ? (
               <motion.div
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={animations !== "minimal" ? { opacity: 0, scale: 0.5 } : undefined}
+                animate={animations !== "minimal" ? { opacity: 1, scale: 1 } : undefined}
                 transition={{
                   type: "spring",
                   damping: 35,
                   stiffness: 300,
-                  delay: game.courses.length * 0.5
+                  delay: game.courses.length * 0.25
                 }}
               >
                 <h2 className="font-bold mb-4">Final Score: {game.score}</h2>
@@ -299,13 +303,13 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
               </motion.div>
             ) : (
               <motion.div
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={animations !== "minimal" ? { opacity: 0, scale: 0.5 } : undefined}
+                animate={animations !== "minimal" ? { opacity: 1, scale: 1 } : undefined}
                 transition={{
                   type: "spring",
                   damping: 35,
                   stiffness: 300,
-                  delay: game.courses.length * 0.5
+                  delay: game.courses.length * 0.25
                 }}
               >
                 <CustomButton

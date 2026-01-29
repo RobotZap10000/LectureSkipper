@@ -1,13 +1,15 @@
 import Inventory from "@/components/Inventory";
 import { type GameState, type Quest } from "../game";
-import type { Dispatch, SetStateAction } from "react";
+import { useContext, type Dispatch, type SetStateAction } from "react";
 import { MessageCircle, MessagesSquare } from "lucide-react";
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import chroma from "chroma-js";
 import { CustomInfoCard } from "@/components/CustomInfoCard";
 import { CustomButton } from "@/components/CustomButton";
 import { CoursesCard } from "@/components/CoursesCard";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import { AnimationContext } from "@/App";
+import { CustomAnimatePresence } from "@/components/CustomAnimatePresence";
 
 interface Props
 {
@@ -17,6 +19,8 @@ interface Props
 
 export default function ChatView({ game, setGame }: Props)
 {
+  let { animations, setAnimations } = useContext(AnimationContext)!;
+
   const haveCosts = (quest: Quest): boolean =>
   {
     return quest.costs.every((req) =>
@@ -137,7 +141,7 @@ export default function ChatView({ game, setGame }: Props)
           <div className="p-3 italic text-gray-400">No offers available.</div>
         ) : (
           <div className="flex flex-wrap gap-2 max-h-[675px] overflow-y-auto overflow-x-hidden">
-            <AnimatePresence>
+            <CustomAnimatePresence>
               {game.quests
                 .filter((quest) =>
                   game.showOnlyCompletableQuests ? haveCosts(quest) : true
@@ -151,17 +155,17 @@ export default function ChatView({ game, setGame }: Props)
 
                   return (
                     <motion.div
-                      layout
-                      layoutId={"quest-" + quest.id}
+                      layout={animations === "full"}
+                      layoutId={animations === "full" ? "quest-" + quest.id : undefined}
                       key={"quest-" + quest.id}
-                      initial={{ opacity: 0, y: -100, scale: 1 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{
+                      initial={animations !== "minimal" ? { opacity: 0, y: -100, scale: 1 } : undefined}
+                      animate={animations !== "minimal" ? { opacity: 1, y: 0, scale: 1 } : undefined}
+                      exit={animations === "full" ? {
                         opacity: 0, y: 100, scale: 1, transition: {
                           duration: 0.1,
                           ease: "easeIn"
                         }
-                      }}
+                      } : undefined}
                       transition={{
                         type: "spring",
                         damping: 35,
@@ -226,7 +230,7 @@ export default function ChatView({ game, setGame }: Props)
                     </motion.div>
                   );
                 })}
-            </AnimatePresence>
+            </CustomAnimatePresence>
           </div>
         )}
       </CustomInfoCard>

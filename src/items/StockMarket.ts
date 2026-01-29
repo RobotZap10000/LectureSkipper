@@ -17,14 +17,14 @@ export const itemData: ItemData = {
 export const itemMeta: ItemMeta = {
   icon: ItemIcon,
   getDescription: (item) =>
-    `**After Skip**: For every **$${Math.max(51 - item.level, 5)}** that you have, gain +$1.`,
+    `**After Skip**: For every **$${Math.max(31 - item.level, 5)}** that you have, gain +$1.`,
   getEnabled: (item, state) => true,
 };
 
 export const itemBehavior: ItemBehavior = {
   afterSkipLecture: (params) =>
   {
-    let cashToAdd = Math.floor(params.state.cash / (Math.max(51 - params.item.level, 5)));
+    let cashToAdd = Math.floor(params.state.cash / (Math.max(31 - params.item.level, 5)));
     params.state.cash += cashToAdd;
     params.logEntry.message = `+$${cashToAdd}`;
   },

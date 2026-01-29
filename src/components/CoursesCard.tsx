@@ -1,13 +1,16 @@
 import chroma from "chroma-js";
 
 import { CustomInfoCard } from "./CustomInfoCard";
-import { GraduationCap, BookAlert } from "lucide-react";
+import { GraduationCap, BookAlert, TrendingUp } from "lucide-react";
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { DEFAULT_MINIMUM_LECTURES_LEFT, type GameState } from "@/game";
 import { EffectBadge } from "./EffectBadge";
 import { motion, AnimatePresence } from "framer-motion";
+import { CustomAnimatePresence } from "@/components/CustomAnimatePresence";
+import { useContext } from "react";
+import { AnimationContext } from "@/App";
 
 interface CoursesCardProps
 {
@@ -16,6 +19,8 @@ interface CoursesCardProps
 
 export function CoursesCard({ game }: CoursesCardProps)
 {
+  let { animations, setAnimations } = useContext(AnimationContext)!;
+
   return (
     <CustomInfoCard
       icon={GraduationCap}
@@ -47,11 +52,21 @@ export function CoursesCard({ game }: CoursesCardProps)
             <br />
             You can gain more Understanding (U) than the course requires. Going above 100% with the chance to pass does nothing.
           </p>
+
+          <br />
+
+          <h2 className="font-bold m-1 flex items-center gap-2">
+            <TrendingUp className="w-5 h-5" /> Score
+          </h2>
+
+          <p className="text-sm">
+            You get 1 Score for each Understanding received <span className="font-bold">from a lecture</span>. Items that directly give Understandings do not give Score, but items that increase the Understanding given by a lecture do indirectly contribute to your Score.
+          </p>
         </>
       }
     >
       <div className="col-span-1 flex flex-col h-full">
-        <AnimatePresence mode="popLayout">
+        <CustomAnimatePresence>
           <div className="flex-1 space-y-2">
             {game.courses.map((c, i) =>
             {
@@ -64,12 +79,12 @@ export function CoursesCard({ game }: CoursesCardProps)
 
               return (
                 <motion.div
-                  layout
-                  layoutId={"course-" + c.title + "-color-" + c.color + "-view-" + game.view}
+                  layout={animations === "full"}
+                  layoutId={animations === "full" ? "course-" + c.title + "-color-" + c.color + "-view-" + game.view : undefined}
                   key={"course-" + c.title + "-color-" + c.color + "-view-" + game.view}
-                  initial={{ opacity: 0, x: -100, scale: 0.5 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: 100, scale: 0.5 }}
+                  initial={animations === "full" ? { opacity: 0, x: -100, scale: 0.5 } : undefined}
+                  animate={animations === "full" ? { opacity: 1, x: 0, scale: 1 } : undefined}
+                  exit={animations === "full" ? { opacity: 0, x: 100, scale: 0.5 } : undefined}
                   transition={{
                     type: "spring",
                     damping: 35,
@@ -85,17 +100,17 @@ export function CoursesCard({ game }: CoursesCardProps)
                       color: textColor,
                     }}
                   >
-                    <AnimatePresence mode="popLayout">
+                    <CustomAnimatePresence>
                       {/* --- Gained Understandings Text Effect --- */}
                       {game.courseTexts.length > i && game.courseTexts[i].length > 0 && (
                         <motion.div
                           className="absolute right-10 top-5"
-                          layout
+                          layout={animations !== "minimal"}
                           key={"course-" + i + c.title + "-color-" + c.color + "-view-" + game.view + "-textEffect-" + game.courseTexts[i] + "-lecturesLeft-" + game.lecturesLeft}
-                          layoutId={"course-" + i + c.title + "-color-" + c.color + "-view-" + game.view + "-textEffect-" + game.courseTexts[i] + "-lecturesLeft-" + game.lecturesLeft}
-                          initial={{ opacity: 0, x: -100, scale: 0.5 }}
-                          animate={{ opacity: 1, x: 0, scale: 1 }}
-                          exit={{ opacity: 0, x: 0, scale: 0.5 }}
+                          layoutId={animations !== "minimal" ? "course-" + i + c.title + "-color-" + c.color + "-view-" + game.view + "-textEffect-" + game.courseTexts[i] + "-lecturesLeft-" + game.lecturesLeft : undefined}
+                          initial={animations !== "minimal" ? { opacity: 0, x: -100, scale: 0.5 } : undefined}
+                          animate={animations !== "minimal" ? { opacity: 1, x: 0, scale: 1 } : undefined}
+                          exit={animations !== "minimal" ? { opacity: 0, x: 0, scale: 0.5 } : undefined}
                           transition={{
                             type: "spring",
                             damping: 35,
@@ -105,7 +120,7 @@ export function CoursesCard({ game }: CoursesCardProps)
                           <span className={`text-4xl font-bold text-shadow-lg ${game.courseTexts[i][0] == "-" ? "text-red-500" : game.courseTexts[i][0] == "+" ? "text-green-500" : "text-white"}`}>{game.courseTexts[i]}</span>
                         </motion.div>
                       )}
-                    </AnimatePresence>
+                    </CustomAnimatePresence>
 
                     <CardHeader>
                       <CardTitle>{c.title}</CardTitle>
@@ -137,7 +152,7 @@ export function CoursesCard({ game }: CoursesCardProps)
               );
             })}
           </div>
-        </AnimatePresence>
+        </CustomAnimatePresence>
 
         <div className="font-bold m-1 flex flex-col gap-2">
           <p>Score: {game.score}</p>

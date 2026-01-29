@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverAnchor } from "@/components/ui/popover";
 import type { GameState } from "@/game";
 import { type ItemData } from "@/item";
 import { itemMetaRegistry } from "@/itemRegistry";
@@ -21,20 +21,28 @@ export default function ItemComponent({
   threeDHeight = 3,
 }: ItemComponentProps)
 {
-  const [isTouch, setIsTouch] = useState(false);
+  // We use canHover to determine if we should allow hover events
+  const [canHover, setCanHover] = useState(false);
   const [open, setOpen] = useState(false);
 
   useEffect(() =>
   {
-    setIsTouch("ontouchstart" in window || navigator.maxTouchPoints > 0);
+    // Check if the primary input mechanism supports hover (mouse/trackpad)
+    // This is more reliable than checking for touch support.
+    const hoverMedia = window.matchMedia("(hover: hover)");
+    setCanHover(hoverMedia.matches);
+
+    const listener = (e: MediaQueryListEvent) => setCanHover(e.matches);
+    hoverMedia.addEventListener("change", listener);
+    return () => hoverMedia.removeEventListener("change", listener);
   }, []);
 
   const Icon = itemMetaRegistry[item.name].icon;
   const isEnabled = itemMetaRegistry[item.name].getEnabled(item, game);
-
-  const selected = game && game.selectedItemIDs && game.selectedItemIDs.includes(item.id);
+  const selected = game?.selectedItemIDs?.includes(item.id) ?? false;
   const finalHeight = selected ? threeDHeight * 2 : threeDHeight;
 
+  // Color Logic
   let bg = "rgba(40, 93, 40, 1)";
   switch (item.rarity)
   {
@@ -42,16 +50,10 @@ export default function ItemComponent({
     case 2: bg = "rgba(40, 77, 132, 1)"; break;
     case 3: bg = "rgba(134, 116, 28, 1)"; break;
   }
-  if (selected)
-  {
-    bg = chroma(bg).brighten(1).hex();
-  }
 
+  if (selected) bg = chroma(bg).brighten(1).hex();
   let outline = chroma(bg).darken(1.5).hex();
-  if (selected)
-  {
-    outline = chroma(outline).brighten(0.25).hex();
-  }
+  if (selected) outline = chroma(outline).brighten(0.25).hex();
 
   const restingShadow = `0 ${finalHeight}px 0 1px ${outline}`;
   const pressedShadow = `0 0 0 1px ${outline}`;
@@ -60,7 +62,7 @@ export default function ItemComponent({
 
   const itemNode = (
     <div
-      className={`inset-0 rounded flex items-center justify-center select-none z-10 cursor-pointer`}
+      className="inset-0 rounded flex items-center justify-center select-none z-10 cursor-pointer"
       style={{
         width: size,
         height: size,
@@ -69,27 +71,17 @@ export default function ItemComponent({
         transform: `translateY(${restingTranslate})`,
         transition: "box-shadow 0.15s, transform 0.15s, background 0.25s",
       }}
-      onMouseDown={(e) =>
+      onPointerDown={(e) =>
       {
         e.currentTarget.style.boxShadow = pressedShadow;
         e.currentTarget.style.transform = `translateY(${pressedTranslate})`;
       }}
-      onMouseUp={(e) =>
+      onPointerUp={(e) =>
       {
         e.currentTarget.style.boxShadow = restingShadow;
         e.currentTarget.style.transform = `translateY(${restingTranslate})`;
       }}
-      onMouseLeave={(e) =>
-      {
-        e.currentTarget.style.boxShadow = restingShadow;
-        e.currentTarget.style.transform = `translateY(${restingTranslate})`;
-      }}
-      onTouchStart={(e) =>
-      {
-        e.currentTarget.style.boxShadow = pressedShadow;
-        e.currentTarget.style.transform = `translateY(${pressedTranslate})`;
-      }}
-      onTouchEnd={(e) =>
+      onPointerLeave={(e) =>
       {
         e.currentTarget.style.boxShadow = restingShadow;
         e.currentTarget.style.transform = `translateY(${restingTranslate})`;
@@ -104,7 +96,6 @@ export default function ItemComponent({
           }}
         />
       )}
-
       <div
         className="absolute top-0 right-0 bg-black text-white text-xs font-bold rounded-bl px-1"
         style={{ lineHeight: "1rem" }}
@@ -115,24 +106,32 @@ export default function ItemComponent({
   );
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        asChild
-        onMouseEnter={() => !isTouch && setOpen(true)}
-        onMouseLeave={() => !isTouch && setOpen(false)}
-      >
-        {itemNode}
-      </PopoverTrigger>
+    <Popover open={open} onOpenChange={setOpen} modal={false}>
+      {/* 1. PopoverAnchor tells Radix where to position the popover.
+          2. We use a manual wrapper with MouseEvents (more stable for Firefox hover logic).
+      */}
+      <PopoverAnchor asChild>
+        <div
+          className="inline-block"
+          onMouseEnter={() => canHover && setOpen(true)}
+          onMouseLeave={() => canHover && setOpen(false)}
+        >
+          {itemNode}
+        </div>
+      </PopoverAnchor>
 
       <PopoverContent
-        className={`w-96 p-4 rounded-md bg-popover shadow-lg z-10 ring-2 ${item.rarity === 1
-          ? "ring-green-600"
-          : item.rarity === 2
-            ? "ring-blue-600"
-            : "ring-yellow-600"
-          }`}
         side="bottom"
         sideOffset={75}
+        // Prevents the popover from "stealing" focus on hover
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        onCloseAutoFocus={(e) => e.preventDefault()}
+        className={`w-96 p-4 rounded-md bg-popover shadow-lg z-10 ring-2 pointer-events-none ${item.rarity === 1
+            ? "ring-green-600"
+            : item.rarity === 2
+              ? "ring-blue-600"
+              : "ring-yellow-600"
+          }`}
       >
         <div className="flex gap-3 items-center">
           {Icon && <Icon className="w-8 h-8 shrink-0" />}
