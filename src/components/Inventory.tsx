@@ -242,7 +242,7 @@ export default function Inventory({
           </h2>
 
           <div className="text-sm">
-            Items activate from left to right, top to bottom in the Inventory.
+            Items activate from left to right, top to bottom in the Inventory. Course effects activate after items.
           </div>
         </>
       }

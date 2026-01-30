@@ -6,7 +6,7 @@ import { itemUtils, type ItemData } from "@/item";
 import { effectUtils, type EffectData } from "@/effect";
 import { story } from "@/story";
 import { effectMetaRegistry } from "./effectRegistry";
-import { weightedRandom } from "./lib/utils";
+import { parseWithInfinity, stringifyWithInfinity, weightedRandom } from "./lib/utils";
 
 export function generateUUID(): string
 {
@@ -214,10 +214,10 @@ export function initGame(): GameState
   };
 
   // Debug code for testing
-  //let debugItem = itemUtils.createItemInstanceAndAddToInventory(itemRegistry["Low Battery"], game);
+  //let debugItem = itemUtils.createItemInstanceAndAddToInventory(itemRegistry["Course Material"], game);
   //if (debugItem)
   //{
-  //  debugItem.level = 1;
+  //  debugItem.level = Infinity;
   //}
 
   game = startNewBlock(game);
@@ -232,9 +232,9 @@ export function saveGame(game: GameState)
 {
   try
   {
-    // Create a copy of game with an empty log
+    // Create a copy of game with an empty log and no texts
     const toSave: GameState = { ...game, log: [], courseTexts: [] };
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(toSave));
+    localStorage.setItem(LOCAL_STORAGE_KEY, stringifyWithInfinity(toSave));
   } catch (err)
   {
     console.error("Failed to save game:", err);
@@ -253,7 +253,7 @@ export function loadGame(): GameState | "GameDoesNotExist" | "ParsingFailed"
     const data = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (!data) return "GameDoesNotExist";
 
-    const parsed: GameState = JSON.parse(data);
+    const parsed: GameState = parseWithInfinity<GameState>(data);
 
     // Save version migration here
 
@@ -336,7 +336,7 @@ function recordRun(game: GameState, setTopRuns: React.Dispatch<React.SetStateAct
     // Save to localStorage
     try
     {
-      localStorage.setItem("topRuns", JSON.stringify(top5));
+      localStorage.setItem("topRuns", stringifyWithInfinity(top5));
     } catch (err)
     {
       console.error("Failed to save top runs:", err);
@@ -656,11 +656,35 @@ export function startRound(state: GameState, action: "attend" | "skip"): GameSta
     return item && itemMetaRegistry[item.name].getEnabled(item, newState);
   });
 
+  // Fix any potential NaNs in the courses
+  for (let i = 0; i < newState.courses.length; i++)
+  {
+    if (isNaN(newState.courses[i].understandings))
+    {
+      newState.courses[i].understandings = 0;
+    }
+  }
+
+  // Fix any potential NaNs in the items
+  for (let i = 0; i < newState.items.length; i++)
+  {
+    let item = newState.items[i];
+    if (item === null) continue;
+    if (isNaN(item.level))
+    {
+      item.level = 1;
+    }
+  }
+
   // Show U differences for this round
   newState.courseTexts = [];
   for (let i = 0; i < newState.courses.length; i++)
   {
     let Udiff = (newState.courses[i].understandings - lastRoundUnderstandings[i]);
+
+    // Skip NaN
+    if (isNaN(Udiff)) continue;
+
     if (Udiff != 0)
     {
       if (Udiff > 0)
@@ -1089,6 +1113,8 @@ let level3Effects: string[] = [
   "Mutating",
 ];
 
+export const MAX_QUESTS_PER_BLOCK = 40;
+
 export function startNewBlock(state: GameState): GameState
 {
   if (!state.examsAttended) return state;
@@ -1219,7 +1245,7 @@ export function startNewBlock(state: GameState): GameState
 
   // Create new quests
   const newQuests: Quest[] = [];
-  const questCount = Math.min(4 + newState.block * 2 + Math.floor(Math.random() * 4), 40);
+  const questCount = Math.min(4 + newState.block * 2 + Math.floor(Math.random() * 4), MAX_QUESTS_PER_BLOCK);
   for (let i = 0; i < questCount; i++)
   {
     newQuests.push(generateQuest(newState));

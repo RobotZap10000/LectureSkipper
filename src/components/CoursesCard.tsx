@@ -34,6 +34,9 @@ export function CoursesCard({ game }: CoursesCardProps)
 
           <p className="text-sm">
             Every block, you have 3 (or more) courses and a set amount of lectures before exams. Attend lectures to acquire Understanding (U). Every course is guaranteed to have at least {DEFAULT_MINIMUM_LECTURES_LEFT} lectures.
+            <br />
+            <br />
+            Courses may have special effects. Click on them to learn more.
           </p>
 
           <br />
@@ -50,7 +53,7 @@ export function CoursesCard({ game }: CoursesCardProps)
             </span>
             <br />
             <br />
-            You can gain more Understanding (U) than the course requires. Going above 100% with the chance to pass does nothing.
+            You can gain more Understanding (U) than the course requires, but going above 100% with the chance to pass does nothing.
           </p>
 
           <br />
@@ -155,7 +158,15 @@ export function CoursesCard({ game }: CoursesCardProps)
         </CustomAnimatePresence>
 
         <div className="font-bold m-1 flex flex-col gap-2">
-          <p>Score: {game.score}</p>
+          <p>Score:{" "}
+            {game.score === Infinity ? (
+              <span className="infinity-gradient-text">
+                INFINITY
+              </span>
+            ) : (
+              game.score
+            )}
+          </p>
         </div>
       </div>
     </CustomInfoCard >

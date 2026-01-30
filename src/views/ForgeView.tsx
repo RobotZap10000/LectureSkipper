@@ -1,5 +1,5 @@
 import Inventory from "@/components/Inventory";
-import { Box, CirclePlus, MoveDown } from "lucide-react";
+import { Anvil, Box, CirclePlus, MoveDown } from "lucide-react";
 import { type GameState } from "@/game";
 import { useState, type Dispatch, type SetStateAction } from "react";
 import { itemUtils, type ItemData } from "@/item";
@@ -80,8 +80,14 @@ export default function ForgeView({ game, setGame }: Props)
         title="Upgrade Items"
         help={
           <>
-            <div>
-              Spend cash to upgrade your items. Each level costs more than the last.
+            <h2 className="font-bold m-1 flex items-center gap-2">
+              <Anvil className="w-5 h-5" /> Forge
+            </h2>
+            <div className="text-sm">
+              Click on an item in your inventory to select it, then spend cash to upgrade it. Each level costs more than the last.
+              <br />
+              <br />
+              There is no maximum level.
             </div>
           </>
         }

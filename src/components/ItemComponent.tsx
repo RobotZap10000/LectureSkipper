@@ -105,16 +105,29 @@ export default function ItemComponent({
     </div>
   );
 
+  const handleTriggerClick = () =>
+  {
+    // If we are on mobile (no hover capability), toggle the popover on tap
+    if (!canHover)
+    {
+      setOpen((prev) => !prev);
+    }
+  };
+
   return (
-    <Popover open={open} onOpenChange={setOpen} modal={false}>
-      {/* 1. PopoverAnchor tells Radix where to position the popover.
-          2. We use a manual wrapper with MouseEvents (more stable for Firefox hover logic).
-      */}
+    <Popover
+      open={open}
+      onOpenChange={setOpen}
+      modal={false} // modal={false} allows clicking outside to close on mobile
+    >
       <PopoverAnchor asChild>
         <div
           className="inline-block"
+          // HOVER logic for Desktop
           onMouseEnter={() => canHover && setOpen(true)}
           onMouseLeave={() => canHover && setOpen(false)}
+          // TAP logic for Mobile
+          onClick={handleTriggerClick}
         >
           {itemNode}
         </div>
@@ -123,16 +136,16 @@ export default function ItemComponent({
       <PopoverContent
         side="bottom"
         sideOffset={75}
-        // Prevents the popover from "stealing" focus on hover
         onOpenAutoFocus={(e) => e.preventDefault()}
         onCloseAutoFocus={(e) => e.preventDefault()}
-        className={`w-96 p-4 rounded-md bg-popover shadow-lg z-10 ring-2 pointer-events-none ${item.rarity === 1
+        className={`w-96 p-4 rounded-md bg-popover shadow-lg z-50 ring-2 ${item.rarity === 1
             ? "ring-green-600"
             : item.rarity === 2
               ? "ring-blue-600"
               : "ring-yellow-600"
           }`}
       >
+        {/* Popover content remains the same */}
         <div className="flex gap-3 items-center">
           {Icon && <Icon className="w-8 h-8 shrink-0" />}
           <div>

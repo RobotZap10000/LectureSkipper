@@ -1,5 +1,5 @@
 import Inventory from "@/components/Inventory";
-import { type GameState, type Quest } from "../game";
+import { MAX_QUESTS_PER_BLOCK, type GameState, type Quest } from "../game";
 import { useContext, type Dispatch, type SetStateAction } from "react";
 import { MessageCircle, MessagesSquare } from "lucide-react";
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
@@ -107,8 +107,7 @@ export default function ChatView({ game, setGame }: Props)
             </h2>
 
             <div className="text-sm">
-              Every block, there will be a certain number of trade offers available. Spend Understandings
-              to write notes for your fellow students in exchange for cash and other currencies.
+              Every block, there will be a certain number of trade offers available, up to a maximum of {MAX_QUESTS_PER_BLOCK}. Spend Understandings to write notes for your fellow students in exchange for cash.
               <br />
               <br />
               Trade offers appear at the start of a block and remain until exams have been attended.

@@ -15,7 +15,7 @@ import
 import { motion } from "framer-motion";
 
 import { HelpCircle, type LucideIcon } from "lucide-react";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 
 interface CustomInfoCardProps
 {
@@ -36,11 +36,26 @@ export function CustomInfoCard({
 {
   let { animations, setAnimations } = useContext(AnimationContext)!;
 
+  const storageKey = `${title}-help`;
+  const [helpSeen, setHelpSeen] = useState<boolean>(true);
+
+  useEffect(() =>
+  {
+    setHelpSeen(localStorage.getItem(storageKey) === "seen");
+  }, [storageKey]);
+
+  const handleHelpOpen = () =>
+  {
+    if (!helpSeen)
+    {
+      localStorage.setItem(storageKey, "seen");
+      setHelpSeen(true);
+    }
+  };
+
   return (
     <motion.div
       className={`p-2 rounded flex flex-col max-w-[500px] w-full h-content overflow-hidden ${className}`}
-
-      // Entry/Exit Animations
       initial={{ opacity: 0, y: 50, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
 
@@ -60,10 +75,28 @@ export function CustomInfoCard({
             <span className="flex-1">{title}</span>
 
             {help && (
-              <Popover>
+              <Popover onOpenChange={(open) => open && handleHelpOpen()}>
                 <PopoverTrigger asChild>
-                  <HelpCircle className="w-5 h-5 cursor-pointer text-muted-foreground hover:text-white transition-colors" />
+                  <motion.div
+                    animate={
+                      !helpSeen
+                        ? { opacity: [0.2, 1, 0.2] }
+                        : { opacity: 1 }
+                    }
+                    transition={
+                      !helpSeen
+                        ? {
+                          duration: 1.2,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                        }
+                        : undefined
+                    }
+                  >
+                    <HelpCircle className="w-5 h-5 cursor-pointer text-muted-foreground hover:text-white transition-colors" />
+                  </motion.div>
                 </PopoverTrigger>
+
                 <PopoverContent className="w-96" side="top">
                   <div className="text-sm">
                     {typeof help === "string" ? <div>{help}</div> : help}

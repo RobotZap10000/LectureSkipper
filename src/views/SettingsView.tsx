@@ -30,9 +30,26 @@ interface Props
 
 export default function SettingsView({ game, setGame, topRuns }: Props)
 {
-  let {animations, setAnimations} = useContext(AnimationContext)!;
+  let { animations, setAnimations } = useContext(AnimationContext)!;
 
   const gameUpdates = [
+    {
+      version: "1.0.0",
+      date: "January 30, 2026",
+      title: "Final Release",
+      description: "The game is now considered finished. Currently, there are no more planned updates.",
+      majorChanges: [
+        "The game should now handle infinities and NaNs better, allowing runs with such numbers to be saved and shown properly.",
+      ],
+      smallChanges: [
+        "Added a flashing animation to the help buttons to make them more visible for new players.",
+        "Improved some help screens.",
+        "Snail Buff: items that activate after this one can still use gained procrastinations.",
+      ],
+      bugFixes: [
+        "Fixed popovers not working on mobile.",
+      ],
+    },
     {
       version: "0.6.0",
       date: "January 29, 2026",
@@ -305,9 +322,15 @@ export default function SettingsView({ game, setGame, topRuns }: Props)
                   {new Date(run.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </span>
               </div>
-
               <div className="mb-1">
-                <span className="font-semibold">Score:</span> {run.score}
+                <span className="font-semibold">Score:</span>{" "}
+                {run.score === Infinity ? (
+                  <span className="infinity-gradient-text">
+                    INFINITY
+                  </span>
+                ) : (
+                  run.score
+                )}
               </div>
 
               <ul className="pl-4 mb-2 text-sm text-muted-foreground gap-2 list-disc">

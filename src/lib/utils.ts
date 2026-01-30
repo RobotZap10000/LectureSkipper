@@ -39,3 +39,25 @@ export function weightedRandom<T>(items: T[], weights: number[]): T
   }
   return items[items.length - 1];
 }
+
+export function stringifyWithInfinity(value: unknown)
+{
+  return JSON.stringify(value, (_, v) =>
+  {
+    if (v === Infinity) return "__INF__";
+    if (v === -Infinity) return "__-INF__";
+    if (Number.isNaN(v)) return "__NaN__";
+    return v;
+  });
+}
+
+export function parseWithInfinity<T>(json: string): T
+{
+  return JSON.parse(json, (_, v) =>
+  {
+    if (v === "__INF__") return Infinity;
+    if (v === "__-INF__") return -Infinity;
+    if (v === "__NaN__") return NaN;
+    return v;
+  });
+}

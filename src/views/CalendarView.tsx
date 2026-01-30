@@ -292,7 +292,15 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
                   delay: game.courses.length * 0.25
                 }}
               >
-                <h2 className="font-bold mb-4">Final Score: {game.score}</h2>
+                <h2 className="font-bold mb-4">Final Score:{" "}
+                  {game.score == Infinity ? (
+                    <span className="infinity-gradient-text">
+                      INFINITY
+                    </span>
+                  ) : (
+                    game.score
+                  )}
+                </h2>
                 <CustomButton
                   icon={RefreshCcw}
                   color="#ac0000ff"

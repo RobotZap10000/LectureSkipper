@@ -10,6 +10,7 @@ import ForgeView from "@/views/ForgeView";
 import SettingsView from "@/views/SettingsView";
 import { CircleDollarSign, Sparkles, TriangleAlert, Zap } from "lucide-react";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
+import { parseWithInfinity } from "./lib/utils";
 
 export function validateGameState(game: any): { valid: boolean, missing: string[] }
 {
@@ -192,7 +193,7 @@ export default function App()
     try
     {
       const saved = localStorage.getItem("topRuns");
-      return saved ? JSON.parse(saved) as Run[] : [];
+      return saved ? parseWithInfinity<Run[]>(saved) : [];
     } catch
     {
       return [];

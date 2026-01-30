@@ -1,6 +1,41 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.infinity-gradient-text {
+  font-weight: 700;
+  font-style: italic;
+  font-size: 1.5rem;
+  /* text-2xl */
+  color: transparent;
+
+  background: linear-gradient(90deg,
+      #22c55e,
+      #3b82f6,
+      #a855f7,
+      #22c55e);
+  background-size: 150% 150%;
+  background-position: 0% 100%;
+
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  animation: gradient-shift 1500ms linear infinite;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -114,6 +149,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
