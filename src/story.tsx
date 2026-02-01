@@ -106,7 +106,7 @@ export const story: Record<string, (game: GameState, setGame: React.Dispatch<Rea
       <br /> <br />
       I saw a dream the other day. It was the first one in a long while. I remember seeing a grocery store in there. Food. When was the last time I ate anything? What started as a casual thought eventually spiralled out of control.
       <br /> <br />
-      This place is a trap. Hunger is absent so that more time can be spent studying. Memories of your past slowly fade away so that you cannot think of them. Whenever I go outside, I suddenly appear wherever I needed to go, meaning that I can't even take a breath of fresh air. I haven't listened to music in ages, and everything feels so still and lifeless. All you can do is study. It is without a doubt that this place is some alternate dimension.
+      This place is a trap. Hunger is absent so that more time can be spent studying. Memories of your past slowly fade away so that you cannot think of them. Whenever I go outside, I suddenly appear wherever I needed to go, meaning that I can't even take a breath of fresh air. I haven't listened to music in ages, and everything feels so still and lifeless. All you can do is study. It is without a doubt that this place is some kind of alternate dimension.
       <br /> <br />
       Despite all of that, I still believe that there is a way out. There must be.
       <br /> <br />
@@ -180,7 +180,7 @@ export const story: Record<string, (game: GameState, setGame: React.Dispatch<Rea
       <br /> <br />
       I've noticed that some rooms have just disappeared. Some no longer have doors or windows. Some do still have them, but opening them leads to a dark void. Furthermore, the lighting is getting dimmer. I can barely make out details anymore.
       <br /> <br />
-      The exam room is massive, but there is only one seat there in the very center. Whenever I walk in, there are no people. Instructions are given through speakers via pre-recorded messages that I've heard hundreds of times. The room has always looked the same, but now the dark void is swallowing it, only leaving me a thin pathway from the entrance to the seat. While filling in the answers, I can't hear or see anything around me.
+      The exam room is massive, but there is only one seat there in the very center. Whenever I walk in, there are no people. Instructions are given through speakers via pre-recorded messages that I've heard what feels like hundreds of times. The room has always looked the same, but now the dark void is swallowing it, only leaving me a thin pathway from the entrance to the seat. While filling in the answers, I can't hear or see anything around me.
       <br /> <br />
       It's been years since I last saw anyone. I really am the last person here.
     </div>
