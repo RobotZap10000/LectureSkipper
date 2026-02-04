@@ -1,4 +1,4 @@
-import { AnimationContext } from "@/App";
+import { SettingsContext } from "@/App";
 import { useContext } from "react";
 import { AnimatePresence } from "framer-motion";
 
@@ -13,11 +13,11 @@ export function CustomAnimatePresence({
   mode = "popLayout",
 }: CustomAnimatePresenceProps)
 {
-  let { animations, setAnimations } = useContext(AnimationContext)!;
+  let { settings, setSettings } = useContext(SettingsContext)!;
 
   return (
     <>
-      {animations !== "minimal" ? (
+      {settings.animations !== "minimal" ? (
         <AnimatePresence mode={mode}>
           {children}
         </AnimatePresence>

@@ -21,7 +21,7 @@ export default function ItemSlot({
       onClick={onClick}
       className={`
         relative flex items-center justify-center rounded bg-accent
-        ${game && ((game.selectedItemIDs && game.selectedItemIDs.length > 0) || (game.unboxedItem && game.view == "Market")) ? "cursor-pointer" : "cursor-default" /* If we can move an item to a different slot or we have an unboxed item that we can place into an empty slot, show pointer */}
+        ${game && ((game.selectedItemIDs && game.selectedItemIDs.length > 0) || (game.unboxedItems.length > 0 && game.view == "Market")) ? "cursor-pointer" : "cursor-default" /* If we can move an item to a different slot or we have an unboxed item that we can place into an empty slot, show pointer */}
       `}
       style={{ width: size, height: size }}
     >

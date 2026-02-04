@@ -1,9 +1,9 @@
 import Inventory from "@/components/Inventory";
 import type { GameState, Run } from "@/game";
-import { startRound, attendExams, startNewBlock, initGame } from "@/game";
+import { startRound, attendExams, startNewBlock, initGame, skipAll } from "@/game";
 import type { Dispatch, SetStateAction } from "react";
-import { useContext, useEffect, useRef } from "react";
-import { Scroll, BookOpen, RefreshCcw, Zap } from "lucide-react";
+import { useContext, useEffect, useRef, useState } from "react";
+import { Scroll, BookOpen, RefreshCcw, Zap, TriangleAlert } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import chroma from "chroma-js";
@@ -12,10 +12,10 @@ import { CustomButton } from "@/components/CustomButton";
 import { CoursesCard } from "@/components/CoursesCard";
 import { story } from "@/story";
 import { renderDescription } from "@/stringUtils";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Separator } from "@/components/ui/separator";
 import { CustomAnimatePresence } from "@/components/CustomAnimatePresence";
-import { AnimationContext } from "@/App";
+import { SettingsContext } from "@/App";
 
 interface Props
 {
@@ -26,7 +26,7 @@ interface Props
 
 export default function CalendarView({ game, setGame, setTopRuns }: Props)
 {
-  let { animations, setAnimations } = useContext(AnimationContext)!;
+  let { settings, setSettings } = useContext(SettingsContext)!;
 
   const logContainerRef = useRef<HTMLDivElement>(null);
 
@@ -37,6 +37,17 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
       logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
     }
   }, [game.log]);
+
+  const [confirmSkip, setConfirmSkip] = useState(false);
+
+  useEffect(() =>
+  {
+    if (!confirmSkip) return;
+
+    const t = setTimeout(() => setConfirmSkip(false), 2500);
+    return () => clearTimeout(t);
+  }, [confirmSkip]);
+
 
   return (
     <div className="flex flex-wrap justify-center p-4">
@@ -104,12 +115,12 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
 
                 return (
                   <motion.div
-                    layout={animations !== "minimal"}
-                    layoutId={animations !== "minimal" ? "lecture-" + game.nextLecture.potentialUnderstandings + game.nextLecture.understandChance + game.nextLecture.energyCost + game.nextLecture.procrastinationValue : undefined}
+                    layout={settings.animations !== "minimal"}
+                    layoutId={settings.animations !== "minimal" ? "lecture-" + game.nextLecture.potentialUnderstandings + game.nextLecture.understandChance + game.nextLecture.energyCost + game.nextLecture.procrastinationValue : undefined}
                     key={"lecture-" + game.nextLecture.potentialUnderstandings + game.nextLecture.understandChance + game.nextLecture.energyCost + game.nextLecture.procrastinationValue}
-                    initial={animations !== "minimal" ? { opacity: 0, x: 100, scale: 0.5 } : undefined}
-                    animate={animations !== "minimal" ? { opacity: 1, x: 0, scale: 1 } : undefined}
-                    exit={animations !== "minimal" ? { opacity: 0, x: -100, scale: 0.5 } : undefined}
+                    initial={settings.animations !== "minimal" ? { opacity: 0, x: 100, scale: 0.5 } : undefined}
+                    animate={settings.animations !== "minimal" ? { opacity: 1, x: 0, scale: 1 } : undefined}
+                    exit={settings.animations !== "minimal" ? { opacity: 0, x: -100, scale: 0.5 } : undefined}
                     transition={{
                       type: "spring",
                       damping: 35,
@@ -222,6 +233,26 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
                 className="h-3 rounded-full"
               />
             </div>
+
+            {game.block > 1 &&
+              <CustomButton
+                color={confirmSkip ? "Red" : "FireBrick"}
+                onClick={() =>
+                {
+                  if (!confirmSkip)
+                  {
+                    setConfirmSkip(true);
+                    return;
+                  }
+
+                  setConfirmSkip(false);
+                  setGame(g => skipAll(g));
+                }}
+                icon={confirmSkip ? TriangleAlert : undefined}
+              >
+                {confirmSkip ? "Click again to confirm" : "Skip All"}
+              </CustomButton>
+            }
           </div>
         ) : null}
 
@@ -249,11 +280,11 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
                 const course = game.courses[i];
                 return (
                   <motion.div
-                    layout={animations !== "minimal"}
+                    layout={settings.animations !== "minimal"}
                     layoutId={"exam-result-course-" + course.title + "-color-" + course.color}
                     key={"exam-result-course-" + course.title + "-color-" + course.color}
-                    initial={animations !== "minimal" ? { opacity: 0, x: -100, scale: 0.5 } : undefined}
-                    animate={animations !== "minimal" ? { opacity: 1, x: 0, scale: 1 } : undefined}
+                    initial={settings.animations !== "minimal" ? { opacity: 0, x: -100, scale: 0.5 } : undefined}
+                    animate={settings.animations !== "minimal" ? { opacity: 1, x: 0, scale: 1 } : undefined}
                     transition={{
                       type: "spring",
                       damping: 35,
@@ -283,8 +314,8 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
             {/* --- FAILURE CHECK --- */}
             {game.examResults.filter((r) => !r).length >= 2 ? (
               <motion.div
-                initial={animations !== "minimal" ? { opacity: 0, scale: 0.5 } : undefined}
-                animate={animations !== "minimal" ? { opacity: 1, scale: 1 } : undefined}
+                initial={settings.animations !== "minimal" ? { opacity: 0, scale: 0.5 } : undefined}
+                animate={settings.animations !== "minimal" ? { opacity: 1, scale: 1 } : undefined}
                 transition={{
                   type: "spring",
                   damping: 35,
@@ -304,15 +335,15 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
                 <CustomButton
                   icon={RefreshCcw}
                   color="#ac0000ff"
-                  onClick={() => setGame(initGame())}
+                  onClick={() => setGame(initGame(settings))}
                 >
                   Reset Run
                 </CustomButton>
               </motion.div>
             ) : (
               <motion.div
-                initial={animations !== "minimal" ? { opacity: 0, scale: 0.5 } : undefined}
-                animate={animations !== "minimal" ? { opacity: 1, scale: 1 } : undefined}
+                initial={settings.animations !== "minimal" ? { opacity: 0, scale: 0.5 } : undefined}
+                animate={settings.animations !== "minimal" ? { opacity: 1, scale: 1 } : undefined}
                 transition={{
                   type: "spring",
                   damping: 35,
@@ -321,7 +352,7 @@ export default function CalendarView({ game, setGame, setTopRuns }: Props)
                 }}
               >
                 <CustomButton
-                  onClick={() => setGame((g) => startNewBlock(g))}
+                  onClick={() => setGame((g) => startNewBlock(g, settings))}
                   color="RoyalBlue"
                 >
                   Start Next Block

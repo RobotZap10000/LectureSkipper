@@ -19,7 +19,7 @@ import
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { AnimationContext, type AnimationMode } from "@/App";
+import { SettingsContext, type AnimationMode, type SkipStoryMode as StoryMode, type TimerMode } from "@/App";
 
 interface Props
 {
@@ -30,9 +30,29 @@ interface Props
 
 export default function SettingsView({ game, setGame, topRuns }: Props)
 {
-  let { animations, setAnimations } = useContext(AnimationContext)!;
+  let { settings, setSettings } = useContext(SettingsContext)!;
 
   const gameUpdates = [
+    {
+      version: "1.1.0",
+      date: "February 4, 2026",
+      title: "Speedrun Update",
+      description: "A speedrun timer has been added and some items have been rebalanced.",
+      majorChanges: [
+        "Improved Market: you can now buy items more easily and more items at the same time.",
+        "Added more boxes to the Market.",
+      ],
+      smallChanges: [
+        "Various UI improvements.",
+        "Game saves are now compressed to save space.",
+        "Added a toggle for skipping story.",
+        "Added a toggle for a speedrun timer.",
+        "Added a Skip All button that shows up after the first block.",
+      ],
+      bugFixes: [
+        "Improved wording in a few paragraphs of the story.",
+      ],
+    },
     {
       version: "1.0.0",
       date: "January 30, 2026",
@@ -242,6 +262,30 @@ export default function SettingsView({ game, setGame, topRuns }: Props)
     },
   ];
 
+  const formatDuration = (
+    start: Date | string | number | undefined | null,
+    end: Date | string | number | undefined | null
+  ): string =>
+  {
+    // 1. Guard against missing values
+    if (!start || !end) return "0s";
+
+    // 2. Convert to Date objects and then to numbers (ms)
+    const startTime = new Date(start).getTime();
+    const endTime = new Date(end).getTime();
+
+    // 3. Calculate difference
+    const diff = endTime - startTime;
+
+    // Handle invalid dates or negative duration
+    if (isNaN(diff) || diff <= 0) return "0s";
+
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+
+    return `${h > 0 ? h + 'h ' : ''}${m > 0 ? m + 'm ' : ''}${s}s`;
+  };
 
   return (
     <div className="flex flex-wrap justify-center p-4">
@@ -276,8 +320,8 @@ export default function SettingsView({ game, setGame, topRuns }: Props)
           </Label>
           <div className="w-full max-w-[50%]">
             <Select
-              value={animations}
-              onValueChange={(val) => { setAnimations(val as AnimationMode); }}
+              value={settings.animations}
+              onValueChange={(val) => { setSettings({ ...settings, animations: val as AnimationMode }); }}
             >
               <SelectTrigger id="animations-select" className="w-full">
                 <SelectValue placeholder="Full" />
@@ -290,12 +334,52 @@ export default function SettingsView({ game, setGame, topRuns }: Props)
             </Select>
           </div>
         </div>
+        {/* Settings - Skip Story */}
+        <div className="flex items-center justify-end w-full gap-4">
+          <Label htmlFor="story-select" className="whitespace-nowrap">
+            Story
+          </Label>
+          <div className="w-full max-w-[50%]">
+            <Select
+              value={settings.story}
+              onValueChange={(val) => { setSettings({ ...settings, story: val as StoryMode }); }}
+            >
+              <SelectTrigger id="story-select" className="w-full">
+                <SelectValue placeholder="Show" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="show">Show</SelectItem>
+                <SelectItem value="skip">Skip</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        {/* Settings - Speedrun Timer */}
+        <div className="flex items-center justify-end w-full gap-4">
+          <Label htmlFor="timer-select" className="whitespace-nowrap">
+            Speedrun Timer
+          </Label>
+          <div className="w-full max-w-[50%]">
+            <Select
+              value={settings.timer}
+              onValueChange={(val) => { setSettings({ ...settings, timer: val as TimerMode }); }}
+            >
+              <SelectTrigger id="timer-select" className="w-full">
+                <SelectValue placeholder="Hide" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="show">Show</SelectItem>
+                <SelectItem value="hide">Hide</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
         <Separator />
-        {/* Settigns - Reset Run */}
+        {/* Settings - Reset Run */}
         <CustomButton
           icon={RefreshCcw}
           color="FireBrick"
-          onClick={() => setGame(initGame())}
+          onClick={() => setGame(initGame(settings))}
           style={{ maxWidth: "30%" }}
         >
           Reset Run
@@ -311,56 +395,91 @@ export default function SettingsView({ game, setGame, topRuns }: Props)
         title="My Top Runs"
       >
         {topRuns.length === 0 ? (
-          <div className="italic text-muted-foreground p-2">No top runs yet.</div>
+          <div className="italic text-muted-foreground p-2">
+            No top runs yet.
+          </div>
         ) : (
-          topRuns.map((run, index) => (
-            <div key={index} className="border-b border-gray-700 pb-2 last:border-b-0">
-              <div className="flex justify-between items-center mb-1">
-                <span className="font-bold">#{index + 1}</span>
-                <span className="text-sm text-muted-foreground">
-                  {new Date(run.date).toLocaleDateString()}{" "}
-                  {new Date(run.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                </span>
-              </div>
-              <div className="mb-1">
-                <span className="font-semibold">Score:</span>{" "}
-                {run.score === Infinity ? (
-                  <span className="infinity-gradient-text">
-                    INFINITY
-                  </span>
-                ) : (
-                  run.score
-                )}
-              </div>
+          <Accordion type="single" collapsible className="w-full">
+            {topRuns.map((run, index) => (
+              <AccordionItem
+                key={index}
+                value={`run-${index}`}
+                className="border-b border-gray-700 last:border-b-0"
+              >
+                {/* --- Header --- */}
+                <AccordionTrigger className="flex items-center gap-4 text-left">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-neutral-950 w-8 h-8 flex items-center justify-center rounded-full">
+                      <span className="font-bold">#{index + 1}</span>
+                    </div>
 
-              <ul className="pl-4 mb-2 text-sm text-muted-foreground gap-2 list-disc">
-                <li>Block: {run.block}</li>
-                <li>Energy: {run.energy}/{run.maxEnergy}</li>
-                <li>Cash: ${run.cash}</li>
-                <li>Procrastinations: {run.procrastinations}</li>
-                <li>Energy gain per Skip: {run.energyPerSkip}</li>
-                <li>Max Active Items: {run.maxActivatedItems}</li>
-                <li>Total Items in Inventory: {run.items.length}</li>
-              </ul>
+                    <span className="font-semibold">
+                      Score:{" "}
+                      {run.score === Infinity ? (
+                        <span className="infinity-gradient-text">INFINITY</span>
+                      ) : (
+                        run.score
+                      )}
+                    </span>
+                  </div>
 
-              <div className="flex flex-wrap gap-2">
-                {run.items.map((item, idx) => (
-                  <ItemSlot
-                    key={`run-${index}-${idx}`}
-                    game={game}
-                    onClick={() => { }}
-                    size={32}
-                  >
-                    {item && <ItemComponent item={item} game={{} as GameState} size={32} />}
-                  </ItemSlot>
-                ))}
-              </div>
-            </div>
-          ))
+                  {/* Spacer */}
+                  <div className="ml-auto flex items-center gap-3">
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">
+                      {formatDuration(run.dateCreated, run.dateEnded)}
+                    </span>
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">
+                      {new Date(run.dateEnded).toLocaleDateString()}{" "}
+                      {new Date(run.dateEnded).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                </AccordionTrigger>
+
+                {/* --- Content --- */}
+                <AccordionContent>
+                  <p>Date created: {new Date(run.dateCreated).toLocaleDateString()} {new Date(run.dateCreated).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                  <p>Date finished: {new Date(run.dateEnded).toLocaleDateString()} {new Date(run.dateEnded).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                  <p>Duration: {formatDuration(run.dateCreated, run.dateEnded)}</p>
+                  {run.dateEndingReached && <p>Ending reached in: {formatDuration(run.dateCreated, run.dateEndingReached)}</p>}
+                  {run.dateInfinityReached && <p>Infinity Score reached in: {formatDuration(run.dateCreated, run.dateInfinityReached)}</p>}
+                  <ul className="pl-4 my-3 text-sm text-muted-foreground list-disc space-y-1">
+                    <li>Block: {run.block}</li>
+                    <li>Energy: {run.energy}/{run.maxEnergy}</li>
+                    <li>Cash: ${run.cash}</li>
+                    <li>Procrastinations: {run.procrastinations}</li>
+                    <li>Energy gain per Skip: {run.energyPerSkip}</li>
+                    <li>Max Active Items: {run.maxActivatedItems}</li>
+                    <li>Total Items in Inventory: {run.items.length}</li>
+                  </ul>
+
+                  {/* Items */}
+                  <div className="flex flex-wrap gap-2">
+                    {run.items.map((item, idx) => (
+                      <ItemSlot
+                        key={`run-${index}-${idx}`}
+                        game={game}
+                        onClick={() => { }}
+                        size={32}
+                      >
+                        {item && (
+                          <ItemComponent
+                            item={item}
+                            game={{} as GameState}
+                            size={32}
+                          />
+                        )}
+                      </ItemSlot>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         )}
       </CustomInfoCard>
-
-
 
       {/* All Items (Preview) */}
       <CustomInfoCard

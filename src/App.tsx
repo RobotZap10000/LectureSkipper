@@ -1,8 +1,8 @@
-import { useState, useEffect, createContext, useContext, type Dispatch, type SetStateAction } from "react";
+import { useState, useEffect, createContext, type Dispatch, type SetStateAction } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import type { GameState, Lecture, Quest, Run, View } from "@/game";
-import { changeView, generateLecture, generateQuest, initGame, loadGame, saveGame } from "@/game";
+import { changeView, generateLecture, generateQuest, initGame, loadGame, loadRuns, saveGame } from "@/game";
 import CalendarView from "@/views/CalendarView";
 import MarketView from "@/views/MarketView";
 import ChatView from "@/views/ChatView";
@@ -10,9 +10,8 @@ import ForgeView from "@/views/ForgeView";
 import SettingsView from "@/views/SettingsView";
 import { CircleDollarSign, Sparkles, TriangleAlert, Zap } from "lucide-react";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
-import { parseWithInfinity } from "./lib/utils";
 
-export function validateGameState(game: any): { valid: boolean, missing: string[] }
+export function validateGameState(game: any, settings: UserSettings): { valid: boolean, missing: string[] }
 {
   if (typeof game !== "object")
   {
@@ -22,9 +21,9 @@ export function validateGameState(game: any): { valid: boolean, missing: string[
   const missing: string[] = [];
 
   // Build templates from fresh game
-  const gameTemplate: GameState = initGame();
-  const lectureTemplate: Lecture = generateLecture(initGame());
-  const questTemplate: Quest = generateQuest(initGame());
+  const gameTemplate: GameState = initGame(settings);
+  const lectureTemplate: Lecture = generateLecture(initGame(settings));
+  const questTemplate: Quest = generateQuest(initGame(settings));
 
   // Extract flat keys
   const GAME_KEYS = Object.keys(gameTemplate);
@@ -95,23 +94,85 @@ export function validateGameState(game: any): { valid: boolean, missing: string[
   };
 }
 
+function GameTimer({ dateCreated, dateEnded }: { dateCreated: number, dateEnded?: number })
+{
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() =>
+  {
+    const id = setInterval(() =>
+    {
+      setNow(Date.now());
+    }, 50);
+
+    return () => clearInterval(id);
+  }, []);
+
+  let elapsedMs = now - dateCreated;
+
+  if (dateEnded)
+  {
+    elapsedMs = dateEnded - dateCreated
+  }
+
+  const totalSeconds = Math.floor(elapsedMs / 1000);
+
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  const tenths = Math.floor((elapsedMs % 1000) / 100);
+
+  const pad = (n: number) => n.toString().padStart(2, "0");
+
+  return (
+    <div className="z-50 bg-neutral-950 border-2 border-neutral-800 text-white px-3 py-1.5 rounded-full text-xl font-mono shadow-xl">
+      {pad(hours)}:{pad(minutes)}:{pad(seconds)}
+      <span className="text-neutral-400">.{tenths}</span>
+    </div>
+  );
+}
+
+const DEFAULT_SETTINGS: UserSettings = {
+  animations: "full",
+  story: "show",
+  timer: "hide",
+};
+
 export type AnimationMode = "full" | "reduced" | "minimal";
-export const AnimationContext = createContext<{
+export type SkipStoryMode = "show" | "skip";
+export type TimerMode = "show" | "hide";
+
+export interface UserSettings
+{
   animations: AnimationMode;
-  setAnimations: Dispatch<SetStateAction<AnimationMode>>;
+  story: SkipStoryMode;
+  timer: TimerMode;
+}
+
+export const SettingsContext = createContext<{
+  settings: UserSettings;
+  setSettings: Dispatch<SetStateAction<UserSettings>>;
 } | null>(null);
 
 export default function App()
 {
-  const [animations, setAnimations] = useState<AnimationMode>(() =>
+  const [settings, setSettings] = useState<UserSettings>(() =>
   {
-    const saved = localStorage.getItem("animations-pref");
-    return (saved as AnimationMode) ?? "full";
+    try
+    {
+      const saved = localStorage.getItem("user-settings");
+      return saved
+        ? { ...DEFAULT_SETTINGS, ...JSON.parse(saved) }
+        : DEFAULT_SETTINGS;
+    } catch
+    {
+      return DEFAULT_SETTINGS;
+    }
   });
   useEffect(() =>
   {
-    localStorage.setItem("animations-pref", animations);
-  }, [animations]);
+    localStorage.setItem("user-settings", JSON.stringify(settings));
+  }, [settings]);
 
   const [saveCorrupted, setSaveCorrupted] = useState(false);
   const [missingFields, setMissingFields] = useState<string[]>([]);
@@ -121,19 +182,19 @@ export default function App()
     if (loaded === "ParsingFailed")
     {
       setSaveCorrupted(true);
-      setMissingFields(validateGameState(loaded).missing);
-      return initGame();
+      setMissingFields(validateGameState(loaded, settings).missing);
+      return initGame(settings);
     } else if (loaded === "GameDoesNotExist")
     {
-      return initGame();
+      return initGame(settings);
     } else
     {
-      let valid = validateGameState(loaded).valid;
+      let valid = validateGameState(loaded, settings).valid;
       if (!valid)
       {
         setSaveCorrupted(true);
-        setMissingFields(validateGameState(loaded).missing);
-        return initGame();
+        setMissingFields(validateGameState(loaded, settings).missing);
+        return initGame(settings);
       }
       return loaded;
     }
@@ -142,7 +203,7 @@ export default function App()
   // Validate save on mount
   useEffect(() =>
   {
-    let validation = validateGameState(game);
+    let validation = validateGameState(game, settings);
     if (validation.valid == false)
     {
       console.error("Invalid save file detected.");
@@ -150,6 +211,28 @@ export default function App()
       setMissingFields(validation.missing);
     }
   }, []);
+
+  // Save game whenever setGame is called
+  useEffect(() =>
+  {
+    if (saveCorrupted) return;
+    saveGame(game);
+  }, [game]);
+
+  const [topRuns, setTopRuns] = useState<Run[]>(() =>
+  {
+    const loaded = loadRuns();
+    if (loaded === "ParsingFailed")
+    {
+      return [];
+    } else if (loaded === "RunsDoNotExist")
+    {
+      return [];
+    } else
+    {
+      return loaded;
+    }
+  });
 
   // Keyboard buttons to switch between tabs
   useEffect(() => 
@@ -181,24 +264,6 @@ export default function App()
     };
   }, []); // empty dependency array ensures this runs only once
 
-  // Save game whenever setGame is called
-  useEffect(() =>
-  {
-    if (saveCorrupted) return;
-    saveGame(game);
-  }, [game]);
-
-  const [topRuns, setTopRuns] = useState<Run[]>(() =>
-  {
-    try
-    {
-      const saved = localStorage.getItem("topRuns");
-      return saved ? parseWithInfinity<Run[]>(saved) : [];
-    } catch
-    {
-      return [];
-    }
-  });
 
   return (
     <>
@@ -223,7 +288,7 @@ export default function App()
               onClick={() =>
               {
                 setSaveCorrupted(false);
-                setGame(initGame());
+                setGame(initGame(settings));
               }}
               className="bg-red-500 hover:bg-red-600 font-bold py-2 px-4 rounded"
             >
@@ -241,14 +306,15 @@ export default function App()
             <SidebarTrigger className="w-10 h-10 sm:fixed z-20" />
 
             {/* Footer  */}
-            <div className="bg-background p-2 flex justify-around items-center z-10 flex-shrink-0">
+            <div className="bg-background p-2 flex justify-around items-center z-10 flex-shrink-0 ga">
+              {game.dateCreated && settings.timer == "show" && <div className="flex items-center gap-2">Run Time: <GameTimer dateCreated={game.dateCreated} dateEnded={game.dateEnded} /></div>}
               <div className="flex items-center gap-2"><CircleDollarSign /> Cash: ${game.cash}</div>
               <div className="flex items-center gap-2"><Sparkles /> Procrastinations: {game.procrastinations} P</div>
               <div className="flex items-center gap-2"><Zap /> Energy: {game.energy} E / {game.maxEnergy} E</div>
             </div>
 
             {/* scrollable content area */}
-            <AnimationContext.Provider value={{ animations: animations, setAnimations: setAnimations }}>
+            <SettingsContext.Provider value={{ settings, setSettings }}>
               <div className="flex-1 overflow-auto min-h-0 pb-50">
                 <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4 p-0">
                   {game.view === "Calendar" && <CalendarView game={game} setGame={setGame} setTopRuns={setTopRuns} />}
@@ -258,9 +324,8 @@ export default function App()
                   {game.view === "Settings" && <SettingsView game={game} setGame={setGame} topRuns={topRuns} />}
                 </div>
               </div>
-            </AnimationContext.Provider>
+            </SettingsContext.Provider>
           </main>
-
         </div>
       </SidebarProvider>
     </>

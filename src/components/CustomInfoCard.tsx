@@ -1,4 +1,4 @@
-import { AnimationContext } from "@/App";
+import { SettingsContext } from "@/App";
 import
 {
   Card,
@@ -34,9 +34,10 @@ export function CustomInfoCard({
   className = "",
 }: CustomInfoCardProps)
 {
-  let { animations, setAnimations } = useContext(AnimationContext)!;
+  let { settings, setSettings } = useContext(SettingsContext)!;
 
-  const storageKey = `${title}-help`;
+  // Remove numbers, so that "Courses - Block [X]" does not get a new help every block
+  const storageKey = `${title.replace(/\d/g, "")}-help`;
   const [helpSeen, setHelpSeen] = useState<boolean>(true);
 
   useEffect(() =>
@@ -60,7 +61,7 @@ export function CustomInfoCard({
       animate={{ opacity: 1, y: 0, scale: 1 }}
 
       // Spring transition for a "snappy" feel
-      transition={animations === "full" ? {
+      transition={settings.animations === "full" ? {
         type: "spring",
         damping: 25,
         stiffness: 300,

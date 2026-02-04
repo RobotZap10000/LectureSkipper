@@ -18,7 +18,10 @@
 .infinity-gradient-text {
   font-weight: 700;
   font-style: italic;
-  font-size: 1.5rem;
+  scale: 200%;
+  translate: 50%;
+  display:inline-flex;
+  text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.25);
   /* text-2xl */
   color: transparent;
 

@@ -10,7 +10,7 @@ import { EffectBadge } from "./EffectBadge";
 import { motion, AnimatePresence } from "framer-motion";
 import { CustomAnimatePresence } from "@/components/CustomAnimatePresence";
 import { useContext } from "react";
-import { AnimationContext } from "@/App";
+import { SettingsContext } from "@/App";
 
 interface CoursesCardProps
 {
@@ -19,7 +19,7 @@ interface CoursesCardProps
 
 export function CoursesCard({ game }: CoursesCardProps)
 {
-  let { animations, setAnimations } = useContext(AnimationContext)!;
+  let { settings, setSettings } = useContext(SettingsContext)!;
 
   return (
     <CustomInfoCard
@@ -82,12 +82,12 @@ export function CoursesCard({ game }: CoursesCardProps)
 
               return (
                 <motion.div
-                  layout={animations === "full"}
-                  layoutId={animations === "full" ? "course-" + c.title + "-color-" + c.color + "-view-" + game.view : undefined}
+                  layout={settings.animations === "full"}
+                  layoutId={settings.animations === "full" ? "course-" + c.title + "-color-" + c.color + "-view-" + game.view : undefined}
                   key={"course-" + c.title + "-color-" + c.color + "-view-" + game.view}
-                  initial={animations === "full" ? { opacity: 0, x: -100, scale: 0.5 } : undefined}
-                  animate={animations === "full" ? { opacity: 1, x: 0, scale: 1 } : undefined}
-                  exit={animations === "full" ? { opacity: 0, x: 100, scale: 0.5 } : undefined}
+                  initial={settings.animations === "full" ? { opacity: 0, x: -100, scale: 0.5 } : undefined}
+                  animate={settings.animations === "full" ? { opacity: 1, x: 0, scale: 1 } : undefined}
+                  exit={settings.animations === "full" ? { opacity: 0, x: 100, scale: 0.5 } : undefined}
                   transition={{
                     type: "spring",
                     damping: 35,
@@ -108,12 +108,12 @@ export function CoursesCard({ game }: CoursesCardProps)
                       {game.courseTexts.length > i && game.courseTexts[i].length > 0 && (
                         <motion.div
                           className="absolute right-10 top-5"
-                          layout={animations !== "minimal"}
+                          layout={settings.animations !== "minimal"}
                           key={"course-" + i + c.title + "-color-" + c.color + "-view-" + game.view + "-textEffect-" + game.courseTexts[i] + "-lecturesLeft-" + game.lecturesLeft}
-                          layoutId={animations !== "minimal" ? "course-" + i + c.title + "-color-" + c.color + "-view-" + game.view + "-textEffect-" + game.courseTexts[i] + "-lecturesLeft-" + game.lecturesLeft : undefined}
-                          initial={animations !== "minimal" ? { opacity: 0, x: -100, scale: 0.5 } : undefined}
-                          animate={animations !== "minimal" ? { opacity: 1, x: 0, scale: 1 } : undefined}
-                          exit={animations !== "minimal" ? { opacity: 0, x: 0, scale: 0.5 } : undefined}
+                          layoutId={settings.animations !== "minimal" ? "course-" + i + c.title + "-color-" + c.color + "-view-" + game.view + "-textEffect-" + game.courseTexts[i] + "-lecturesLeft-" + game.lecturesLeft : undefined}
+                          initial={settings.animations !== "minimal" ? { opacity: 0, x: -100, scale: 0.5 } : undefined}
+                          animate={settings.animations !== "minimal" ? { opacity: 1, x: 0, scale: 1 } : undefined}
+                          exit={settings.animations !== "minimal" ? { opacity: 0, x: 0, scale: 0.5 } : undefined}
                           transition={{
                             type: "spring",
                             damping: 35,

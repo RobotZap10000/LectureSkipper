@@ -8,7 +8,7 @@ import { CustomButton } from "./CustomButton";
 import { itemMetaRegistry } from "@/itemRegistry";
 import ItemComponent from "./ItemComponent";
 import { motion } from "framer-motion";
-import { AnimationContext } from "@/App";
+import { SettingsContext } from "@/App";
 import { CustomAnimatePresence } from "@/components/CustomAnimatePresence";
 
 interface Props
@@ -22,7 +22,7 @@ export default function Inventory({
   setGame,
 }: Props)
 {
-  let { animations, setAnimations } = useContext(AnimationContext)!;
+  let { settings, setSettings } = useContext(SettingsContext)!;
 
   const handleItemClick = (itemID: string) =>
   {
@@ -59,8 +59,7 @@ export default function Inventory({
     {
       const items = [...prev.items];
       let selected = [...prev.selectedItemIDs];
-
-      let unboxedItem = prev.unboxedItem;
+      const unboxedItems = [...prev.unboxedItems];
 
       if (selected.length === 1)
       {
@@ -72,10 +71,10 @@ export default function Inventory({
           items[sourceIndex!] = null;
           selected = [];
         }
-      } else if (unboxedItem && prev.view == "Market")
+      } else if (unboxedItems.length > 0 && prev.view == "Market")
       {
-        items[itemSlotID] = unboxedItem;
-        unboxedItem = null;
+        items[itemSlotID] = unboxedItems[0];
+        unboxedItems.splice(0, 1);
       } else
       {
         selected = [];
@@ -85,7 +84,7 @@ export default function Inventory({
         ...prev,
         items,
         selectedItemIDs: selected,
-        unboxedItem,
+        unboxedItems,
       };
 
       return newState;
@@ -248,7 +247,7 @@ export default function Inventory({
       }
     >
       <div className="flex-1 flex items-center justify-center overflow-hidden p-5">
-        <div className="flex flex-col items-center scale-90 md:scale-100">
+        <div className="flex flex-col items-center scale-90 md:scale-100 overflow-hidden">
 
           {game.view === "Calendar" && (
             <h2 className="font-bold flex items-center gap-2 pb-2">
@@ -343,17 +342,17 @@ export default function Inventory({
 
                     return (
                       <motion.div
-                        layout={animations !== "minimal"}
+                        layout={settings.animations !== "minimal"}
                         key={`item-${item.id}-view-${game.view}`}
-                        layoutId={animations !== "minimal" ? `item-${item.id}-view-${game.view}` : undefined}
+                        layoutId={settings.animations !== "minimal" ? `item-${item.id}-view-${game.view}` : undefined}
                         className="pointer-events-auto" // Re-enable clicks for the item itself
                         style={{
                           gridColumnStart: col,
                           gridRowStart: row,
                         }}
-                        initial={animations !== "minimal" ? { opacity: 0, scale: 0.5, x: -20 + Math.random() * 40, y: -50 + Math.random() * 10, rotate: 0 } : undefined}
-                        animate={animations !== "minimal" ? { opacity: 1, scale: 1, x: 0, y: 0, rotate: 0 } : undefined}
-                        exit={animations !== "minimal" ? { opacity: 0, scale: 0, x: 0, y: 0, rotate: 90 } : undefined}
+                        initial={settings.animations !== "minimal" ? { opacity: 0, scale: 0.5, x: -20 + Math.random() * 40, y: -50 + Math.random() * 10, rotate: 0 } : undefined}
+                        animate={settings.animations !== "minimal" ? { opacity: 1, scale: 1, x: 0, y: 0, rotate: 0 } : undefined}
+                        exit={settings.animations !== "minimal" ? { opacity: 0, scale: 0, x: 0, y: 0, rotate: 90 } : undefined}
                         transition={{
                           // 1. General settings for the initial "pop-in"
                           duration: 0.5,

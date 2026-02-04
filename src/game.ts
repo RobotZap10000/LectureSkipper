@@ -7,6 +7,9 @@ import { effectUtils, type EffectData } from "@/effect";
 import { story } from "@/story";
 import { effectMetaRegistry } from "./effectRegistry";
 import { parseWithInfinity, stringifyWithInfinity, weightedRandom } from "./lib/utils";
+import { compressToUTF16, decompressFromUTF16 } from "lz-string";
+import type { UserSettings } from "./App";
+
 
 export function generateUUID(): string
 {
@@ -141,11 +144,15 @@ export function changeView(game: GameState, view: View): GameState
 
 export type GameState = {
   saveVersion: number;
+  dateCreated: number;
+  dateEnded?: number;
+  dateEndingReached?: number;
+  dateInfinityReached?: number;
 
   // Settings
   view: View;
   showOnlyCompletableQuests: boolean;
-  autoTrashForge: boolean;
+  autoTrashMarket: boolean;
 
   // General Game
   block: number;
@@ -163,7 +170,7 @@ export type GameState = {
   courseTexts: string[];
   log: LogEntry[];
   quests: Quest[];
-  unboxedItem: ItemData | null;
+  unboxedItems: ItemData[];
   selectedItemIDs: string[];
   calendarActivatedItemIDs: string[];
   shop: ShopEntry[];
@@ -179,14 +186,15 @@ export type GameState = {
 };
 
 // Initial state generator
-export function initGame(): GameState
+export function initGame(settings: UserSettings): GameState
 {
   let game: GameState = {
     saveVersion: CURRENT_SAVE_VERSION,
+    dateCreated: Date.now(),
 
     view: "Calendar",
     showOnlyCompletableQuests: false,
-    autoTrashForge: false,
+    autoTrashMarket: false,
     block: 0,
     lecturesLeft: 0,
     courses: [],
@@ -200,7 +208,7 @@ export function initGame(): GameState
     nextLecture: null,
     items: Array(36).fill(null),
     maxActivatedItems: 3,
-    unboxedItem: null,
+    unboxedItems: [],
     selectedItemIDs: [],
     calendarActivatedItemIDs: [],
     shop: [],
@@ -220,13 +228,13 @@ export function initGame(): GameState
   //  debugItem.level = Infinity;
   //}
 
-  game = startNewBlock(game);
+  game = startNewBlock(game, settings);
 
   return game;
 };
 
 const LOCAL_STORAGE_KEY = "myGameState";
-const CURRENT_SAVE_VERSION = 4;
+const CURRENT_SAVE_VERSION = 5;
 
 export function saveGame(game: GameState)
 {
@@ -234,7 +242,7 @@ export function saveGame(game: GameState)
   {
     // Create a copy of game with an empty log and no texts
     const toSave: GameState = { ...game, log: [], courseTexts: [] };
-    localStorage.setItem(LOCAL_STORAGE_KEY, stringifyWithInfinity(toSave));
+    localStorage.setItem(LOCAL_STORAGE_KEY, compressToUTF16(stringifyWithInfinity(toSave)));
   } catch (err)
   {
     console.error("Failed to save game:", err);
@@ -253,7 +261,14 @@ export function loadGame(): GameState | "GameDoesNotExist" | "ParsingFailed"
     const data = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (!data) return "GameDoesNotExist";
 
-    const parsed: GameState = parseWithInfinity<GameState>(data);
+    const decompressed =
+      data.startsWith("{")
+        ? data
+        : decompressFromUTF16(data);
+
+    if (!decompressed) throw new Error("Decompression failed");
+
+    const parsed: GameState = parseWithInfinity<GameState>(decompressed);
 
     // Save version migration here
 
@@ -268,12 +283,31 @@ export function loadGame(): GameState | "GameDoesNotExist" | "ParsingFailed"
       parsed.lastLecture = null;
       parsed.lastLectureResult = null;
       parsed.courseTexts = [];
-      parsed.autoTrashForge = false;
+      parsed.autoTrashMarket = false;
       generateShop(parsed);
       for (let i = 0; i < parsed.courses.length; i++)
       {
         parsed.courses[i].originalGoal = parsed.courses[i].goal;
       }
+    }
+
+    if (parsed.saveVersion == 4)
+    {
+      parsed.saveVersion = 5;
+      parsed.dateCreated = Date.now();
+      parsed.unboxedItems = [];
+      // @ts-ignore
+      if (parsed.unboxedItem != null)
+      {
+        // @ts-ignore 
+        parsed.unboxedItems.push(parsed.unboxedItem);
+      }
+      // @ts-ignore
+      delete parsed.unboxedItem;
+      // @ts-ignore
+      parsed.autoTrashMarket = parsed.autoTrashForge;
+      // @ts-ignore
+      delete parsed.autoTrashForge;
     }
 
     parsed.log = [{
@@ -292,7 +326,10 @@ export function loadGame(): GameState | "GameDoesNotExist" | "ParsingFailed"
 }
 
 export type Run = {
-  date: string;
+  dateCreated: number;
+  dateEnded: number;
+  dateEndingReached?: number;
+  dateInfinityReached?: number;
   score: number;
   block: number;
 
@@ -305,6 +342,52 @@ export type Run = {
   maxActivatedItems: number;
 };
 
+/**
+ * Load the GameState from localStorage.
+ * If nothing exists, returns "GameDoesNotExist",
+ * If parsing fails, returns "ParsingFailed",
+ */
+export function loadRuns(): Run[] | "RunsDoNotExist" | "ParsingFailed"
+{
+  try
+  {
+    const data = localStorage.getItem("topRuns");
+    if (!data) return "RunsDoNotExist";
+
+    const decompressed =
+      data.startsWith("[")
+        ? data
+        : decompressFromUTF16(data);
+
+    if (!decompressed) throw new Error("Decompression failed");
+
+    const parsed: Run[] = parseWithInfinity<Run[]>(decompressed);
+
+    // dateEnded used to be date, so we migrate here
+    for (let i = 0; i < parsed.length; i++)
+    {
+      if (!parsed[i].dateEnded)
+      {
+        // date -> dateEnded
+
+        // @ts-ignore
+        parsed[i].dateEnded = parsed[i].date;
+        // @ts-ignore
+        delete parsed[i].date;
+
+        // new dateCreated. 0s because we do not know the run time
+        parsed[i].dateCreated = parsed[i].dateEnded;
+      }
+    }
+
+    return parsed;
+  } catch (err)
+  {
+    console.error("Failed to load runs from localStorage:", err);
+    return "ParsingFailed";
+  }
+}
+
 function recordRun(game: GameState, setTopRuns: React.Dispatch<React.SetStateAction<Run[]>>)
 {
   // Create a snapshot of items (omit nulls) and sort by rarity descending
@@ -313,7 +396,10 @@ function recordRun(game: GameState, setTopRuns: React.Dispatch<React.SetStateAct
     .sort((a, b) => b.rarity - a.rarity);
 
   const newRun: Run = {
-    date: new Date().toISOString(),
+    dateCreated: game.dateCreated,
+    dateEnded: game.dateEnded ?? Date.now(),
+    dateEndingReached: game.dateEndingReached,
+    dateInfinityReached: game.dateInfinityReached,
     score: game.score,
     block: game.block,
     items: snapshotItems,
@@ -327,22 +413,54 @@ function recordRun(game: GameState, setTopRuns: React.Dispatch<React.SetStateAct
 
   setTopRuns(prev =>
   {
-    // Insert and sort descending by score
-    const updated = [...prev, newRun].sort((a, b) => b.score - a.score);
+    const updated = [...prev, newRun].sort((a, b) =>
+    {
+      // Primary: score (descending)
+      if (a.score !== b.score)
+      {
+        return b.score - a.score;
+      }
 
-    // Keep only top 5
-    const top5 = updated.slice(0, 5);
+      // Secondary: if both scores are Infinity, shorter durations win
+      if (a.score === Infinity && b.score === Infinity)
+      {
+        let durationA = 0;
+        let durationB = 0;
+        if (a.dateInfinityReached && b.dateInfinityReached)
+        {
+          // Sort by time to reach infinity
+          durationA = a.dateInfinityReached - a.dateCreated;
+          durationB = b.dateInfinityReached - b.dateCreated;
+        } else if (a.dateEndingReached && b.dateEndingReached)
+        {
+          // Sort by time to reach ending
+          durationA = a.dateEndingReached - a.dateCreated;
+          durationB = b.dateEndingReached - b.dateCreated;
+        } else
+        {
+          // Sort by time to end run
+          durationA = a.dateEnded - a.dateCreated;
+          durationB = b.dateEnded - b.dateCreated;
+        }
+        return durationA - durationB; // ascending (shorter first)
+      }
+
+      return 0;
+    });
+
+    // Keep only top runs
+    const topX = updated.slice(0, 10);
 
     // Save to localStorage
     try
     {
-      localStorage.setItem("topRuns", stringifyWithInfinity(top5));
+      localStorage.setItem("topRuns", compressToUTF16(stringifyWithInfinity(topX)));
     } catch (err)
     {
       console.error("Failed to save top runs:", err);
     }
 
-    return top5;
+    return topX;
   });
 }
 
@@ -656,6 +774,12 @@ export function startRound(state: GameState, action: "attend" | "skip"): GameSta
     return item && itemMetaRegistry[item.name].getEnabled(item, newState);
   });
 
+  // Check for Infinity score
+  if (newState.score === Infinity && !newState.dateInfinityReached)
+  {
+    newState.dateInfinityReached = Date.now();
+  }
+
   // Fix any potential NaNs in the courses
   for (let i = 0; i < newState.courses.length; i++)
   {
@@ -700,6 +824,16 @@ export function startRound(state: GameState, action: "attend" | "skip"): GameSta
     }
   }
 
+  return newState;
+}
+
+export function skipAll(state: GameState): GameState
+{
+  let newState = { ...state };
+  while (newState.lecturesLeft > 0)
+  {
+    newState = startRound(newState, "skip");
+  }
   return newState;
 }
 
@@ -1085,6 +1219,7 @@ export function attendExams(state: GameState, setTopRuns: React.Dispatch<React.S
   if (results.filter(r => r).length < 2)
   {
     // Game failed, record run
+    newState.dateEnded = Date.now();
     recordRun(newState, setTopRuns);
   }
 
@@ -1115,7 +1250,7 @@ let level3Effects: string[] = [
 
 export const MAX_QUESTS_PER_BLOCK = 40;
 
-export function startNewBlock(state: GameState): GameState
+export function startNewBlock(state: GameState, settings: UserSettings): GameState
 {
   if (!state.examsAttended) return state;
 
@@ -1243,6 +1378,12 @@ export function startNewBlock(state: GameState): GameState
     }
   }
 
+  // Block 11 completed date
+  if (newState.block == 12)
+  {
+    newState.dateEndingReached = Date.now();
+  }
+
   // Create new quests
   const newQuests: Quest[] = [];
   const questCount = Math.min(4 + newState.block * 2 + Math.floor(Math.random() * 4), MAX_QUESTS_PER_BLOCK);
@@ -1282,7 +1423,7 @@ export function startNewBlock(state: GameState): GameState
     })
   }
 
-  if (Object.keys(story).includes(newState.block.toString()))
+  if (Object.keys(story).includes(newState.block.toString()) && settings.story == "show")
   {
     // Activate story
     newState.story = newState.block;

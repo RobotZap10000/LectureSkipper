@@ -8,7 +8,7 @@ import { CustomInfoCard } from "@/components/CustomInfoCard";
 import { CustomButton } from "@/components/CustomButton";
 import { CoursesCard } from "@/components/CoursesCard";
 import { motion } from "framer-motion";
-import { AnimationContext } from "@/App";
+import { SettingsContext } from "@/App";
 import { CustomAnimatePresence } from "@/components/CustomAnimatePresence";
 
 interface Props
@@ -19,7 +19,7 @@ interface Props
 
 export default function ChatView({ game, setGame }: Props)
 {
-  let { animations, setAnimations } = useContext(AnimationContext)!;
+  let { settings, setSettings } = useContext(SettingsContext)!;
 
   const haveCosts = (quest: Quest): boolean =>
   {
@@ -154,12 +154,12 @@ export default function ChatView({ game, setGame }: Props)
 
                   return (
                     <motion.div
-                      layout={animations === "full"}
-                      layoutId={animations === "full" ? "quest-" + quest.id : undefined}
+                      layout={settings.animations === "full"}
+                      layoutId={settings.animations === "full" ? "quest-" + quest.id : undefined}
                       key={"quest-" + quest.id}
-                      initial={animations !== "minimal" ? { opacity: 0, y: -100, scale: 1 } : undefined}
-                      animate={animations !== "minimal" ? { opacity: 1, y: 0, scale: 1 } : undefined}
-                      exit={animations === "full" ? {
+                      initial={settings.animations !== "minimal" ? { opacity: 0, y: -100, scale: 1 } : undefined}
+                      animate={settings.animations !== "minimal" ? { opacity: 1, y: 0, scale: 1 } : undefined}
+                      exit={settings.animations === "full" ? {
                         opacity: 0, y: 100, scale: 1, transition: {
                           duration: 0.1,
                           ease: "easeIn"
