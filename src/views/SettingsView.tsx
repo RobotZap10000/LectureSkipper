@@ -49,7 +49,7 @@ export default function SettingsView({ game, setGame, topRuns }: Props)
         "Lectures are now guaranteed to generate with at least 20% of the max Potential U that a lecture of that course can give.",
         "It now takes even longer for lectures with very low Understand Chances to appear.",
         "Chats now give more rewards overall.",
-        "Lectures for some course now become less likely to appear once the goal has been completed.",
+        "Lectures for a course now become less likely to appear once the goal has been completed.",
         "The minimum Procrastination Value of each lecture is now 50 P.",
       ],
       smallChanges: [
