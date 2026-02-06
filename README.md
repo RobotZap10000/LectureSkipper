@@ -94,6 +94,24 @@ Lecture Skipper is built and developed with Node.js, so you'll need to <a href="
    ```
 4. Open `http://localhost:5173/`
 
+Alternatively, you can install and run Lecture Skipper in a Docker container:
+
+1. Clone the repo (or download a .zip from the green "Code" button near the top)
+   ```sh
+   git clone https://github.com/KrisPuusepp/LectureSkipper.git
+   ```
+2. Build the Docker container
+   ```
+   docker build . -t "lectureskipper:v1.1.0"
+   ```
+3. Start the Docker container
+   ```
+   docker run -dp 3000:3000 lectureskipper:v1.1.0
+   ```
+4. Open `http://localhost:3000/`
+
+A Docker compose file has been provided as a template.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
